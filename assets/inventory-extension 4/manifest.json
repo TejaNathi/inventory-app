@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "ThinkMetal Inventory — Cart Importer",
+  "version": "1.0.0",
+  "description": "Import Amazon, Robu, or any vendor cart directly into ThinkMetal inventory app",
+
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+
+  "host_permissions": [
+    "*://*.amazon.in/*",
+    "*://*.robu.in/*",
+    "http://127.0.0.1/*",
+    "http://localhost/*",
+    "*://*/*"
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
