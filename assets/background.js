@@ -21,7 +21,7 @@ async function handleCartSend(tabId, vendor) {
     // 1. Inject parsers into the vendor cart page
     await chrome.scripting.executeScript({
       target: { tabId },
-      files: ['parsers/amazon.js', 'parsers/robu.js', 'parsers/generic.js']
+      files: ['amazon.js', 'robu.js', 'generic.js']
     });
 
     // 2. Run the right parser inside the vendor page and get items back
@@ -34,7 +34,7 @@ async function handleCartSend(tabId, vendor) {
     const items = results?.[0]?.result || [];
 
     if (items.length === 0) {
-      chrome.runtime.sendMessage({ type: 'PARSE_RESULT', success: false, count: 0 });
+      sendParseResult({ type: 'PARSE_RESULT', success: false, count: 0 });
       return;
     }
 
@@ -73,7 +73,7 @@ async function handleCartSend(tabId, vendor) {
     }
 
     // Tell popup it worked
-    chrome.runtime.sendMessage({
+    sendParseResult({
       type: 'PARSE_RESULT',
       success: true,
       count: items.length
@@ -81,12 +81,21 @@ async function handleCartSend(tabId, vendor) {
 
   } catch (err) {
     console.error('[ThinkMetal extension error]', err);
-    chrome.runtime.sendMessage({
+    sendParseResult({
       type: 'PARSE_RESULT',
       success: false,
       error: err.message
     });
   }
+}
+
+function sendParseResult(payload) {
+  chrome.runtime.sendMessage(payload, () => {
+    if (chrome.runtime.lastError) {
+      // Popup might be closed before background posts result.
+      // This is safe to ignore.
+    }
+  });
 }
 
 // ── Runs inside vendor page context ───────────────────────────
