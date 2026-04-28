@@ -417,37 +417,6 @@ function loadDemoCart(vendor) {
   renderCartItems();
 }
 
-
-function openGenericCartParser() {
-  document.getElementById('generic-vendor').value = '';
-  document.getElementById('generic-html').value = '';
-  document.getElementById('generic-parser-modal').classList.add('show');
-}
-
-function parseGenericCartHtml() {
-  const vendor = document.getElementById('generic-vendor').value.trim() || 'Generic Cart';
-  const html = document.getElementById('generic-html').value;
-  if (!window.parseGenericCart) {
-    toast('Generic parser not loaded');
-    return;
-  }
-
-  const result = window.parseGenericCart(html);
-  if (result.error) {
-    toast(result.error);
-    return;
-  }
-
-  currentCartVendor = vendor;
-  currentCartData = result.items;
-  document.getElementById('cart-vendor-badge').textContent = vendor;
-  document.getElementById('cart-import-card').style.display = 'none';
-  document.getElementById('cart-review-section').style.display = 'block';
-  closeModal('generic-parser-modal');
-  renderCartItems();
-  toast('✓ Parsed ' + result.items.length + ' items from generic cart');
-}
-
 function renderCartItems() {
   const list = document.getElementById('cart-items-list');
   list.innerHTML = currentCartData.map((item, i) => `
