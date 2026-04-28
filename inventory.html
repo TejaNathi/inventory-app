@@ -254,9 +254,6 @@
   <div class="page" id="page-cart">
     <div class="page-hdr">
       <div class="page-hdr-left"><h1>Cart requests</h1><p>Import cart from Amazon / Robu via browser extension</p></div>
-      <div class="card-hdr-right">
-        <button class="btn btn-primary" id="open-generic-parser-btn" onclick="openGenericCartParser()">Parse Generic HTML Cart</button>
-      </div>
     </div>
 
     <!-- Extension import simulation -->
@@ -267,7 +264,6 @@
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn btn-secondary" onclick="loadDemoCart('amazon')">▶ Simulate Amazon cart</button>
           <button class="btn btn-secondary" onclick="loadDemoCart('robu')">▶ Simulate Robu cart</button>
-          <button class="btn btn-secondary" onclick="openGenericCartParser()">Parse generic cart (paste HTML)</button>
         </div>
       </div>
     </div>
@@ -504,33 +500,9 @@
   </div>
 </div>
 
-
-<!-- MODAL: Parse generic cart HTML -->
-<div class="modal-overlay" id="generic-parser-modal">
-  <div class="modal" style="max-width:680px">
-    <h3>Parse Generic Cart HTML</h3>
-    <p>Paste page HTML from a cart webview. The parser will extract item name, quantity, unit price, and total.</p>
-    <div class="form-grid" style="grid-template-columns:1fr">
-      <div class="form-group">
-        <label>Vendor label</label>
-        <input type="text" id="generic-vendor" placeholder="e.g. Generic Marketplace">
-      </div>
-      <div class="form-group">
-        <label>Cart page HTML</label>
-        <textarea id="generic-html" class="parser-textarea" placeholder="Paste full HTML from the webview page source"></textarea>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('generic-parser-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="parseGenericCartHtml()">Parse and review</button>
-    </div>
-  </div>
-</div>
-
 <!-- TOAST -->
 <div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toast-msg"></span></div>
 
-<script src="assets/js/parse_generic.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>

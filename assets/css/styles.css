@@ -314,10 +314,3 @@ option { background: var(--surface2); color: var(--text); }
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
-
-/* GENERIC PARSER */
-.parser-textarea {
-  min-height: 220px;
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-}
