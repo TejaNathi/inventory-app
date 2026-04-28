@@ -74,14 +74,25 @@ function analyseTab(tab) {
 }
 
 function sendCart() {
-  document.getElementById('send-btn').disabled = true;
+  const sendBtn = document.getElementById('send-btn');
+  const loading = document.getElementById('loading');
+  const result = document.getElementById('result');
+
+  sendBtn.disabled = true;
   document.getElementById('loading').classList.add('show');
-  document.getElementById('result').classList.remove('show');
+  result.classList.remove('show');
 
   chrome.runtime.sendMessage({
     type: 'SEND_CART_TO_APP',
     tabId: currentTab.id,
     vendor: detectedVendor
+  }, () => {
+    if (chrome.runtime.lastError) {
+      loading.classList.remove('show');
+      result.className = 'result error show';
+      result.textContent = '✗ Extension connection lost. Reload extension from chrome://extensions and try again.';
+      sendBtn.disabled = false;
+    }
   });
 }
 
