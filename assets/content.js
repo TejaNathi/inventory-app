@@ -5,7 +5,7 @@
 // so their functions are available in this context.
 
 // This file is intentionally minimal — all parsing logic lives in
-// parsers/*.js. This script just provides a coordination layer
+// amazon.js / robu.js / generic.js. This script just provides a coordination layer
 // if needed for future two-way messaging.
 
 console.log('[ThinkMetal] Content script ready on', window.location.hostname);

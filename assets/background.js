@@ -19,10 +19,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 async function handleCartSend(tabId, vendor) {
   try {
     // 1. Inject parsers into the vendor cart page
-    await chrome.scripting.executeScript({
-      target: { tabId },
-      files: ['parsers/amazon.js', 'parsers/robu.js', 'parsers/generic.js']
-    });
+    await injectParserFiles(tabId);
 
     // 2. Run the right parser inside the vendor page and get items back
     const results = await chrome.scripting.executeScript({
@@ -34,7 +31,7 @@ async function handleCartSend(tabId, vendor) {
     const items = results?.[0]?.result || [];
 
     if (items.length === 0) {
-      chrome.runtime.sendMessage({ type: 'PARSE_RESULT', success: false, count: 0 });
+      sendParseResult({ type: 'PARSE_RESULT', success: false, count: 0 });
       return;
     }
 
@@ -73,7 +70,7 @@ async function handleCartSend(tabId, vendor) {
     }
 
     // Tell popup it worked
-    chrome.runtime.sendMessage({
+    sendParseResult({
       type: 'PARSE_RESULT',
       success: true,
       count: items.length
@@ -81,12 +78,45 @@ async function handleCartSend(tabId, vendor) {
 
   } catch (err) {
     console.error('[ThinkMetal extension error]', err);
-    chrome.runtime.sendMessage({
+    sendParseResult({
       type: 'PARSE_RESULT',
       success: false,
       error: err.message
     });
   }
+}
+
+async function injectParserFiles(tabId) {
+  const parserLayouts = [
+    ['amazon.js', 'robu.js', 'generic.js'],
+    ['parsers/amazon.js', 'parsers/robu.js', 'parsers/generic.js']
+  ];
+
+  let lastErr = null;
+  for (const files of parserLayouts) {
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        files
+      });
+      return;
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+
+  throw new Error(
+    `Could not load parser scripts from extension package. ${lastErr?.message || ''}`.trim()
+  );
+}
+
+function sendParseResult(payload) {
+  chrome.runtime.sendMessage(payload, () => {
+    if (chrome.runtime.lastError) {
+      // Popup might be closed before background posts result.
+      // This is safe to ignore.
+    }
+  });
 }
 
 // ── Runs inside vendor page context ───────────────────────────
