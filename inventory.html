@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThinkMetal — Inventory</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">THINKMETAL</div>
+    <div class="logo-sub">Inventory system</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active" onclick="nav('dashboard',this)" id="nav-dashboard">
+      <span class="nav-icon">◈</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="nav('inventory',this)" id="nav-inventory">
+      <span class="nav-icon">▦</span> Master inventory
+    </div>
+    <div class="nav-item" onclick="nav('wip',this)" id="nav-wip">
+      <span class="nav-icon">⟳</span> WIP
+    </div>
+    <div class="nav-item" onclick="nav('log',this)" id="nav-log">
+      <span class="nav-icon">≡</span> Inward/Outward log
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Transactions</div>
+    <div class="nav-item" onclick="nav('request',this)" id="nav-request">
+      <span class="nav-icon">+</span> Raise request
+    </div>
+    <div class="nav-item" onclick="nav('cart',this)" id="nav-cart">
+      <span class="nav-icon">⊞</span> Cart request
+    </div>
+    <div class="nav-item" onclick="nav('inward',this)" id="nav-inward">
+      <span class="nav-icon">↓</span> Inward entry
+    </div>
+    <div class="nav-item" onclick="nav('outward',this)" id="nav-outward">
+      <span class="nav-icon">↑</span> Outward / WIP
+    </div>
+    <div class="nav-item" onclick="nav('approvals',this)" id="nav-approvals">
+      <span class="nav-icon">✓</span> Approvals
+      <span class="nav-badge" id="approval-badge">3</span>
+    </div>
+    <div class="nav-item" onclick="nav('payments',this)" id="nav-payments">
+      <span class="nav-icon">₹</span> Payments
+      <span class="nav-badge" id="payment-badge">2</span>
+    </div>
+  </div>
+
+  <div class="role-section">
+    <div class="role-label">Role</div>
+    <select class="role-select" id="role-select" onchange="setRole(this.value)">
+      <option value="member">Member</option>
+      <option value="lead">Team lead</option>
+      <option value="accounts">Accounts</option>
+    </select>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-hdr">
+      <div class="page-hdr-left">
+        <h1>Dashboard</h1>
+        <p>Live overview — ThinkMetal inventory</p>
+      </div>
+    </div>
+
+    <!-- Delivery pending banner (shown for member) -->
+    <div class="delivery-banner" id="delivery-banner">
+      <div class="delivery-banner-icon">📦</div>
+      <div class="delivery-banner-text">
+        <strong>2 deliveries pending confirmation</strong> — Items from approved cart requests are on the way. Confirm when received.
+      </div>
+      <button class="btn btn-sm btn-secondary" onclick="nav('cart',document.getElementById('nav-cart'))">View</button>
+    </div>
+
+    <div class="metrics">
+      <div class="metric accent">
+        <div class="metric-label">Total items</div>
+        <div class="metric-value">148</div>
+        <div class="metric-sub">across 5 categories</div>
+      </div>
+      <div class="metric red">
+        <div class="metric-label">Low stock</div>
+        <div class="metric-value">6</div>
+        <div class="metric-sub">below reorder level</div>
+      </div>
+      <div class="metric amber">
+        <div class="metric-label">Pending approvals</div>
+        <div class="metric-value">3</div>
+        <div class="metric-sub">awaiting lead action</div>
+      </div>
+      <div class="metric green">
+        <div class="metric-label">WIP items</div>
+        <div class="metric-value">12</div>
+        <div class="metric-sub">currently in progress</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>Stock by category</h3>
+        <div class="bar-chart" id="bar-chart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Request pipeline</h3>
+        <div class="bar-chart" id="pipeline-chart"></div>
+      </div>
+    </div>
+
+    <div class="status-row">
+      <div class="status-card">
+        <div class="status-icon">🟡</div>
+        <div>
+          <div class="status-info-label">Pending approval</div>
+          <div class="status-info-val">3 requests</div>
+        </div>
+      </div>
+      <div class="status-card">
+        <div class="status-icon">🟣</div>
+        <div>
+          <div class="status-info-label">Payment pending</div>
+          <div class="status-info-val">2 carts</div>
+        </div>
+      </div>
+      <div class="status-card">
+        <div class="status-icon">🟢</div>
+        <div>
+          <div class="status-info-label">Delivered this month</div>
+          <div class="status-info-val">18 items</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><h3>Recent activity</h3></div>
+      <div id="activity-feed"></div>
+    </div>
+  </div>
+
+  <!-- MASTER INVENTORY -->
+  <div class="page" id="page-inventory">
+    <div class="page-hdr">
+      <div class="page-hdr-left">
+        <h1>Master inventory</h1>
+        <p>Live stock — all categories</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <h3>All items</h3>
+        <div class="card-hdr-right">
+          <input class="search-input" placeholder="Search items..." oninput="filterInventory(this.value)" id="inv-search">
+          <select class="search-input" style="width:140px" onchange="filterInventoryByCat(this.value)" id="cat-filter">
+            <option value="">All categories</option>
+            <option>Raw materials</option>
+            <option>Hardware</option>
+            <option>Tools</option>
+            <option>Accessories</option>
+            <option>Storage utilities</option>
+          </select>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Item ID</th><th>Name</th><th>Category</th>
+            <th>Unit</th><th>Opening</th><th>Current qty</th>
+            <th>Reorder at</th><th>Dept</th><th>Rate/unit</th><th>Total value</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="inv-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- WIP -->
+  <div class="page" id="page-wip">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Work in Progress</h1><p>Items currently allocated to active work orders</p></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><h3>Active WIP items</h3><span class="badge badge-wip">12 items</span></div>
+      <table>
+        <thead><tr><th>WIP ID</th><th>Item</th><th>Qty</th><th>Allocated to</th><th>Work order</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody id="wip-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INWARD OUTWARD LOG -->
+  <div class="page" id="page-log">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Inward / Outward log</h1><p>Complete transaction history</p></div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchLogTab('all',this)">All</div>
+      <div class="tab" onclick="switchLogTab('inward',this)">Inward</div>
+      <div class="tab" onclick="switchLogTab('outward',this)">Outward</div>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Item</th><th>Qty</th><th>By</th><th>Supplier/Dept</th><th>Date</th><th>Notes</th></tr></thead>
+        <tbody id="log-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RAISE REQUEST -->
+  <div class="page" id="page-request">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Raise request</h1><p>Submit a single item request for approval</p></div>
+    </div>
+    <div class="form-wrap">
+      <div class="form-card">
+        <h3>New item request</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Your name</label><input type="text" id="req-member" placeholder="e.g. Arjun Rajan"></div>
+          <div class="form-group"><label>Department</label>
+            <select id="req-dept"><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select>
+          </div>
+          <div class="form-group"><label>Category</label>
+            <select id="req-cat"><option>Raw materials</option><option>Hardware</option><option>Tools</option><option>Accessories</option><option>Storage utilities</option></select>
+          </div>
+          <div class="form-group"><label>Item name</label><input type="text" id="req-item" placeholder="e.g. M8 hex bolt"></div>
+          <div class="form-group"><label>Quantity</label><input type="number" id="req-qty" placeholder="50"></div>
+          <div class="form-group"><label>Unit</label><input type="text" id="req-unit" placeholder="pcs / m / kg"></div>
+          <div class="form-group"><label>Est. rate/unit (₹)</label><input type="number" id="req-rate" placeholder="0.00"></div>
+          <div class="form-group"><label>Required by</label><input type="date" id="req-date"></div>
+          <div class="form-group full"><label>Purpose</label><textarea id="req-purpose" placeholder="What is this needed for?"></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitRequest()">Submit request</button>
+          <button class="btn btn-secondary" onclick="clearForm('request')">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART REQUEST -->
+  <div class="page" id="page-cart">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Cart requests</h1><p>Import cart from Amazon / Robu via browser extension</p></div>
+      <div class="card-hdr-right">
+        <button class="btn btn-primary" id="open-generic-parser-btn" onclick="openGenericCartParser()">Parse Generic HTML Cart</button>
+      </div>
+    </div>
+
+    <!-- Extension import simulation -->
+    <div class="card" id="cart-import-card">
+      <div class="card-hdr"><h3>Import from extension</h3></div>
+      <div style="padding:20px">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Simulate what happens when the browser extension sends a cart to the web app. In production this happens automatically when the member clicks the extension icon on Amazon or Robu.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="loadDemoCart('amazon')">▶ Simulate Amazon cart</button>
+          <button class="btn btn-secondary" onclick="loadDemoCart('robu')">▶ Simulate Robu cart</button>
+          <button class="btn btn-secondary" onclick="openGenericCartParser()">Parse generic cart (paste HTML)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart review (hidden until import) -->
+    <div id="cart-review-section" style="display:none">
+      <div class="card">
+        <div class="card-hdr">
+          <h3>Review cart items</h3>
+          <div class="card-hdr-right">
+            <span class="badge badge-pending" id="cart-vendor-badge">Amazon India</span>
+          </div>
+        </div>
+        <div id="cart-items-list"></div>
+        <div class="cart-total-row">
+          <span class="cart-total-label">Estimated total</span>
+          <span class="cart-total-val" id="cart-total">₹0</span>
+        </div>
+      </div>
+      <div class="form-wrap">
+        <div class="form-card">
+          <h3>Request details</h3>
+          <div class="form-grid">
+            <div class="form-group"><label>Your name</label><input type="text" id="cart-member" placeholder="Your name"></div>
+            <div class="form-group"><label>Department</label>
+              <select id="cart-dept"><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select>
+            </div>
+            <div class="form-group full"><label>Note to lead</label><textarea id="cart-note" placeholder="What is this cart for?"></textarea></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="submitCart()">Submit for approval</button>
+            <button class="btn btn-secondary" onclick="cancelCart()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Existing cart requests -->
+    <div class="card">
+      <div class="card-hdr"><h3>My cart requests</h3></div>
+      <table>
+        <thead><tr><th>Cart ID</th><th>Source</th><th>Items</th><th>Est. total</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="cart-list-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INWARD ENTRY -->
+  <div class="page" id="page-inward">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Inward entry</h1><p>Record received items and update stock</p></div>
+    </div>
+    <div class="form-wrap">
+      <div class="form-card">
+        <h3>Record delivery</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Linked request (optional)</label>
+            <select id="inw-req">
+              <option value="">— standalone entry —</option>
+              <option value="REQ-0039">REQ-0039 · Soldering iron tip × 2</option>
+              <option value="REQ-0037">REQ-0037 · M6 standoffs × 50</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Received by</label><input type="text" id="inw-by" placeholder="Your name"></div>
+          <div class="form-group"><label>Vendor / invoice name</label><input type="text" id="inw-vendor" placeholder="Name as on invoice"></div>
+          <div class="form-group"><label>Canonical item name</label>
+            <select id="inw-canonical">
+              <option>Thermocouple</option><option>M8 Hex Bolt</option><option>Servo Motor SG90</option>
+              <option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option><option>Soldering Iron Tip</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Qty received</label><input type="number" id="inw-qty" placeholder="0"></div>
+          <div class="form-group"><label>Unit</label><input type="text" id="inw-unit" placeholder="pcs"></div>
+          <div class="form-group"><label>Supplier</label><input type="text" id="inw-supplier" placeholder="Amazon / Robu / vendor"></div>
+          <div class="form-group"><label>Invoice / order no.</label><input type="text" id="inw-invoice" placeholder="INV-2024-001"></div>
+          <div class="form-group"><label>Rate per unit (₹)</label><input type="number" id="inw-rate" placeholder="0.00"></div>
+          <div class="form-group"><label>Date of receipt</label><input type="date" id="inw-date"></div>
+          <div class="form-group full"><label>Notes</label><textarea id="inw-notes" placeholder="Condition, partial delivery, damage etc."></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitInward()">Save inward entry</button>
+          <button class="btn btn-secondary" onclick="clearForm('inward')">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OUTWARD / WIP -->
+  <div class="page" id="page-outward">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Outward / WIP</h1><p>Record items used, allocated, or in progress</p></div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchOutTab('usage',this)">Direct usage</div>
+      <div class="tab" onclick="switchOutTab('wip',this)">Work in progress</div>
+      <div class="tab" onclick="switchOutTab('allocate',this)">Allocate to team</div>
+    </div>
+
+    <div class="form-wrap" id="out-usage">
+      <div class="form-card">
+        <h3>Mark as used</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Member name</label><input type="text" id="out-member" placeholder="Who used this"></div>
+          <div class="form-group"><label>Department</label><select><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select></div>
+          <div class="form-group"><label>Item</label><select id="out-item"><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option><option>Soldering Iron Tip</option></select></div>
+          <div class="form-group"><label>Qty used</label><input type="number" id="out-qty" placeholder="0"></div>
+          <div class="form-group"><label>Unit</label><input type="text" id="out-unit" placeholder="pcs"></div>
+          <div class="form-group"><label>Date</label><input type="date" id="out-date"></div>
+          <div class="form-group full"><label>Purpose</label><textarea placeholder="What was this used for?"></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitOutward('Usage')">Save outward entry</button>
+          <button class="btn btn-secondary" onclick="clearForm('outward-usage')">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-wrap" id="out-wip" style="display:none">
+      <div class="form-card">
+        <h3>Mark as WIP</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Member</label><input type="text" placeholder="Assigned to"></div>
+          <div class="form-group"><label>Item</label><select><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option></select></div>
+          <div class="form-group"><label>Qty</label><input type="number" placeholder="0"></div>
+          <div class="form-group"><label>Unit</label><input type="text" placeholder="pcs"></div>
+          <div class="form-group full"><label>Work order / task ref</label><input type="text" placeholder="e.g. Arm assembly — joint 3"></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitOutward('WIP')">Mark as WIP</button>
+          <button class="btn btn-secondary" onclick="clearForm('outward-wip')">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-wrap" id="out-allocate" style="display:none">
+      <div class="form-card">
+        <h3>Allocate to team member</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Allocate to</label><input type="text" placeholder="Team member name"></div>
+          <div class="form-group"><label>Department</label><select><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select></div>
+          <div class="form-group"><label>Item</label><select><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option></select></div>
+          <div class="form-group"><label>Quantity</label><input type="number" placeholder="0"></div>
+          <div class="form-group full"><label>Notes</label><textarea placeholder="Purpose, expected return date if applicable"></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitOutward('Allocated')">Allocate item</button>
+          <button class="btn btn-secondary" onclick="clearForm('outward-allocate')">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPROVALS -->
+  <div class="page" id="page-approvals">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Approvals</h1><p>Review and act on pending requests</p></div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr"><h3>Pending item requests</h3><span class="badge badge-pending" id="pending-count-badge">3 pending</span></div>
+      <table>
+        <thead><tr><th>Req ID</th><th>Member</th><th>Item</th><th>Qty</th><th>Purpose</th><th>Est. cost</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody id="pending-requests-body"></tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr"><h3>Pending cart requests</h3><span class="badge badge-pending" id="pending-cart-badge">1 pending</span></div>
+      <table>
+        <thead><tr><th>Cart ID</th><th>Member</th><th>Source</th><th>Items</th><th>Total</th><th>Note</th><th>Action</th></tr></thead>
+        <tbody id="pending-carts-body"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><h3>Approved — awaiting delivery</h3></div>
+      <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Item/Cart</th><th>Approved by</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody id="approved-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PAYMENTS -->
+  <div class="page" id="page-payments">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Payments</h1><p>Process approved requests and mark payments done</p></div>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr"><h3>Awaiting payment</h3><span class="badge badge-approved">2 approved</span></div>
+      <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Approved total</th><th>Approved by</th><th>Action</th></tr></thead>
+        <tbody id="payments-body"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><h3>Payment history</h3></div>
+      <table>
+        <thead><tr><th>ID</th><th>Item/Cart</th><th>Amount paid</th><th>Invoice no.</th><th>Paid on</th><th>Status</th></tr></thead>
+        <tbody id="payment-history-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+<!-- MODAL: Cart detail view -->
+<div class="modal-overlay" id="cart-detail-modal">
+  <div class="modal">
+    <h3 id="modal-cart-title">Cart CART-001</h3>
+    <p id="modal-cart-meta">Amazon India · 4 items</p>
+    <div id="modal-cart-items"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('cart-detail-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Mark payment done -->
+<div class="modal-overlay" id="payment-modal">
+  <div class="modal">
+    <h3>Mark payment done</h3>
+    <p id="payment-modal-desc">Processing payment for request</p>
+    <div class="form-grid" style="grid-template-columns:1fr">
+      <div class="form-group"><label>Invoice number</label><input type="text" id="pay-invoice" placeholder="INV-2024-001"></div>
+      <div class="form-group"><label>Amount paid (₹)</label><input type="number" id="pay-amount" placeholder="0.00"></div>
+      <div class="form-group"><label>Payment date</label><input type="date" id="pay-date"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('payment-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmPayment()">Confirm payment</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL: Parse generic cart HTML -->
+<div class="modal-overlay" id="generic-parser-modal">
+  <div class="modal" style="max-width:680px">
+    <h3>Parse Generic Cart HTML</h3>
+    <p>Paste page HTML from a cart webview. The parser will extract item name, quantity, unit price, and total.</p>
+    <div class="form-grid" style="grid-template-columns:1fr">
+      <div class="form-group">
+        <label>Vendor label</label>
+        <input type="text" id="generic-vendor" placeholder="e.g. Generic Marketplace">
+      </div>
+      <div class="form-group">
+        <label>Cart page HTML</label>
+        <textarea id="generic-html" class="parser-textarea" placeholder="Paste full HTML from the webview page source"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('generic-parser-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="parseGenericCartHtml()">Parse and review</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toast-msg"></span></div>
+
+<script src="assets/js/parse_generic.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
