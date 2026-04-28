@@ -1,4 +1,6 @@
 // ─── DUMMY DATA ────────────────────────────────────────────────
+
+//-let see the update
 const inventory = [
   { id:'ITEM-001', name:'Thermocouple', cat:'Accessories', unit:'pcs', opening:20, current:8, reorder:5, dept:'Electrical', rate:349 },
   { id:'ITEM-002', name:'M8 Hex Bolt', cat:'Hardware', unit:'pcs', opening:500, current:342, reorder:100, dept:'Mechanical', rate:3 },
