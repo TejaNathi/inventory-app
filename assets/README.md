@@ -59,10 +59,9 @@ inventory-extension/
 ├── content.js         — Thin coordinator injected into vendor pages
 ├── popup.html         — UI shown when member clicks the icon
 ├── popup.js           — Popup logic, vendor detection
-├── parsers/
-│   ├── amazon.js      — Amazon India cart DOM parser
-│   ├── robu.js        — Robu.in cart DOM parser
-│   └── generic.js     — Fallback for any other vendor
+├── amazon.js          — Amazon India cart DOM parser
+├── robu.js            — Robu.in cart DOM parser
+├── generic.js         — Fallback for any other vendor
 └── icons/
     └── (add icon PNGs: icon16.png, icon48.png, icon128.png)
 ```
