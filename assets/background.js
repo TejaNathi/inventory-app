@@ -19,7 +19,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 async function handleCartSend(tabId, vendor) {
   try {
     // 1. Inject parsers into the vendor cart page
-    await injectParserFiles(tabId);
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ['amazon.js', 'robu.js', 'generic.js']
+    });
 
     // 2. Run the right parser inside the vendor page and get items back
     const results = await chrome.scripting.executeScript({
@@ -84,30 +87,6 @@ async function handleCartSend(tabId, vendor) {
       error: err.message
     });
   }
-}
-
-async function injectParserFiles(tabId) {
-  const parserLayouts = [
-    ['amazon.js', 'robu.js', 'generic.js'],
-    ['parsers/amazon.js', 'parsers/robu.js', 'parsers/generic.js']
-  ];
-
-  let lastErr = null;
-  for (const files of parserLayouts) {
-    try {
-      await chrome.scripting.executeScript({
-        target: { tabId },
-        files
-      });
-      return;
-    } catch (err) {
-      lastErr = err;
-    }
-  }
-
-  throw new Error(
-    `Could not load parser scripts from extension package. ${lastErr?.message || ''}`.trim()
-  );
 }
 
 function sendParseResult(payload) {
