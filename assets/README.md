@@ -72,3 +72,12 @@ After changing any file:
 1. Go to `chrome://extensions`
 2. Click the refresh icon on the ThinkMetal extension card
 3. Changes take effect immediately
+
+## Troubleshooting
+
+- `Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist`
+  - Usually means the extension was edited but not reloaded.
+  - Fix: refresh the extension in `chrome://extensions`, then reopen popup and retry.
+- `[Redirect Blocker] Stopping to prevent same tab redirects`
+  - This message is produced by a separate browser extension (commonly Live Server helper scripts), not by ThinkMetal extension files in this repo.
+  - If import still works, this log can be ignored. If not, disable that browser extension on your local app URL and retry.
