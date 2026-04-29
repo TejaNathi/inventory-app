@@ -1679,8 +1679,8 @@ function nav(page, el) {
 
 function setRole(role) {
   const rules = {
-    member: { show:['nav-dashboard','nav-inventory','nav-wip','nav-log','nav-request','nav-cart'], hide:['nav-inward','nav-outward','nav-approvals','nav-payments'] },
-    lead: { show:['nav-dashboard','nav-inventory','nav-wip','nav-log','nav-request','nav-cart','nav-approvals'], hide:['nav-inward','nav-outward','nav-payments'] },
+    member: { show:['nav-dashboard','nav-inventory','nav-wip','nav-log','nav-request','nav-cart','nav-inward'], hide:['nav-outward','nav-approvals','nav-payments'] },
+    lead: { show:['nav-dashboard','nav-inventory','nav-wip','nav-log','nav-request','nav-cart','nav-inward','nav-approvals'], hide:['nav-outward','nav-payments'] },
     accounts: { show:['nav-dashboard','nav-inventory','nav-log','nav-inward','nav-outward','nav-approvals','nav-payments'], hide:['nav-request','nav-cart','nav-wip'] },
   };
   const r = rules[role];
