@@ -3,10 +3,6 @@
 const VENDOR_PATTERNS = {
   'amazon.in':  { name: 'Amazon India',  cartPaths: ['/cart', '/gp/cart'] },
   'robu.in':    { name: 'Robu.in',       cartPaths: ['/cart'] },
-  'dc3d':       { name: 'DC3D',          cartPaths: ['/cart', '/checkout'] },
-  'zee3d':      { name: 'Zee3D',         cartPaths: ['/cart', '/checkout'] },
-  'novo3d':     { name: 'Novo3D',        cartPaths: ['/cart', '/checkout'] },
-  'ktron.in':   { name: 'Ktron.in',      cartPaths: ['/cart', '/checkout'] },
   'flipkart.com':{ name: 'Flipkart',     cartPaths: ['/checkout/cart'] },
   'indiamart.com':{ name: 'IndiaMart',   cartPaths: ['/'] },
 };

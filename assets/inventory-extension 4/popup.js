@@ -1,30 +1,10 @@
 // ─── THINKMETAL EXTENSION — POPUP SCRIPT ─────────────────────
 
 const VENDOR_PATTERNS = {
-  // Amazon — specific parser
-  'amazon.in':            { name: 'Amazon India',    cartPaths: ['/cart', '/gp/cart'], parser: 'amazon' },
-  // Robu — specific parser
-  'robu.in':              { name: 'Robu.in',         cartPaths: ['/cart'],             parser: 'robu' },
-  // WooCommerce vendors
-  'electronicscomp.com':  { name: 'ElectronicsComp', cartPaths: ['/cart'],             parser: 'generic' },
-  'electroncomponents.in':{ name: 'Electron Components', cartPaths: ['/cart'],         parser: 'generic' },
-  // Magento vendors
-  'industrybuying.com':   { name: 'IndustryBuying',  cartPaths: ['/checkout/cart'],    parser: 'generic' },
-  // OpenCart vendors
-  '3dnova.in':            { name: '3DNova',           cartPaths: ['/index.php', '/cart'], parser: 'generic' },
-  'dccomponents.in':      { name: 'DC Components',   cartPaths: ['/cart', '/index.php'], parser: 'generic' },
-  'dcsupplies.in':        { name: 'DC Supplies',     cartPaths: ['/cart', '/index.php'], parser: 'generic' },
-  // BigTreeTech
-  'bigtree-tech.com':     { name: 'BigTreeTech',     cartPaths: ['/cart', '/checkout'], parser: 'generic' },
-  'bigtreetech.com':      { name: 'BigTreeTech',     cartPaths: ['/cart', '/checkout'], parser: 'generic' },
-  // Other common Indian electronics stores
-  'projectpoint.in':      { name: 'ProjectPoint',    cartPaths: ['/cart'],             parser: 'generic' },
-  'sunrom.com':           { name: 'Sunrom',           cartPaths: ['/cart'],             parser: 'generic' },
-  'evelta.com':           { name: 'Evelta',           cartPaths: ['/cart'],             parser: 'generic' },
-  'thinkrobotics.in':     { name: 'ThinkRobotics',   cartPaths: ['/cart'],             parser: 'generic' },
-  'rhydolabz.com':        { name: 'Rhydolabz',       cartPaths: ['/cart'],             parser: 'generic' },
-  'nex-robotics.com':     { name: 'Nex Robotics',    cartPaths: ['/cart'],             parser: 'generic' },
-  'flipkart.com':         { name: 'Flipkart',        cartPaths: ['/checkout/cart'],    parser: 'generic' },
+  'amazon.in':  { name: 'Amazon India',  cartPaths: ['/cart', '/gp/cart'] },
+  'robu.in':    { name: 'Robu.in',       cartPaths: ['/cart'] },
+  'flipkart.com':{ name: 'Flipkart',     cartPaths: ['/checkout/cart'] },
+  'indiamart.com':{ name: 'IndiaMart',   cartPaths: ['/'] },
 };
 
 let currentTab = null;
@@ -36,12 +16,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   currentTab = tab;
   analyseTab(tab);
-  document.getElementById('send-btn')?.addEventListener('click', sendCart);
 
-  // Wire button — no inline handlers allowed in extension HTML (CSP)
-  document.getElementById('send-btn').addEventListener('click', sendCart);
-
-  // Listen for result back from background
+  // Listen for result from background
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.type === 'PARSE_RESULT') {
       clearSendTimeout();
@@ -101,11 +77,7 @@ function analyseTab(tab) {
 }
 
 function sendCart() {
-  const sendBtn = document.getElementById('send-btn');
-  const loading = document.getElementById('loading');
-  const result = document.getElementById('result');
-
-  sendBtn.disabled = true;
+  document.getElementById('send-btn').disabled = true;
   document.getElementById('loading').classList.add('show');
   document.getElementById('result').classList.remove('show');
   startSendTimeout();
