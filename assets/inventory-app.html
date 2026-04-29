@@ -566,6 +566,20 @@ option { background: var(--surface2); color: var(--text); }
         </div>
       </div>
     </div>
+    <div class="card">
+      <div class="card-hdr"><h3>Delivered items pending inward entry</h3></div>
+      <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Paid on</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="inward-delivered-body"></tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <div class="card-hdr"><h3>Delivered items history</h3></div>
+      <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Delivered on</th><th>Status</th></tr></thead>
+        <tbody id="inward-delivered-history-body"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- CART REQUEST -->
@@ -789,9 +803,9 @@ option { background: var(--surface2); color: var(--text); }
     </div>
 
     <div class="card">
-      <div class="card-hdr"><h3>Approved — awaiting delivery</h3></div>
+      <div class="card-hdr"><h3>Approved — awaiting payment</h3></div>
       <table>
-        <thead><tr><th>ID</th><th>Type</th><th>Item/Cart</th><th>Approved by</th><th>Date</th><th>Action</th></tr></thead>
+        <thead><tr><th>ID</th><th>Type</th><th>Item/Cart</th><th>Approved by</th><th>Approved date</th><th>Status</th></tr></thead>
         <tbody id="approved-body"></tbody>
       </table>
     </div>
@@ -805,8 +819,15 @@ option { background: var(--surface2); color: var(--text); }
     <div class="card" style="margin-bottom:20px">
       <div class="card-hdr"><h3>Awaiting payment</h3><span class="badge badge-approved">2 approved</span></div>
       <table>
-        <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Approved total</th><th>Approved by</th><th>Action</th></tr></thead>
+        <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Approved total</th><th>Approved by</th><th>Approved date</th><th>Action</th></tr></thead>
         <tbody id="payments-body"></tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr"><h3>Delivery queue (managed in Inward entry)</h3></div>
+      <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Amount</th><th>Paid on</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="awaiting-delivery-body"></tbody>
       </table>
     </div>
     <div class="card">
@@ -1018,14 +1039,30 @@ function renderPendingCarts() {
 }
 
 function renderApprovedList() {
-  const approved = requests.filter(r => r.status === 'Approved');
-  document.getElementById('approved-body').innerHTML = approved.map(r => `<tr>
+  const approvedReqs = requests.filter(r => r.status === 'Approved');
+  const approvedCarts = cartRequests.filter(c => c.status === 'Approved');
+  let rows = '';
+  approvedReqs.forEach(r => {
+    rows += `<tr>
     <td class="mono">${r.id}</td>
     <td><span class="badge badge-approved">Request</span></td>
     <td style="font-weight:500">${r.item}</td>
-    <td>${r.approvedBy}</td><td class="mono">${r.date}</td>
-    <td><button class="btn btn-deliver btn-sm" onclick="markDelivered('${r.id}')">Mark delivered</button></td>
-  </tr>`).join('');
+    <td>${r.approvedBy || 'Lead'}</td>
+    <td class="mono">${r.approvedDate || r.date}</td>
+    <td><span class="badge badge-approved">Awaiting payment</span></td>
+  </tr>`;
+  });
+  approvedCarts.forEach(c => {
+    rows += `<tr>
+    <td class="mono">${c.id}</td>
+    <td><span class="badge badge-pending">${c.source}</span></td>
+    <td style="font-weight:500">${c.items} items — ${c.note}</td>
+    <td>${c.approvedBy || 'Lead'}</td>
+    <td class="mono">${c.approvedDate || c.date}</td>
+    <td><span class="badge badge-approved">Awaiting payment</span></td>
+  </tr>`;
+  });
+  document.getElementById('approved-body').innerHTML = rows || '<tr><td colspan="6"><div class="empty"><p>No approved entries awaiting payment</p></div></td></tr>';
 }
 
 function renderPayments() {
@@ -1037,7 +1074,7 @@ function renderPayments() {
       <td class="mono">${r.id}</td>
       <td><span class="badge badge-approved">Request</span></td>
       <td style="font-weight:500">${r.item} × ${r.qty}</td>
-      <td class="mono">₹${r.est}</td><td>${r.approvedBy}</td>
+      <td class="mono">₹${r.est}</td><td>${r.approvedBy || 'Lead'}</td><td class="mono">${r.approvedDate || r.date}</td>
       <td><button class="btn btn-pay btn-sm" onclick="openPaymentModal('${r.id}','${r.item}')">Mark paid</button></td>
     </tr>`;
   });
@@ -1046,21 +1083,23 @@ function renderPayments() {
       <td class="mono">${c.id}</td>
       <td><span class="badge badge-pending">${c.source}</span></td>
       <td style="font-weight:500">${c.items} items — ${c.note}</td>
-      <td class="mono">₹${c.total.toLocaleString('en-IN')}</td><td>Lead</td>
+      <td class="mono">₹${c.total.toLocaleString('en-IN')}</td><td>${c.approvedBy || 'Lead'}</td><td class="mono">${c.approvedDate || c.date}</td>
       <td><button class="btn btn-pay btn-sm" onclick="openPaymentModal('${c.id}','Cart ${c.id}')">Mark paid</button></td>
     </tr>`;
   });
-  document.getElementById('payments-body').innerHTML = rows || '<tr><td colspan="6"><div class="empty"><p>Nothing awaiting payment</p></div></td></tr>';
+  document.getElementById('payments-body').innerHTML = rows || '<tr><td colspan="7"><div class="empty"><p>Nothing awaiting payment</p></div></td></tr>';
+
+  document.getElementById('awaiting-delivery-body').innerHTML = '<tr><td colspan="7"><div class="empty"><p>After Mark paid, entries move to Inward entry → Delivered items pending inward entry.</p></div></td></tr>';
 
   // Payment history
-  const paid = cartRequests.filter(c => c.status === 'PaymentDone');
+  const paid = cartRequests.filter(c => c.status === 'Delivered');
   document.getElementById('payment-history-body').innerHTML = paid.map(c => `<tr>
     <td class="mono">${c.id}</td>
     <td>${c.source} — ${c.items} items</td>
     <td class="mono">₹${c.total.toLocaleString('en-IN')}</td>
     <td class="mono">INV-AUTO-001</td>
-    <td class="mono">${c.date}</td>
-    <td><span class="badge badge-paid">Paid</span></td>
+    <td class="mono">${c.paymentDate || c.date}</td>
+    <td><span class="badge badge-delivered">Delivered</span></td>
   </tr>`).join('');
 }
 
@@ -1079,6 +1118,56 @@ function renderCartList() {
       <td>${action || '<button class="btn btn-sm btn-secondary" onclick="viewCartDetail(\''+c.id+'\')">View</button>'}</td>
     </tr>`;
   }).join('');
+}
+
+function renderInwardDeliveries() {
+  const paidReqs = requests.filter(r => r.status === 'PaymentDone');
+  const paidCarts = cartRequests.filter(c => c.status === 'PaymentDone');
+  let rows = '';
+  paidReqs.forEach(r => {
+    rows += `<tr>
+      <td class="mono">${r.id}</td>
+      <td><span class="badge badge-approved">Request</span></td>
+      <td style="font-weight:500">${r.item} × ${r.qty}</td>
+      <td class="mono">${r.paymentDate || '-'}</td>
+      <td><span class="badge badge-paid">Awaiting delivery</span></td>
+      <td><button class="btn btn-deliver btn-sm" onclick="markDelivered('${r.id}')">Mark delivered</button></td>
+    </tr>`;
+  });
+  paidCarts.forEach(c => {
+    rows += `<tr>
+      <td class="mono">${c.id}</td>
+      <td><span class="badge badge-pending">${c.source}</span></td>
+      <td style="font-weight:500">${c.items} items — ${c.note}</td>
+      <td class="mono">${c.paymentDate || '-'}</td>
+      <td><span class="badge badge-paid">Awaiting delivery</span></td>
+      <td><button class="btn btn-deliver btn-sm" onclick="confirmDelivery('${c.id}')">Confirm delivery</button></td>
+    </tr>`;
+  });
+  document.getElementById('inward-delivered-body').innerHTML = rows || '<tr><td colspan="6"><div class="empty"><p>No delivered items pending inward entry</p></div></td></tr>';
+
+  const deliveredReqs = requests.filter(r => r.status === 'Delivered');
+  const deliveredCarts = cartRequests.filter(c => c.status === 'Delivered');
+  let historyRows = '';
+  deliveredReqs.forEach(r => {
+    historyRows += `<tr>
+      <td class="mono">${r.id}</td>
+      <td><span class="badge badge-approved">Request</span></td>
+      <td style="font-weight:500">${r.item} × ${r.qty}</td>
+      <td class="mono">${r.deliveredDate || '-'}</td>
+      <td><span class="badge badge-delivered">Delivered</span></td>
+    </tr>`;
+  });
+  deliveredCarts.forEach(c => {
+    historyRows += `<tr>
+      <td class="mono">${c.id}</td>
+      <td><span class="badge badge-pending">${c.source}</span></td>
+      <td style="font-weight:500">${c.items} items — ${c.note}</td>
+      <td class="mono">${c.deliveredDate || '-'}</td>
+      <td><span class="badge badge-delivered">Delivered</span></td>
+    </tr>`;
+  });
+  document.getElementById('inward-delivered-history-body').innerHTML = historyRows || '<tr><td colspan="5"><div class="empty"><p>No delivered history yet</p></div></td></tr>';
 }
 
 function renderCharts() {
@@ -1109,7 +1198,7 @@ function renderCharts() {
 function approveReq(id) {
   const r = requests.find(x => x.id === id);
   if (!r) return;
-  r.status = 'Approved'; r.approvedBy = 'Lead';
+  r.status = 'Approved'; r.approvedBy = 'Lead'; r.approvedDate = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
   renderPendingRequests(); renderApprovedList(); renderPayments();
   updateBadges();
   toast('✓ ' + id + ' approved — forwarded to accounts');
@@ -1127,7 +1216,9 @@ function approveCart(id) {
   const c = cartRequests.find(x => x.id === id);
   if (!c) return;
   c.status = 'Approved';
-  renderPendingCarts(); renderPayments(); renderCartList(); updateBadges();
+  c.approvedBy = 'Lead';
+  c.approvedDate = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  renderPendingCarts(); renderApprovedList(); renderPayments(); renderCartList(); updateBadges();
   toast('✓ ' + id + ' approved — forwarded to accounts for payment');
 }
 
@@ -1143,7 +1234,8 @@ function markDelivered(id) {
   const r = requests.find(x => x.id === id);
   if (!r) return;
   r.status = 'Delivered';
-  renderApprovedList();
+  r.deliveredDate = new Date().toISOString().split('T')[0];
+  renderApprovedList(); renderPayments(); renderInwardDeliveries();
   const entry = { id:'INW-00'+(logEntries.length+10), type:'Inward', item:r.item, qty:r.qty, by:r.member, source:'Delivery', date:'Today', notes:'From REQ' };
   logEntries.unshift(entry);
   toast('✓ Marked delivered — inward register updated');
@@ -1153,10 +1245,11 @@ function confirmDelivery(id) {
   const c = cartRequests.find(x => x.id === id);
   if (!c) return;
   c.status = 'Delivered';
+  c.deliveredDate = new Date().toISOString().split('T')[0];
   c.lineItems.forEach(item => {
     logEntries.unshift({ id:'INW-00'+(logEntries.length+10), type:'Inward', item:item.name, qty:item.qty+' pcs', by:c.member, source:c.source, date:'Today', notes:'From '+id });
   });
-  renderCartList();
+  renderCartList(); renderPayments(); renderInwardDeliveries();
   toast('✓ Delivery confirmed — ' + c.items + ' items inwarded to stock');
 }
 
@@ -1173,10 +1266,11 @@ function confirmPayment() {
   if (!invoice || !amount) { toast('Please fill invoice number and amount'); return; }
   const r = requests.find(x => x.id === currentPaymentId);
   const c = cartRequests.find(x => x.id === currentPaymentId);
-  if (r) r.status = 'PaymentDone';
-  if (c) c.status = 'PaymentDone';
+  const paidOn = document.getElementById('pay-date').value || new Date().toISOString().split('T')[0];
+  if (r) { r.status = 'PaymentDone'; r.paymentDate = paidOn; r.invoiceNo = invoice; r.amountPaid = parseFloat(amount); }
+  if (c) { c.status = 'PaymentDone'; c.paymentDate = paidOn; c.invoiceNo = invoice; c.amountPaid = parseFloat(amount); }
   closeModal('payment-modal');
-  renderPayments(); renderCartList(); updateBadges();
+  renderApprovedList(); renderPayments(); renderCartList(); renderInwardDeliveries(); updateBadges();
   toast('✓ Payment recorded — member notified of delivery pending');
 }
 
@@ -1560,8 +1654,8 @@ function nav(page, el) {
 
 function setRole(role) {
   const rules = {
-    member: { show:['nav-dashboard','nav-inventory','nav-wip','nav-log','nav-request','nav-cart'], hide:['nav-inward','nav-outward','nav-approvals','nav-payments'] },
-    lead: { show:['nav-dashboard','nav-inventory','nav-wip','nav-log','nav-request','nav-cart','nav-approvals'], hide:['nav-inward','nav-outward','nav-payments'] },
+    member: { show:['nav-dashboard','nav-inventory','nav-wip','nav-log','nav-request','nav-cart','nav-inward'], hide:['nav-outward','nav-approvals','nav-payments'] },
+    lead: { show:['nav-dashboard','nav-inventory','nav-wip','nav-log','nav-request','nav-cart','nav-inward','nav-approvals'], hide:['nav-outward','nav-payments'] },
     accounts: { show:['nav-dashboard','nav-inventory','nav-log','nav-inward','nav-outward','nav-approvals','nav-payments'], hide:['nav-request','nav-cart','nav-wip'] },
   };
   const r = rules[role];
@@ -1630,6 +1724,7 @@ renderPendingCarts();
 renderApprovedList();
 renderPayments();
 renderCartList();
+renderInwardDeliveries();
 renderCharts();
 setRole('member');
 checkUrlCartData(); // reads ?cartdata= param from extension handoff
