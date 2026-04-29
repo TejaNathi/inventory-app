@@ -1249,9 +1249,9 @@ function markDelivered(id) {
   if (!r) return;
   r.status = 'Delivered';
   r.deliveredDate = new Date().toISOString().split('T')[0];
-  renderApprovedList(); renderPayments(); renderInwardDeliveries();
   const entry = { id:'INW-00'+(logEntries.length+10), type:'Inward', item:r.item, qty:r.qty, by:r.member, source:'Delivery', date:'Today', notes:'From REQ' };
   logEntries.unshift(entry);
+  renderApprovedList(); renderPayments(); renderInwardDeliveries(); renderLog('all');
   toast('✓ Marked delivered — inward register updated');
 }
 
@@ -1263,7 +1263,7 @@ function confirmDelivery(id) {
   c.lineItems.forEach(item => {
     logEntries.unshift({ id:'INW-00'+(logEntries.length+10), type:'Inward', item:item.name, qty:item.qty+' pcs', by:c.member, source:c.source, date:'Today', notes:'From '+id });
   });
-  renderCartList(); renderPayments(); renderInwardDeliveries();
+  renderCartList(); renderPayments(); renderInwardDeliveries(); renderLog('all');
   toast('✓ Delivery confirmed — ' + c.items + ' items inwarded to stock');
 }
 
