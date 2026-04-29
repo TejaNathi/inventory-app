@@ -1,10 +1,30 @@
 // ─── THINKMETAL EXTENSION — POPUP SCRIPT ─────────────────────
 
 const VENDOR_PATTERNS = {
-  'amazon.in':  { name: 'Amazon India',  cartPaths: ['/cart', '/gp/cart'] },
-  'robu.in':    { name: 'Robu.in',       cartPaths: ['/cart'] },
-  'flipkart.com':{ name: 'Flipkart',     cartPaths: ['/checkout/cart'] },
-  'indiamart.com':{ name: 'IndiaMart',   cartPaths: ['/'] },
+  // Amazon — specific parser
+  'amazon.in':            { name: 'Amazon India',    cartPaths: ['/cart', '/gp/cart'], parser: 'amazon' },
+  // Robu — specific parser
+  'robu.in':              { name: 'Robu.in',         cartPaths: ['/cart'],             parser: 'robu' },
+  // WooCommerce vendors
+  'electronicscomp.com':  { name: 'ElectronicsComp', cartPaths: ['/cart'],             parser: 'generic' },
+  'electroncomponents.in':{ name: 'Electron Components', cartPaths: ['/cart'],         parser: 'generic' },
+  // Magento vendors
+  'industrybuying.com':   { name: 'IndustryBuying',  cartPaths: ['/checkout/cart'],    parser: 'generic' },
+  // OpenCart vendors
+  '3dnova.in':            { name: '3DNova',           cartPaths: ['/index.php', '/cart'], parser: 'generic' },
+  'dccomponents.in':      { name: 'DC Components',   cartPaths: ['/cart', '/index.php'], parser: 'generic' },
+  'dcsupplies.in':        { name: 'DC Supplies',     cartPaths: ['/cart', '/index.php'], parser: 'generic' },
+  // BigTreeTech
+  'bigtree-tech.com':     { name: 'BigTreeTech',     cartPaths: ['/cart', '/checkout'], parser: 'generic' },
+  'bigtreetech.com':      { name: 'BigTreeTech',     cartPaths: ['/cart', '/checkout'], parser: 'generic' },
+  // Other common Indian electronics stores
+  'projectpoint.in':      { name: 'ProjectPoint',    cartPaths: ['/cart'],             parser: 'generic' },
+  'sunrom.com':           { name: 'Sunrom',           cartPaths: ['/cart'],             parser: 'generic' },
+  'evelta.com':           { name: 'Evelta',           cartPaths: ['/cart'],             parser: 'generic' },
+  'thinkrobotics.in':     { name: 'ThinkRobotics',   cartPaths: ['/cart'],             parser: 'generic' },
+  'rhydolabz.com':        { name: 'Rhydolabz',       cartPaths: ['/cart'],             parser: 'generic' },
+  'nex-robotics.com':     { name: 'Nex Robotics',    cartPaths: ['/cart'],             parser: 'generic' },
+  'flipkart.com':         { name: 'Flipkart',        cartPaths: ['/checkout/cart'],    parser: 'generic' },
 };
 
 let currentTab = null;
@@ -16,11 +36,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   currentTab = tab;
   analyseTab(tab);
-  document.getElementById('send-btn')?.addEventListener('click', sendCart);
 
-  // Listen for result from background
+  // Wire button — no inline handlers allowed in extension HTML (CSP)
+  document.getElementById('send-btn').addEventListener('click', sendCart);
+
+  // Listen for result back from background
   chrome.runtime.onMessage.addListener((msg) => {
-    if (msg.type === 'PARSE_RESULT') onParseResult(msg);
+    if (msg.type === 'PARSE_RESULT') {
+      clearSendTimeout();
+      onParseResult(msg);
+    }
   });
 });
 
@@ -75,24 +100,23 @@ function analyseTab(tab) {
 }
 
 function sendCart() {
-  const sendBtn = document.getElementById('send-btn');
-  const loading = document.getElementById('loading');
-  const result = document.getElementById('result');
-
-  sendBtn.disabled = true;
+  document.getElementById('send-btn').disabled = true;
   document.getElementById('loading').classList.add('show');
-  result.classList.remove('show');
+  document.getElementById('result').classList.remove('show');
+  startSendTimeout();
 
   chrome.runtime.sendMessage({
     type: 'SEND_CART_TO_APP',
     tabId: currentTab.id,
     vendor: detectedVendor
-  }, () => {
+  }, (response) => {
     if (chrome.runtime.lastError) {
-      loading.classList.remove('show');
+      clearSendTimeout();
+      document.getElementById('loading').classList.remove('show');
+      const result = document.getElementById('result');
       result.className = 'result error show';
-      result.textContent = '✗ Extension connection lost. Reload extension from chrome://extensions and try again.';
-      sendBtn.disabled = false;
+      result.textContent = '✗ Extension error: ' + chrome.runtime.lastError.message;
+      document.getElementById('send-btn').disabled = false;
     }
   });
 }
@@ -104,11 +128,28 @@ function onParseResult(msg) {
 
   if (msg.success) {
     result.className = 'result success show';
-    result.textContent = '✓ ' + msg.count + ' items sent to inventory app — check the new tab';
+    result.textContent = '✓ ' + msg.count + ' items sent — check your inventory app tab';
     sendBtn.disabled = true;
   } else {
     result.className = 'result error show';
-    result.textContent = '✗ Could not extract items. Try the copy-paste method in the web app.';
+    const errDetail = msg.error ? (' (' + msg.error + ')') : '';
+    result.textContent = '✗ Could not extract items' + errDetail + '. Try the paste method in the web app.';
     sendBtn.disabled = false;
   }
+}
+
+// Timeout — if no response in 8 seconds, show an error
+let sendTimeout;
+function startSendTimeout() {
+  sendTimeout = setTimeout(() => {
+    document.getElementById('loading').classList.remove('show');
+    const result = document.getElementById('result');
+    result.className = 'result error show';
+    result.textContent = '✗ Timed out. Make sure the web app is open at 127.0.0.1:5500 and extension has permission to access all sites.';
+    document.getElementById('send-btn').disabled = false;
+  }, 8000);
+}
+
+function clearSendTimeout() {
+  clearTimeout(sendTimeout);
 }
