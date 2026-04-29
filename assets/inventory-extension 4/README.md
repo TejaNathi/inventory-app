@@ -41,8 +41,6 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
 | Robu.in      | `robu.js`      | Must be on /cart page          |
 | Any other    | `generic.js`   | Best-effort, always review output |
 
-`generic.js` has extra WooCommerce/cart-table handling for vendors like DC3D/Zee3D/Ktron/Novo3D.
-
 ## Fallback: copy-paste method
 
 If the extension can't extract items automatically, use the
@@ -61,9 +59,10 @@ inventory-extension/
 ├── content.js         — Thin coordinator injected into vendor pages
 ├── popup.html         — UI shown when member clicks the icon
 ├── popup.js           — Popup logic, vendor detection
-├── amazon.js          — Amazon India cart DOM parser
-├── robu.js            — Robu.in cart DOM parser
-├── generic.js         — Fallback for any other vendor
+├── parsers/
+│   ├── amazon.js      — Amazon India cart DOM parser
+│   ├── robu.js        — Robu.in cart DOM parser
+│   └── generic.js     — Fallback for any other vendor
 └── icons/
     └── (add icon PNGs: icon16.png, icon48.png, icon128.png)
 ```
@@ -74,12 +73,3 @@ After changing any file:
 1. Go to `chrome://extensions`
 2. Click the refresh icon on the ThinkMetal extension card
 3. Changes take effect immediately
-
-## Troubleshooting
-
-- `Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist`
-  - Usually means the extension was edited but not reloaded.
-  - Fix: refresh the extension in `chrome://extensions`, then reopen popup and retry.
-- `[Redirect Blocker] Stopping to prevent same tab redirects`
-  - This message is produced by a separate browser extension (commonly Live Server helper scripts), not by ThinkMetal extension files in this repo.
-  - If import still works, this log can be ignored. If not, disable that browser extension on your local app URL and retry.
