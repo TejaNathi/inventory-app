@@ -1153,8 +1153,8 @@ function renderInwardDeliveries() {
       <td class="mono">${c.paymentDate || '-'}</td>
       <td><span class="badge badge-paid">Awaiting delivery</span></td>
       <td style="display:flex;gap:6px;padding:8px 18px;flex-wrap:wrap">
-        <button class="btn btn-sm btn-secondary" onclick="viewCartDetail('${c.id}')">View items</button>
-        <button class="btn btn-deliver btn-sm" onclick="openDeliveryChecklist('${c.id}')">Checklist & confirm</button>
+        <button class="btn btn-sm btn-secondary" onclick="openDeliveryChecklist('${c.id}')">View list</button>
+        <button class="btn btn-deliver btn-sm" onclick="openDeliveryChecklist('${c.id}')">Confirm delivery</button>
       </td>
     </tr>`;
   });
