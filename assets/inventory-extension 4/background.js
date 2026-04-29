@@ -21,7 +21,7 @@ async function handleCartSend(tabId, vendor) {
     // 1. Inject parsers into the vendor cart page
     await chrome.scripting.executeScript({
       target: { tabId },
-      files: ['amazon.js', 'robu.js', 'generic.js']
+      files: ['parsers/amazon.js', 'parsers/robu.js', 'parsers/generic.js']
     });
 
     // 2. Run the right parser inside the vendor page and get items back
@@ -34,7 +34,7 @@ async function handleCartSend(tabId, vendor) {
     const items = results?.[0]?.result || [];
 
     if (items.length === 0) {
-      sendParseResult({ type: 'PARSE_RESULT', success: false, count: 0 });
+      chrome.runtime.sendMessage({ type: 'PARSE_RESULT', success: false, count: 0 });
       return;
     }
 
@@ -44,15 +44,15 @@ async function handleCartSend(tabId, vendor) {
 
     if (appTab) {
       // ── App tab is already open ──────────────────────────
-      // Focus it first so user sees it
       await chrome.tabs.update(appTab.id, { active: true });
       await chrome.windows.update(appTab.windowId, { focused: true });
 
-      // Inject a script into the app tab that fires postMessage
-      // This bypasses cross-origin restrictions because we're injecting
-      // from the extension which has scripting permission on all URLs
+      // IMPORTANT: world:'MAIN' — runs in the page's own JS context,
+      // not the extension's isolated world. This makes postMessage
+      // actually reach the web app's window.addEventListener listener.
       await chrome.scripting.executeScript({
         target: { tabId: appTab.id },
+        world: 'MAIN',
         func: (cartItems, cartVendor) => {
           window.postMessage({
             type: 'THINKMETAL_CART',
@@ -73,7 +73,7 @@ async function handleCartSend(tabId, vendor) {
     }
 
     // Tell popup it worked
-    sendParseResult({
+    chrome.runtime.sendMessage({
       type: 'PARSE_RESULT',
       success: true,
       count: items.length
@@ -81,21 +81,12 @@ async function handleCartSend(tabId, vendor) {
 
   } catch (err) {
     console.error('[ThinkMetal extension error]', err);
-    sendParseResult({
+    chrome.runtime.sendMessage({
       type: 'PARSE_RESULT',
       success: false,
       error: err.message
     });
   }
-}
-
-function sendParseResult(payload) {
-  chrome.runtime.sendMessage(payload, () => {
-    if (chrome.runtime.lastError) {
-      // Popup might be closed before background posts result.
-      // This is safe to ignore.
-    }
-  });
 }
 
 // ── Runs inside vendor page context ───────────────────────────

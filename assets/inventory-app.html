@@ -1295,7 +1295,7 @@ function confirmPayment() {
   if (r) { r.status = 'PaymentDone'; r.paymentDate = paidOn; r.invoiceNo = invoice; r.amountPaid = parseFloat(amount); }
   if (c) { c.status = 'PaymentDone'; c.paymentDate = paidOn; c.invoiceNo = invoice; c.amountPaid = parseFloat(amount); }
   closeModal('payment-modal');
-  renderApprovedList(); renderPayments(); renderCartList(); renderInwardDeliveries(); updateBadges();
+  renderApprovedList(); renderPayments(); renderCartList(); updateBadges();
   toast('✓ Payment recorded — member notified of delivery pending');
 }
 
