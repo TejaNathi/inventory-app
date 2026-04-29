@@ -124,8 +124,8 @@ function parseWooCommerce() {
     items.push({
       name,
       qty,
-      unitPrice,
-      total,
+      unitPrice: qty > 1 ? Math.round(price / qty) : price,
+      total: price,
       asin: '',
       currency: 'INR'
     });
@@ -162,8 +162,8 @@ function parseWooCommerce() {
     items.push({
       name,
       qty,
-      unitPrice,
-      total,
+      unitPrice: qty > 1 ? Math.round(price / qty) : price,
+      total: price,
       asin: '',
       currency: 'INR'
     });
@@ -182,21 +182,15 @@ function parseWooCommerce() {
     const name = nameEl?.textContent.trim();
     if (!name || name.length < 3 || name.length > 150) return;
 
-      const unitPriceEl =
-        row.querySelector('td.product-price .woocommerce-Price-amount') ||
-        row.querySelector('td.product-price .amount') ||
-        row.querySelector('.wc-block-cart-item__prices .woocommerce-Price-amount');
-      const subtotalEl =
-        row.querySelector('td.product-subtotal .woocommerce-Price-amount') ||
-        row.querySelector('td.product-subtotal .amount');
+    const qtyInput = el.querySelector('input[type="number"]');
+    const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
 
     const prices = Array.from(text.matchAll(moneyGlobalRe)).map(m => m[2]);
     const price = prices.length > 0
       ? parseFloat(prices[prices.length - 1].replace(/,/g, ''))
       : 0;
 
-      if (name) items.push(makeItem(name, qty, unitPrice));
-    } catch (e) {}
+    if (name) items.push(makeItem(name, qty, qty > 1 ? price / qty : price));
   });
 
   // Block cart fallback
