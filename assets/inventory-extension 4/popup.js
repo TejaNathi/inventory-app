@@ -3,10 +3,6 @@
 const VENDOR_PATTERNS = {
   'amazon.in':  { name: 'Amazon India',  cartPaths: ['/cart', '/gp/cart'] },
   'robu.in':    { name: 'Robu.in',       cartPaths: ['/cart'] },
-  'dc3d':       { name: 'DC3D',          cartPaths: ['/cart', '/checkout'] },
-  'zee3d':      { name: 'Zee3D',         cartPaths: ['/cart', '/checkout'] },
-  'novo3d':     { name: 'Novo3D',        cartPaths: ['/cart', '/checkout'] },
-  'ktron.in':   { name: 'Ktron.in',      cartPaths: ['/cart', '/checkout'] },
   'flipkart.com':{ name: 'Flipkart',     cartPaths: ['/checkout/cart'] },
   'indiamart.com':{ name: 'IndiaMart',   cartPaths: ['/'] },
 };
@@ -20,12 +16,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   currentTab = tab;
   analyseTab(tab);
-  document.getElementById('send-btn')?.addEventListener('click', sendCart);
 
-  // Wire button — no inline handlers allowed in extension HTML (CSP)
-  document.getElementById('send-btn').addEventListener('click', sendCart);
-
-  // Listen for result back from background
+  // Listen for result from background
   chrome.runtime.onMessage.addListener((msg) => {
     if (msg.type === 'PARSE_RESULT') {
       clearSendTimeout();
@@ -85,24 +77,23 @@ function analyseTab(tab) {
 }
 
 function sendCart() {
-  const sendBtn = document.getElementById('send-btn');
-  const loading = document.getElementById('loading');
-  const result = document.getElementById('result');
-
-  sendBtn.disabled = true;
+  document.getElementById('send-btn').disabled = true;
   document.getElementById('loading').classList.add('show');
-  result.classList.remove('show');
+  document.getElementById('result').classList.remove('show');
+  startSendTimeout();
 
   chrome.runtime.sendMessage({
     type: 'SEND_CART_TO_APP',
     tabId: currentTab.id,
     vendor: detectedVendor
-  }, () => {
+  }, (response) => {
     if (chrome.runtime.lastError) {
-      loading.classList.remove('show');
+      clearSendTimeout();
+      document.getElementById('loading').classList.remove('show');
+      const result = document.getElementById('result');
       result.className = 'result error show';
-      result.textContent = '✗ Extension connection lost. Reload extension from chrome://extensions and try again.';
-      sendBtn.disabled = false;
+      result.textContent = '✗ Extension error: ' + chrome.runtime.lastError.message;
+      document.getElementById('send-btn').disabled = false;
     }
   });
 }
