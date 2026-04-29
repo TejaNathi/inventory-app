@@ -567,7 +567,7 @@ option { background: var(--surface2); color: var(--text); }
       </div>
     </div>
     <div class="card">
-      <div class="card-hdr"><h3>Delivered items pending inward entry</h3></div>
+      <div class="card-hdr"><h3>Payment done — awaiting delivery confirmation (Inward entry)</h3></div>
       <table>
         <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Paid on</th><th>Status</th><th>Action</th></tr></thead>
         <tbody id="inward-delivered-body"></tbody>
@@ -1158,7 +1158,7 @@ function renderInwardDeliveries() {
       </td>
     </tr>`;
   });
-  document.getElementById('inward-delivered-body').innerHTML = rows || '<tr><td colspan="6"><div class="empty"><p>No delivered items pending inward entry</p></div></td></tr>';
+  document.getElementById('inward-delivered-body').innerHTML = rows || '<tr><td colspan="6"><div class="empty"><p>No payment-done entries awaiting delivery confirmation</p></div></td></tr>';
 
   const deliveredReqs = requests.filter(r => r.status === 'Delivered');
   const deliveredCarts = cartRequests.filter(c => c.status === 'Delivered');
