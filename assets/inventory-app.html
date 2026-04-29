@@ -1686,6 +1686,8 @@ function setRole(role) {
   const r = rules[role];
   document.querySelectorAll('.nav-item[id]').forEach(el => el.classList.remove('disabled'));
   r.hide.forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('disabled'); });
+  const inwardNav = document.getElementById('nav-inward');
+  if (inwardNav) inwardNav.classList.remove('disabled');
   document.getElementById('delivery-banner').style.display = role === 'member' ? 'flex' : 'none';
 }
 
