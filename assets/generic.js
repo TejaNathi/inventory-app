@@ -87,6 +87,51 @@ function makeItem(name, qty, unitPrice) {
 // dc3d.in, novo3d.in, electronicscomp (some themes), many others
 function parseWooCommerce() {
   const items = [];
+  const moneyRe = /(₹|Rs\.?|INR)\s*([\d,]+(?:\.\d+)?)/i;
+  const moneyGlobalRe = /(₹|Rs\.?|INR)\s*([\d,]+(?:\.\d+)?)/gi;
+
+  // Strategy 0: WooCommerce-style carts (used by many electronics vendors)
+  const wooRows = document.querySelectorAll(
+    'tr.cart_item, .woocommerce-cart-form__cart-item, .shop_table.cart tbody tr'
+  );
+  wooRows.forEach(row => {
+    const rowText = row.textContent || '';
+    if (/cart-subtotal|order-total|shipping|coupon/i.test(row.className + ' ' + rowText)) return;
+
+    const nameEl =
+      row.querySelector('.product-name a') ||
+      row.querySelector('td.product-name a') ||
+      row.querySelector('.product-name') ||
+      row.querySelector('[class*="product-name"] a');
+    const name = nameEl?.textContent?.trim()?.replace(/\s+/g, ' ');
+    if (!name || name.length < 3) return;
+
+    const qtyInput = row.querySelector('input.qty, .quantity input[type="number"], input[type="number"]');
+    let qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+    if (!qty || Number.isNaN(qty)) {
+      const qtyText = rowText.match(/(?:qty|quantity|x|×)\s*[:\-]?\s*(\d+)/i);
+      qty = qtyText ? parseInt(qtyText[1], 10) : 1;
+    }
+
+    const prices = Array.from(rowText.matchAll(moneyGlobalRe))
+      .map(m => parseFloat(m[2].replace(/,/g, '')))
+      .filter(n => Number.isFinite(n) && n > 0);
+    if (prices.length === 0) return;
+
+    const total = prices[prices.length - 1];
+    const unitPrice = qty > 1 ? Math.round(total / qty) : (prices[0] || total);
+
+    items.push({
+      name,
+      qty,
+      unitPrice,
+      total,
+      asin: '',
+      currency: 'INR'
+    });
+  });
+
+  if (items.length > 0) return dedupeItems(items);
 
   const rows = document.querySelectorAll('tr.cart_item, .wc-block-cart-item');
   rows.forEach(row => {

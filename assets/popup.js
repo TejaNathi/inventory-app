@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   currentTab = tab;
   analyseTab(tab);
+  document.getElementById('send-btn')?.addEventListener('click', sendCart);
 
   // Wire button — no inline handlers allowed in extension HTML (CSP)
   document.getElementById('send-btn').addEventListener('click', sendCart);
@@ -100,7 +101,11 @@ function analyseTab(tab) {
 }
 
 function sendCart() {
-  document.getElementById('send-btn').disabled = true;
+  const sendBtn = document.getElementById('send-btn');
+  const loading = document.getElementById('loading');
+  const result = document.getElementById('result');
+
+  sendBtn.disabled = true;
   document.getElementById('loading').classList.add('show');
   document.getElementById('result').classList.remove('show');
   startSendTimeout();
