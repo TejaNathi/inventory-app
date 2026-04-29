@@ -1,30 +1,14 @@
 // ─── THINKMETAL EXTENSION — POPUP SCRIPT ─────────────────────
 
 const VENDOR_PATTERNS = {
-  // Amazon — specific parser
-  'amazon.in':            { name: 'Amazon India',    cartPaths: ['/cart', '/gp/cart'], parser: 'amazon' },
-  // Robu — specific parser
-  'robu.in':              { name: 'Robu.in',         cartPaths: ['/cart'],             parser: 'robu' },
-  // WooCommerce vendors
-  'electronicscomp.com':  { name: 'ElectronicsComp', cartPaths: ['/cart'],             parser: 'generic' },
-  'electroncomponents.in':{ name: 'Electron Components', cartPaths: ['/cart'],         parser: 'generic' },
-  // Magento vendors
-  'industrybuying.com':   { name: 'IndustryBuying',  cartPaths: ['/checkout/cart'],    parser: 'generic' },
-  // OpenCart vendors
-  '3dnova.in':            { name: '3DNova',           cartPaths: ['/index.php', '/cart'], parser: 'generic' },
-  'dccomponents.in':      { name: 'DC Components',   cartPaths: ['/cart', '/index.php'], parser: 'generic' },
-  'dcsupplies.in':        { name: 'DC Supplies',     cartPaths: ['/cart', '/index.php'], parser: 'generic' },
-  // BigTreeTech
-  'bigtree-tech.com':     { name: 'BigTreeTech',     cartPaths: ['/cart', '/checkout'], parser: 'generic' },
-  'bigtreetech.com':      { name: 'BigTreeTech',     cartPaths: ['/cart', '/checkout'], parser: 'generic' },
-  // Other common Indian electronics stores
-  'projectpoint.in':      { name: 'ProjectPoint',    cartPaths: ['/cart'],             parser: 'generic' },
-  'sunrom.com':           { name: 'Sunrom',           cartPaths: ['/cart'],             parser: 'generic' },
-  'evelta.com':           { name: 'Evelta',           cartPaths: ['/cart'],             parser: 'generic' },
-  'thinkrobotics.in':     { name: 'ThinkRobotics',   cartPaths: ['/cart'],             parser: 'generic' },
-  'rhydolabz.com':        { name: 'Rhydolabz',       cartPaths: ['/cart'],             parser: 'generic' },
-  'nex-robotics.com':     { name: 'Nex Robotics',    cartPaths: ['/cart'],             parser: 'generic' },
-  'flipkart.com':         { name: 'Flipkart',        cartPaths: ['/checkout/cart'],    parser: 'generic' },
+  'amazon.in':  { name: 'Amazon India',  cartPaths: ['/cart', '/gp/cart'] },
+  'robu.in':    { name: 'Robu.in',       cartPaths: ['/cart'] },
+  'dc3d':       { name: 'DC3D',          cartPaths: ['/cart', '/checkout'] },
+  'zee3d':      { name: 'Zee3D',         cartPaths: ['/cart', '/checkout'] },
+  'novo3d':     { name: 'Novo3D',        cartPaths: ['/cart', '/checkout'] },
+  'ktron.in':   { name: 'Ktron.in',      cartPaths: ['/cart', '/checkout'] },
+  'flipkart.com':{ name: 'Flipkart',     cartPaths: ['/checkout/cart'] },
+  'indiamart.com':{ name: 'IndiaMart',   cartPaths: ['/'] },
 };
 
 let currentTab = null;
@@ -107,21 +91,18 @@ function sendCart() {
 
   sendBtn.disabled = true;
   document.getElementById('loading').classList.add('show');
-  document.getElementById('result').classList.remove('show');
-  startSendTimeout();
+  result.classList.remove('show');
 
   chrome.runtime.sendMessage({
     type: 'SEND_CART_TO_APP',
     tabId: currentTab.id,
     vendor: detectedVendor
-  }, (response) => {
+  }, () => {
     if (chrome.runtime.lastError) {
-      clearSendTimeout();
-      document.getElementById('loading').classList.remove('show');
-      const result = document.getElementById('result');
+      loading.classList.remove('show');
       result.className = 'result error show';
-      result.textContent = '✗ Extension error: ' + chrome.runtime.lastError.message;
-      document.getElementById('send-btn').disabled = false;
+      result.textContent = '✗ Extension connection lost. Reload extension from chrome://extensions and try again.';
+      sendBtn.disabled = false;
     }
   });
 }

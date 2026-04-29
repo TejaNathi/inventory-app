@@ -133,23 +133,54 @@ function parseWooCommerce() {
 
   if (items.length > 0) return dedupeItems(items);
 
-  const rows = document.querySelectorAll('tr.cart_item, .wc-block-cart-item');
-  rows.forEach(row => {
-    try {
-      const nameEl =
-        row.querySelector('.product-name a') ||
-        row.querySelector('td.product-name a') ||
-        row.querySelector('.wc-block-cart-item__product-name') ||
-        row.querySelector('[class*="product-name"] a');
-      if (!nameEl) return;
-      const name = nameEl.textContent.trim();
-      if (!name || name.length < 3) return;
+  // Strategy 1: Look for cart table rows with price data
+  const tableRows = document.querySelectorAll('tr');
+  tableRows.forEach(row => {
+    const text = row.textContent;
+    // Row must have a price-like pattern
+    if (!text.match(moneyRe)) return;
+    if (/subtotal|order total|shipping|coupon|tax/i.test(text)) return;
 
-      const qtyInput =
-        row.querySelector('input.qty') ||
-        row.querySelector('.quantity input[type="number"]') ||
-        row.querySelector('input[type="number"]');
-      const qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+    const nameEl = row.querySelector(
+      '.product-name a, td.product-name a, a[href*="product"], .name, [class*="title"], [class*="product-name"]'
+    );
+    const name = nameEl?.textContent.trim();
+    if (!name || name.length < 3 || name.length > 150) return;
+
+    const qtyInput = row.querySelector('input[type="number"], input.qty, select, .quantity input');
+    let qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+    if (!qty || Number.isNaN(qty)) {
+      const qtyText = text.match(/(?:qty|quantity|x|×)\s*[:\-]?\s*(\d+)/i);
+      qty = qtyText ? parseInt(qtyText[1], 10) : 1;
+    }
+
+    const prices = Array.from(text.matchAll(moneyGlobalRe))
+      .map(m => parseFloat(m[2].replace(/,/g, '')))
+      .filter(n => Number.isFinite(n) && n > 0);
+    const price = prices.length ? prices[prices.length - 1] : 0;
+
+    items.push({
+      name,
+      qty,
+      unitPrice,
+      total,
+      asin: '',
+      currency: 'INR'
+    });
+  });
+
+  if (items.length > 0) return dedupeItems(items);
+
+  // Strategy 2: Look for list items with product links + prices
+  const listItems = document.querySelectorAll('li, .item, .product, [class*="cart-item"], [class*="line-item"]');
+  listItems.forEach(el => {
+    const text = el.textContent;
+    if (!text.match(moneyRe)) return;
+    if (el.children.length < 2) return; // Too simple, skip
+
+    const nameEl = el.querySelector('a[href*="product"], [class*="name"], [class*="title"]');
+    const name = nameEl?.textContent.trim();
+    if (!name || name.length < 3 || name.length > 150) return;
 
       const unitPriceEl =
         row.querySelector('td.product-price .woocommerce-Price-amount') ||
@@ -159,12 +190,10 @@ function parseWooCommerce() {
         row.querySelector('td.product-subtotal .woocommerce-Price-amount') ||
         row.querySelector('td.product-subtotal .amount');
 
-      let unitPrice = 0;
-      if (unitPriceEl) unitPrice = extractPrice(unitPriceEl.textContent);
-      else if (subtotalEl) {
-        const sub = extractPrice(subtotalEl.textContent);
-        unitPrice = qty > 1 ? Math.round(sub / qty) : sub;
-      }
+    const prices = Array.from(text.matchAll(moneyGlobalRe)).map(m => m[2]);
+    const price = prices.length > 0
+      ? parseFloat(prices[prices.length - 1].replace(/,/g, ''))
+      : 0;
 
       if (name) items.push(makeItem(name, qty, unitPrice));
     } catch (e) {}
