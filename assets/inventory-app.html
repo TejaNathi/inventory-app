@@ -567,7 +567,7 @@ option { background: var(--surface2); color: var(--text); }
       </div>
     </div>
     <div class="card">
-      <div class="card-hdr"><h3>Delivered items pending inward entry</h3></div>
+      <div class="card-hdr"><h3>Payment done — awaiting delivery confirmation (Inward entry)</h3></div>
       <table>
         <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Paid on</th><th>Status</th><th>Action</th></tr></thead>
         <tbody id="inward-delivered-body"></tbody>
@@ -853,6 +853,18 @@ option { background: var(--surface2); color: var(--text); }
   </div>
 </div>
 
+<div class="modal-overlay" id="delivery-checklist-modal">
+  <div class="modal">
+    <h3 id="delivery-checklist-title">Confirm delivery checklist</h3>
+    <p id="delivery-checklist-meta">Tick each item that has been received.</p>
+    <div id="delivery-checklist-items"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('delivery-checklist-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmChecklistDelivery()">Confirm delivery</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Mark payment done -->
 <div class="modal-overlay" id="payment-modal">
   <div class="modal">
@@ -944,6 +956,7 @@ const activityData = [
 
 // ─── PAYMENT STATE ────────────────────────────────────────────
 let currentPaymentId = null;
+let currentDeliveryId = null;
 let currentCartData = null;
 
 // ─── RENDER FUNCTIONS ─────────────────────────────────────────
@@ -1105,7 +1118,7 @@ function renderCartList() {
   document.getElementById('cart-list-body').innerHTML = cartRequests.map(c => {
     const statusMap = { Pending:'badge-pending', Approved:'badge-approved', PaymentDone:'badge-paid', Delivered:'badge-delivered', Rejected:'badge-rejected' };
     let action = '';
-    if (c.status === 'PaymentDone') action = `<button class="btn btn-deliver btn-sm" onclick="confirmDelivery('${c.id}')">Confirm delivery</button>`;
+    if (c.status === 'PaymentDone') action = `<button class="btn btn-deliver btn-sm" onclick="openDeliveryChecklist('${c.id}')">Confirm delivery</button>`;
     return `<tr>
       <td class="mono">${c.id}</td>
       <td><span class="badge badge-pending" style="font-size:10px">${c.source}</span></td>
@@ -1141,11 +1154,11 @@ function renderInwardDeliveries() {
       <td><span class="badge badge-paid">Awaiting delivery</span></td>
       <td style="display:flex;gap:6px;padding:8px 18px;flex-wrap:wrap">
         <button class="btn btn-sm btn-secondary" onclick="viewCartDetail('${c.id}')">View items</button>
-        <button class="btn btn-deliver btn-sm" onclick="confirmDelivery('${c.id}')">Confirm delivery</button>
+        <button class="btn btn-deliver btn-sm" onclick="openDeliveryChecklist('${c.id}')">Checklist & confirm</button>
       </td>
     </tr>`;
   });
-  document.getElementById('inward-delivered-body').innerHTML = rows || '<tr><td colspan="6"><div class="empty"><p>No delivered items pending inward entry</p></div></td></tr>';
+  document.getElementById('inward-delivered-body').innerHTML = rows || '<tr><td colspan="6"><div class="empty"><p>No payment-done entries awaiting delivery confirmation</p></div></td></tr>';
 
   const deliveredReqs = requests.filter(r => r.status === 'Delivered');
   const deliveredCarts = cartRequests.filter(c => c.status === 'Delivered');
@@ -1236,9 +1249,9 @@ function markDelivered(id) {
   if (!r) return;
   r.status = 'Delivered';
   r.deliveredDate = new Date().toISOString().split('T')[0];
-  renderApprovedList(); renderPayments(); renderInwardDeliveries();
   const entry = { id:'INW-00'+(logEntries.length+10), type:'Inward', item:r.item, qty:r.qty, by:r.member, source:'Delivery', date:'Today', notes:'From REQ' };
   logEntries.unshift(entry);
+  renderApprovedList(); renderPayments(); renderInwardDeliveries(); renderLog('all');
   toast('✓ Marked delivered — inward register updated');
 }
 
@@ -1250,8 +1263,42 @@ function confirmDelivery(id) {
   c.lineItems.forEach(item => {
     logEntries.unshift({ id:'INW-00'+(logEntries.length+10), type:'Inward', item:item.name, qty:item.qty+' pcs', by:c.member, source:c.source, date:'Today', notes:'From '+id });
   });
-  renderCartList(); renderPayments(); renderInwardDeliveries();
+  renderCartList(); renderPayments(); renderInwardDeliveries(); renderLog('all');
   toast('✓ Delivery confirmed — ' + c.items + ' items inwarded to stock');
+}
+
+function openDeliveryChecklist(id) {
+  const c = cartRequests.find(x => x.id === id);
+  if (!c) return;
+  currentDeliveryId = id;
+  if (!c.receivedItems || c.receivedItems.length !== c.lineItems.length) c.receivedItems = c.lineItems.map(() => false);
+  document.getElementById('delivery-checklist-title').textContent = `Confirm delivery — ${c.id}`;
+  document.getElementById('delivery-checklist-meta').textContent = `${c.source} · Mark delivered items before confirmation`;
+  document.getElementById('delivery-checklist-items').innerHTML = c.lineItems.map((l, i) => `
+    <div class="cart-item-row">
+      <input type="checkbox" ${c.receivedItems[i] ? 'checked' : ''} onchange="toggleDeliveredItem(${i}, this.checked)"
+        style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer">
+      <div class="cart-item-info">
+        <div class="cart-item-name">${l.name}</div>
+        <div class="cart-item-meta">Qty: ${l.qty} × ₹${l.unitPrice}</div>
+      </div>
+      <div class="cart-item-price">₹${l.total.toLocaleString('en-IN')}</div>
+    </div>`).join('');
+  document.getElementById('delivery-checklist-modal').classList.add('show');
+}
+
+function toggleDeliveredItem(index, checked) {
+  const c = cartRequests.find(x => x.id === currentDeliveryId);
+  if (!c) return;
+  c.receivedItems[index] = checked;
+}
+
+function confirmChecklistDelivery() {
+  const c = cartRequests.find(x => x.id === currentDeliveryId);
+  if (!c) return;
+  if (c.receivedItems.some(done => !done)) return toast('⚠ Please check all delivered items before confirming');
+  closeModal('delivery-checklist-modal');
+  confirmDelivery(c.id);
 }
 
 function openPaymentModal(id, desc) {
