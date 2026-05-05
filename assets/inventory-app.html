@@ -7,189 +7,373 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#0f0f0f;--surface:#171717;--surface2:#1f1f1f;--surface3:#272727;
-  --border:#2a2a2a;--border2:#333;--text:#e8e8e8;--text2:#999;--text3:#555;
-  --accent:#e8ff47;--accent-dim:rgba(232,255,71,0.1);--accent-dim2:rgba(232,255,71,0.06);
-  --green:#4ade80;--green-dim:rgba(74,222,128,0.1);
-  --red:#f87171;--red-dim:rgba(248,113,113,0.1);
-  --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.1);
-  --blue:#60a5fa;--blue-dim:rgba(96,165,250,0.1);
-  --purple:#c084fc;--purple-dim:rgba(192,132,252,0.1);
-  --radius:8px;--radius-lg:12px;
+  --bg: #0f0f0f;
+  --surface: #171717;
+  --surface2: #1f1f1f;
+  --surface3: #272727;
+  --border: #2a2a2a;
+  --border2: #333;
+  --text: #e8e8e8;
+  --text2: #999;
+  --text3: #555;
+  --accent: #e8ff47;
+  --accent-dim: rgba(232,255,71,0.1);
+  --accent-dim2: rgba(232,255,71,0.06);
+  --green: #4ade80;
+  --green-dim: rgba(74,222,128,0.1);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,0.1);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251,191,36,0.1);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.1);
+  --purple: #c084fc;
+  --purple-dim: rgba(192,132,252,0.1);
+  --radius: 8px;
+  --radius-lg: 12px;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow:hidden;}
-.sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:fixed;left:0;top:0;z-index:10;}
-.sidebar-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border);}
-.logo-mark{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--accent);letter-spacing:0.08em;margin-bottom:2px;}
-.logo-sub{font-size:11px;color:var(--text3);letter-spacing:0.04em;}
-.nav-section{padding:12px 0 4px;}
-.nav-label{font-size:10px;font-weight:500;color:var(--text3);padding:0 16px 6px;letter-spacing:0.08em;text-transform:uppercase;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.15s;border-left:2px solid transparent;user-select:none;}
-.nav-item:hover{color:var(--text);background:var(--surface2);}
-.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim2);font-weight:500;}
-.nav-item.disabled{opacity:0.3;pointer-events:none;}
-.nav-icon{font-size:14px;width:16px;text-align:center;}
-.nav-badge{margin-left:auto;background:var(--amber);color:#000;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;font-family:'DM Mono',monospace;}
-.role-section{margin-top:auto;padding:12px 16px;border-top:1px solid var(--border);}
-.role-label{font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:0.06em;text-transform:uppercase;}
-.role-select{width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;padding:7px 10px;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;}
-.main{margin-left:220px;flex:1;height:100vh;overflow-y:auto;padding:28px;}
-.page{display:none;}.page.active{display:block;}
-.page-hdr{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;}
-.page-hdr-left h1{font-size:20px;font-weight:600;letter-spacing:-0.02em;}
-.page-hdr-left p{font-size:13px;color:var(--text2);margin-top:3px;}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
-.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;}
-.metric-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
-.metric-value{font-size:28px;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:-0.02em;}
-.metric-sub{font-size:11px;color:var(--text3);margin-top:4px;}
-.metric.accent .metric-value{color:var(--accent);}
-.metric.green .metric-value{color:var(--green);}
-.metric.red .metric-value{color:var(--red);}
-.metric.amber .metric-value{color:var(--amber);}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:20px;}
-.card-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.card-hdr h3{font-size:13px;font-weight:500;}
-.card-hdr-right{display:flex;gap:8px;align-items:center;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th{text-align:left;padding:10px 18px;font-size:10px;font-weight:500;color:var(--text3);background:var(--surface2);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:0.06em;}
-td{padding:11px 18px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:var(--surface2);}
-.mono{font-family:'DM Mono',monospace;font-size:12px;}
-.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;letter-spacing:0.04em;font-family:'DM Mono',monospace;}
-.badge-pending{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(251,191,36,0.2);}
-.badge-approved{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(96,165,250,0.2);}
-.badge-paid{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(192,132,252,0.2);}
-.badge-delivered{background:var(--green-dim);color:var(--green);border:1px solid rgba(74,222,128,0.2);}
-.badge-rejected{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,0.2);}
-.badge-wip{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(232,255,71,0.2);}
-.badge-low{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,0.2);}
-.badge-ok{background:var(--green-dim);color:var(--green);border:1px solid rgba(74,222,128,0.2);}
-.badge-inward{background:var(--green-dim);color:var(--green);border:1px solid rgba(74,222,128,0.2);}
-.badge-outward{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,0.2);}
-.badge-new{background:rgba(96,165,250,0.15);color:var(--blue);border:1px solid rgba(96,165,250,0.3);}
-.form-wrap{max-width:640px;}
-.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin-bottom:20px;}
-.form-card h3{font-size:14px;font-weight:500;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.form-group{display:flex;flex-direction:column;gap:5px;}
-.form-group.full{grid-column:1/-1;}
-.form-group label{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;}
-.form-group input,.form-group select,.form-group textarea{background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:13px;padding:8px 12px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;transition:border-color 0.15s;}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--accent);}
-.form-group textarea{resize:vertical;min-height:80px;}
-.form-actions{display:flex;gap:10px;margin-top:18px;}
-.btn{padding:8px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px;}
-.btn-primary{background:var(--accent);color:#000;}
-.btn-primary:hover{background:#d4eb3a;}
-.btn-secondary{background:var(--surface2);color:var(--text2);border:1px solid var(--border2);}
-.btn-secondary:hover{color:var(--text);background:var(--surface3);}
-.btn-approve{background:var(--green-dim);color:var(--green);border:1px solid rgba(74,222,128,0.25);font-size:12px;padding:5px 12px;}
-.btn-approve:hover{background:rgba(74,222,128,0.2);}
-.btn-reject{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,0.25);font-size:12px;padding:5px 12px;}
-.btn-pay{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(192,132,252,0.25);font-size:12px;padding:5px 12px;}
-.btn-deliver{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(96,165,250,0.25);font-size:12px;padding:5px 12px;}
-.btn-sm{font-size:11px;padding:4px 10px;}
-.search-input{background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;padding:7px 12px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;width:200px;}
-.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;}
-.tab{padding:9px 16px;font-size:13px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;}
-.tab:hover{color:var(--text);}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500;}
-.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
-.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;}
-.chart-card h3{font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px;}
-.bar-chart{display:flex;align-items:flex-end;gap:8px;height:90px;}
-.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end;}
-.bar{width:100%;border-radius:3px 3px 0 0;min-height:3px;cursor:pointer;transition:opacity 0.15s;}
-.bar:hover{opacity:0.7;}
-.bar-lbl{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;text-align:center;}
-.bar-val{font-size:10px;color:var(--text2);font-family:'DM Mono',monospace;}
-.cart-item-row{display:flex;align-items:flex-start;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border);transition:background 0.15s;}
-.cart-item-row:hover{background:var(--surface2);}
-.cart-item-row.removed{opacity:0.35;}
-.cart-item-info{flex:1;}
-.cart-item-name{font-size:13px;font-weight:500;}
-.cart-item-meta{font-size:11px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace;}
-.cart-item-price{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);min-width:80px;text-align:right;}
-.cart-total-row{padding:12px 18px;display:flex;justify-content:space-between;align-items:center;}
-.cart-total-label{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;}
-.cart-total-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:600;color:var(--accent);}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow: hidden; }
 
-/* DELIVERY CHECKLIST SPECIFIC */
-.checklist-item{display:grid;grid-template-columns:28px 1fr 200px 80px;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border);}
-.checklist-item:hover{background:var(--surface2);}
-.checklist-item.received{background:rgba(74,222,128,0.04);}
-.checklist-vendor{font-size:13px;font-weight:500;}
-.checklist-vendor-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:'DM Mono',monospace;}
-.checklist-canonical select,.checklist-canonical input{width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;padding:6px 10px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;}
-.checklist-canonical select:focus,.checklist-canonical input:focus{outline:none;border-color:var(--accent);}
-.checklist-canonical select.auto-filled{border-color:rgba(74,222,128,0.4);background:rgba(74,222,128,0.05);}
-.checklist-canonical select.new-item{border-color:rgba(96,165,250,0.4);}
-.checklist-qty{font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);text-align:center;}
-.checklist-header{display:grid;grid-template-columns:28px 1fr 200px 80px;gap:12px;padding:8px 18px;background:var(--surface2);border-bottom:1px solid var(--border);}
-.checklist-header span{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;}
-.alias-tag{font-size:10px;padding:1px 6px;border-radius:10px;margin-left:6px;font-family:'DM Mono',monospace;}
-.alias-auto{background:rgba(74,222,128,0.15);color:var(--green);}
-.alias-new{background:rgba(96,165,250,0.15);color:var(--blue);}
-.alias-manual{background:rgba(251,191,36,0.15);color:var(--amber);}
+/* SIDEBAR */
+.sidebar {
+  width: 220px; min-width: 220px; background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  height: 100vh; position: fixed; left: 0; top: 0; z-index: 10;
+}
+.sidebar-logo {
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-mark {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px; font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+.logo-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.04em; }
 
-.toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--surface3);border:1px solid var(--border2);color:var(--text);padding:12px 18px;border-radius:var(--radius-lg);font-size:13px;display:none;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.4);animation:slideUp 0.2s ease;}
-@keyframes slideUp{from{transform:translateY(8px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.toast.show{display:block;}
-.toast-icon{color:var(--green);margin-right:6px;}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;display:none;align-items:center;justify-content:center;}
-.modal-overlay.show{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:580px;box-shadow:0 24px 64px rgba(0,0,0,0.5);max-height:90vh;overflow-y:auto;}
-.modal h3{font-size:15px;font-weight:600;margin-bottom:4px;}
-.modal-sub{font-size:12px;color:var(--text2);margin-bottom:16px;}
-.modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;}
-.delivery-banner{background:var(--accent-dim);border:1px solid rgba(232,255,71,0.2);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;}
-.delivery-banner-icon{font-size:18px;}
-.delivery-banner-text{flex:1;font-size:13px;}
-.delivery-banner-text strong{color:var(--accent);}
-.status-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
-.status-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;display:flex;align-items:center;gap:12px;}
-.status-icon{font-size:20px;}
-.status-info-label{font-size:11px;color:var(--text3);}
-.status-info-val{font-size:14px;font-weight:600;font-family:'DM Mono',monospace;margin-top:1px;}
-.activity-item{display:flex;gap:12px;padding:10px 18px;border-bottom:1px solid var(--border);align-items:flex-start;}
-.activity-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
-.activity-text{font-size:13px;flex:1;}
-.activity-time{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px;}
-.empty{padding:48px;text-align:center;color:var(--text3);}
-.empty-icon{font-size:32px;margin-bottom:12px;}
-.empty p{font-size:13px;}
-option{background:var(--surface2);color:var(--text);}
-::-webkit-scrollbar{width:5px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
-@keyframes extpulse{0%,100%{opacity:1}50%{opacity:0.2}}
+.nav-section { padding: 12px 0 4px; }
+.nav-label {
+  font-size: 10px; font-weight: 500; color: var(--text3);
+  padding: 0 16px 6px; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px; cursor: pointer;
+  font-size: 13px; color: var(--text2);
+  transition: all 0.15s; position: relative;
+  border-left: 2px solid transparent;
+  user-select: none;
+}
+.nav-item:hover { color: var(--text); background: var(--surface2); }
+.nav-item.active {
+  color: var(--accent); border-left-color: var(--accent);
+  background: var(--accent-dim2); font-weight: 500;
+}
+.nav-item.disabled { opacity: 0.3; pointer-events: none; }
+.nav-icon { font-size: 14px; width: 16px; text-align: center; }
+.nav-badge {
+  margin-left: auto; background: var(--amber); color: #000;
+  font-size: 10px; font-weight: 600;
+  padding: 1px 6px; border-radius: 10px; font-family: 'DM Mono', monospace;
+}
+.nav-badge.green { background: var(--green); }
+
+.role-section {
+  margin-top: auto; padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+.role-label { font-size: 10px; color: var(--text3); margin-bottom: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+.role-select {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); font-size: 12px; padding: 7px 10px;
+  border-radius: var(--radius); cursor: pointer; font-family: 'DM Sans', sans-serif;
+}
+.role-select:focus { outline: none; border-color: var(--accent); }
+
+/* MAIN */
+.main { margin-left: 220px; flex: 1; height: 100vh; overflow-y: auto; padding: 28px; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* PAGE HEADER */
+.page-hdr { margin-bottom: 24px; display: flex; align-items: flex-start; justify-content: space-between; }
+.page-hdr-left h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+.page-hdr-left p { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+/* METRIC CARDS */
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+.metric {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px;
+}
+.metric-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+.metric-value { font-size: 28px; font-weight: 600; font-family: 'DM Mono', monospace; letter-spacing: -0.02em; }
+.metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+.metric.accent .metric-value { color: var(--accent); }
+.metric.green .metric-value { color: var(--green); }
+.metric.red .metric-value { color: var(--red); }
+.metric.amber .metric-value { color: var(--amber); }
+
+/* CARDS */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 20px;
+}
+.card-hdr {
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-hdr h3 { font-size: 13px; font-weight: 500; }
+.card-hdr-right { display: flex; gap: 8px; align-items: center; }
+
+/* TABLE */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left; padding: 10px 18px;
+  font-size: 10px; font-weight: 500; color: var(--text3);
+  background: var(--surface2); border-bottom: 1px solid var(--border);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+td { padding: 11px 18px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+
+/* BADGES */
+.badge {
+  display: inline-block; font-size: 10px; font-weight: 500;
+  padding: 2px 8px; border-radius: 20px; letter-spacing: 0.04em;
+  font-family: 'DM Mono', monospace;
+}
+.badge-pending { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(251,191,36,0.2); }
+.badge-approved { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
+.badge-paid { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(192,132,252,0.2); }
+.badge-delivered { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+.badge-rejected { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+.badge-wip { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(232,255,71,0.2); }
+.badge-low { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+.badge-ok { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+.badge-inward { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+.badge-outward { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+
+/* FORMS */
+.form-wrap { max-width: 640px; }
+.form-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 22px; margin-bottom: 20px;
+}
+.form-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 11px; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+.form-group input, .form-group select, .form-group textarea {
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); font-size: 13px; padding: 8px 12px;
+  border-radius: var(--radius); font-family: 'DM Sans', sans-serif;
+  transition: border-color 0.15s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: none; border-color: var(--accent);
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-actions { display: flex; gap: 10px; margin-top: 18px; }
+
+/* BUTTONS */
+.btn {
+  padding: 8px 18px; border-radius: var(--radius); font-size: 13px;
+  font-weight: 500; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { background: #d4eb3a; }
+.btn-secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); }
+.btn-secondary:hover { color: var(--text); border-color: var(--border2); background: var(--surface3); }
+.btn-approve { background: var(--green-dim); color: var(--green); border: 1px solid rgba(74,222,128,0.25); font-size: 12px; padding: 5px 12px; }
+.btn-approve:hover { background: rgba(74,222,128,0.2); }
+.btn-reject { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.25); font-size: 12px; padding: 5px 12px; }
+.btn-reject:hover { background: rgba(248,113,113,0.2); }
+.btn-pay { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(192,132,252,0.25); font-size: 12px; padding: 5px 12px; }
+.btn-pay:hover { background: rgba(192,132,252,0.2); }
+.btn-deliver { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); font-size: 12px; padding: 5px 12px; }
+.btn-deliver:hover { background: rgba(96,165,250,0.2); }
+.btn-sm { font-size: 11px; padding: 4px 10px; }
+
+/* SEARCH */
+.search-input {
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); font-size: 12px; padding: 7px 12px;
+  border-radius: var(--radius); font-family: 'DM Sans', sans-serif; width: 200px;
+}
+.search-input:focus { outline: none; border-color: var(--accent); }
+
+/* TABS */
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.tab {
+  padding: 9px 16px; font-size: 13px; cursor: pointer;
+  color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: all 0.15s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+/* CHARTS */
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; }
+.chart-card h3 { font-size: 12px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 90px; }
+.bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; height: 100%; justify-content: flex-end; }
+.bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 3px; cursor: pointer; transition: opacity 0.15s; }
+.bar:hover { opacity: 0.7; }
+.bar-lbl { font-size: 9px; color: var(--text3); font-family: 'DM Mono', monospace; text-align: center; }
+.bar-val { font-size: 10px; color: var(--text2); font-family: 'DM Mono', monospace; }
+
+/* CART REVIEW */
+.cart-item-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px; border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.cart-item-row:hover { background: var(--surface2); }
+.cart-item-row.removed { opacity: 0.35; }
+.cart-item-info { flex: 1; }
+.cart-item-name { font-size: 13px; font-weight: 500; }
+.cart-item-meta { font-size: 11px; color: var(--text2); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.cart-item-price { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--accent); min-width: 80px; text-align: right; }
+.cart-total-row { padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; }
+.cart-total-label { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
+.cart-total-val { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 600; color: var(--accent); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 999;
+  background: var(--surface3); border: 1px solid var(--border2);
+  color: var(--text); padding: 12px 18px; border-radius: var(--radius-lg);
+  font-size: 13px; display: none; max-width: 320px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  animation: slideUp 0.2s ease;
+}
+@keyframes slideUp { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.toast.show { display: block; }
+.toast-icon { color: var(--green); margin-right: 6px; }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 100; display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--radius-lg); padding: 24px; width: 100%; max-width: 480px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+}
+.modal h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.modal p { font-size: 13px; color: var(--text2); margin-bottom: 18px; }
+.modal .form-grid { grid-template-columns: 1fr; }
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+
+/* ACTIVITY FEED */
+.activity-item {
+  display: flex; gap: 12px; padding: 10px 18px;
+  border-bottom: 1px solid var(--border); align-items: flex-start;
+}
+.activity-dot {
+  width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0;
+}
+.activity-text { font-size: 13px; flex: 1; }
+.activity-text strong { font-weight: 500; }
+.activity-time { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; margin-top: 2px; }
+
+/* EMPTY STATE */
+.empty { padding: 48px; text-align: center; color: var(--text3); }
+.empty-icon { font-size: 32px; margin-bottom: 12px; }
+.empty p { font-size: 13px; }
+
+/* DELIVERY PENDING BANNER */
+.delivery-banner {
+  background: var(--accent-dim); border: 1px solid rgba(232,255,71,0.2);
+  border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.delivery-banner-icon { font-size: 18px; }
+.delivery-banner-text { flex: 1; font-size: 13px; }
+.delivery-banner-text strong { color: var(--accent); }
+
+/* DASHBOARD STATUS ROW */
+.status-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.status-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.status-icon { font-size: 20px; }
+.status-info-label { font-size: 11px; color: var(--text3); }
+.status-info-val { font-size: 14px; font-weight: 600; font-family: 'DM Mono', monospace; margin-top: 1px; }
+
+/* RESPONSIVE input/select option dark */
+option { background: var(--surface2); color: var(--text); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
+@keyframes extpulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
 </style>
 </head>
 <body>
+
+<!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">THINKMETAL</div>
     <div class="logo-sub">Inventory system</div>
   </div>
+
   <div class="nav-section">
     <div class="nav-label">Overview</div>
-    <div class="nav-item active" onclick="nav('dashboard',this)" id="nav-dashboard"><span class="nav-icon">◈</span> Dashboard</div>
-    <div class="nav-item" onclick="nav('inventory',this)" id="nav-inventory"><span class="nav-icon">▦</span> Master inventory</div>
-    <div class="nav-item" onclick="nav('wip',this)" id="nav-wip"><span class="nav-icon">⟳</span> WIP</div>
-    <div class="nav-item" onclick="nav('log',this)" id="nav-log"><span class="nav-icon">≡</span> Inward/Outward log</div>
+    <div class="nav-item active" onclick="nav('dashboard',this)" id="nav-dashboard">
+      <span class="nav-icon">◈</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="nav('inventory',this)" id="nav-inventory">
+      <span class="nav-icon">▦</span> Master inventory
+    </div>
+    <div class="nav-item" onclick="nav('wip',this)" id="nav-wip">
+      <span class="nav-icon">⟳</span> WIP
+    </div>
+    <div class="nav-item" onclick="nav('log',this)" id="nav-log">
+      <span class="nav-icon">≡</span> Inward/Outward log
+    </div>
   </div>
+
   <div class="nav-section">
     <div class="nav-label">Transactions</div>
-    <div class="nav-item" onclick="nav('request',this)" id="nav-request"><span class="nav-icon">+</span> Raise request</div>
-    <div class="nav-item" onclick="nav('cart',this)" id="nav-cart"><span class="nav-icon">⊞</span> Cart request</div>
-    <div class="nav-item" onclick="nav('inward',this)" id="nav-inward"><span class="nav-icon">↓</span> Inward entry<span class="nav-badge" id="inward-badge" style="display:none">0</span></div>
-    <div class="nav-item" onclick="nav('outward',this)" id="nav-outward"><span class="nav-icon">↑</span> Outward / WIP</div>
-    <div class="nav-item" onclick="nav('approvals',this)" id="nav-approvals"><span class="nav-icon">✓</span> Approvals<span class="nav-badge" id="approval-badge">3</span></div>
-    <div class="nav-item" onclick="nav('payments',this)" id="nav-payments"><span class="nav-icon">₹</span> Payments<span class="nav-badge" id="payment-badge">2</span></div>
+    <div class="nav-item" onclick="nav('request',this)" id="nav-request">
+      <span class="nav-icon">+</span> Raise request
+    </div>
+    <div class="nav-item" onclick="nav('cart',this)" id="nav-cart">
+      <span class="nav-icon">⊞</span> Cart request
+    </div>
+    <div class="nav-item" onclick="nav('inward',this)" id="nav-inward">
+      <span class="nav-icon">↓</span> Inward entry
+    </div>
+    <div class="nav-item" onclick="nav('outward',this)" id="nav-outward">
+      <span class="nav-icon">↑</span> Outward / WIP
+    </div>
+    <div class="nav-item" onclick="nav('approvals',this)" id="nav-approvals">
+      <span class="nav-icon">✓</span> Approvals
+      <span class="nav-badge" id="approval-badge">3</span>
+    </div>
+    <div class="nav-item" onclick="nav('payments',this)" id="nav-payments">
+      <span class="nav-icon">₹</span> Payments
+      <span class="nav-badge" id="payment-badge">2</span>
+    </div>
   </div>
+
   <div class="role-section">
     <div class="role-label">Role</div>
     <select class="role-select" id="role-select" onchange="setRole(this.value)">
@@ -200,285 +384,492 @@ option{background:var(--surface2);color:var(--text);}
   </div>
 </div>
 
+<!-- MAIN CONTENT -->
 <div class="main">
 
-<!-- DASHBOARD -->
-<div class="page active" id="page-dashboard">
-  <div class="page-hdr"><div class="page-hdr-left"><h1>Dashboard</h1><p>Live overview — ThinkMetal inventory</p></div></div>
-  <div class="delivery-banner" id="delivery-banner">
-    <div class="delivery-banner-icon">📦</div>
-    <div class="delivery-banner-text"><strong id="delivery-banner-count">2 deliveries pending confirmation</strong> — Items paid and on the way. Confirm receipt when arrived.</div>
-    <button class="btn btn-sm btn-secondary" onclick="nav('inward',document.getElementById('nav-inward'))">View</button>
-  </div>
-  <div class="metrics">
-    <div class="metric accent"><div class="metric-label">Total items</div><div class="metric-value">148</div><div class="metric-sub">across 5 categories</div></div>
-    <div class="metric red"><div class="metric-label">Low stock</div><div class="metric-value">6</div><div class="metric-sub">below reorder level</div></div>
-    <div class="metric amber"><div class="metric-label">Pending approvals</div><div class="metric-value" id="dash-pending">3</div><div class="metric-sub">awaiting lead action</div></div>
-    <div class="metric green"><div class="metric-label">WIP items</div><div class="metric-value">12</div><div class="metric-sub">currently in progress</div></div>
-  </div>
-  <div class="charts-row">
-    <div class="chart-card"><h3>Stock by category</h3><div class="bar-chart" id="bar-chart"></div></div>
-    <div class="chart-card"><h3>Request pipeline</h3><div class="bar-chart" id="pipeline-chart"></div></div>
-  </div>
-  <div class="status-row">
-    <div class="status-card"><div class="status-icon">🟡</div><div><div class="status-info-label">Pending approval</div><div class="status-info-val" id="dash-stat-pending">3 requests</div></div></div>
-    <div class="status-card"><div class="status-icon">🟣</div><div><div class="status-info-label">Payment pending</div><div class="status-info-val" id="dash-stat-payment">2 carts</div></div></div>
-    <div class="status-card"><div class="status-icon">📦</div><div><div class="status-info-label">Awaiting delivery</div><div class="status-info-val" id="dash-stat-delivery">0 items</div></div></div>
-  </div>
-  <div class="card"><div class="card-hdr"><h3>Recent activity</h3></div><div id="activity-feed"></div></div>
-</div>
-
-<!-- MASTER INVENTORY -->
-<div class="page" id="page-inventory">
-  <div class="page-hdr"><div class="page-hdr-left"><h1>Master inventory</h1><p>Live stock — all categories</p></div></div>
-  <div class="card">
-    <div class="card-hdr"><h3>All items</h3><div class="card-hdr-right">
-      <input class="search-input" placeholder="Search items..." oninput="filterInventory(this.value)" id="inv-search">
-      <select class="search-input" style="width:140px" onchange="filterInventoryByCat(this.value)" id="cat-filter">
-        <option value="">All categories</option><option>Raw materials</option><option>Hardware</option><option>Tools</option><option>Accessories</option><option>Storage utilities</option>
-      </select>
-    </div></div>
-    <table><thead><tr><th>Item ID</th><th>Canonical name</th><th>Category</th><th>Unit</th><th>Opening</th><th>Current qty</th><th>Reorder at</th><th>Dept</th><th>Rate/unit</th><th>Total value</th><th>Status</th></tr></thead><tbody id="inv-body"></tbody></table>
-  </div>
-</div>
-
-<!-- WIP -->
-<div class="page" id="page-wip">
-  <div class="page-hdr"><div class="page-hdr-left"><h1>Work in Progress</h1><p>Items currently allocated to active work orders</p></div></div>
-  <div class="card"><div class="card-hdr"><h3>Active WIP items</h3><span class="badge badge-wip">12 items</span></div>
-    <table><thead><tr><th>WIP ID</th><th>Item</th><th>Qty</th><th>Allocated to</th><th>Work order</th><th>Date</th><th>Status</th></tr></thead><tbody id="wip-body"></tbody></table>
-  </div>
-</div>
-
-<!-- INWARD / OUTWARD LOG -->
-<div class="page" id="page-log">
-  <div class="page-hdr"><div class="page-hdr-left"><h1>Inward / Outward log</h1><p>Complete transaction history</p></div></div>
-  <div class="tabs">
-    <div class="tab active" onclick="switchLogTab('all',this)">All</div>
-    <div class="tab" onclick="switchLogTab('inward',this)">Inward</div>
-    <div class="tab" onclick="switchLogTab('outward',this)">Outward</div>
-  </div>
-  <div class="card"><table><thead><tr><th>ID</th><th>Type</th><th>Canonical name</th><th>Vendor name</th><th>Qty</th><th>By</th><th>Source</th><th>Date</th><th>Notes</th></tr></thead><tbody id="log-body"></tbody></table></div>
-</div>
-
-<!-- RAISE REQUEST -->
-<div class="page" id="page-request">
-  <div class="page-hdr"><div class="page-hdr-left"><h1>Raise request</h1><p>Submit a single item request for approval</p></div></div>
-  <div class="form-wrap">
-    <div class="form-card">
-      <h3>New item request</h3>
-      <div class="form-grid">
-        <div class="form-group"><label>Your name</label><input type="text" id="req-member" placeholder="e.g. Arjun Rajan"></div>
-        <div class="form-group"><label>Department</label><select id="req-dept"><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select></div>
-        <div class="form-group"><label>Category</label><select id="req-cat"><option>Raw materials</option><option>Hardware</option><option>Tools</option><option>Accessories</option><option>Storage utilities</option></select></div>
-        <div class="form-group"><label>Item name</label><input type="text" id="req-item" placeholder="e.g. M8 hex bolt"></div>
-        <div class="form-group"><label>Quantity</label><input type="number" id="req-qty" placeholder="50"></div>
-        <div class="form-group"><label>Unit</label><input type="text" id="req-unit" placeholder="pcs / m / kg"></div>
-        <div class="form-group"><label>Est. rate/unit (₹)</label><input type="number" id="req-rate" placeholder="0.00"></div>
-        <div class="form-group"><label>Required by</label><input type="date" id="req-date"></div>
-        <div class="form-group full"><label>Purpose</label><textarea id="req-purpose" placeholder="What is this needed for?"></textarea></div>
-      </div>
-      <div class="form-actions">
-        <button class="btn btn-primary" onclick="submitRequest()">Submit request</button>
-        <button class="btn btn-secondary">Clear</button>
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-hdr">
+      <div class="page-hdr-left">
+        <h1>Dashboard</h1>
+        <p>Live overview — ThinkMetal inventory</p>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- CART REQUEST -->
-<div class="page" id="page-cart">
-  <div class="page-hdr"><div class="page-hdr-left"><h1>Cart requests</h1><p>Import cart from Amazon / Robu via browser extension</p></div></div>
-  <div class="card" id="cart-import-card">
-    <div class="card-hdr"><h3>Import cart</h3><span class="badge badge-ok" id="ext-status-badge">Extension ready</span></div>
-    <div style="padding:20px">
-      <div style="margin-bottom:20px;padding:14px 16px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border2)">
-        <div style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Method 1 — Browser extension (primary)</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:10px">Install the ThinkMetal extension in Chrome. On any vendor cart page click the extension icon — items appear here instantly.</div>
-        <div id="ext-waiting" style="font-size:12px;color:var(--green);font-family:'DM Mono',monospace;display:flex;align-items:center;gap:8px">
-          <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;animation:extpulse 2s infinite"></span>
-          <span id="ext-waiting-text">Listening — click the ThinkMetal icon on your cart page</span>
+    <!-- Delivery pending banner (shown for member) -->
+    <div class="delivery-banner" id="delivery-banner">
+      <div class="delivery-banner-icon">📦</div>
+      <div class="delivery-banner-text">
+        <strong>2 deliveries pending confirmation</strong> — Items from approved cart requests are on the way. Confirm when received.
+      </div>
+      <button class="btn btn-sm btn-secondary" onclick="nav('cart',document.getElementById('nav-cart'))">View</button>
+    </div>
+
+    <div class="metrics">
+      <div class="metric accent">
+        <div class="metric-label">Total items</div>
+        <div class="metric-value">148</div>
+        <div class="metric-sub">across 5 categories</div>
+      </div>
+      <div class="metric red">
+        <div class="metric-label">Low stock</div>
+        <div class="metric-value">6</div>
+        <div class="metric-sub">below reorder level</div>
+      </div>
+      <div class="metric amber">
+        <div class="metric-label">Pending approvals</div>
+        <div class="metric-value">3</div>
+        <div class="metric-sub">awaiting lead action</div>
+      </div>
+      <div class="metric green">
+        <div class="metric-label">WIP items</div>
+        <div class="metric-value">12</div>
+        <div class="metric-sub">currently in progress</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>Stock by category</h3>
+        <div class="bar-chart" id="bar-chart"></div>
+      </div>
+      <div class="chart-card">
+        <h3>Request pipeline</h3>
+        <div class="bar-chart" id="pipeline-chart"></div>
+      </div>
+    </div>
+
+    <div class="status-row">
+      <div class="status-card">
+        <div class="status-icon">🟡</div>
+        <div>
+          <div class="status-info-label">Pending approval</div>
+          <div class="status-info-val">3 requests</div>
         </div>
       </div>
-      <div>
-        <div style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Method 2 — Paste cart text (fallback)</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:10px">On any vendor cart page press <kbd style="background:var(--surface3);border:1px solid var(--border2);padding:1px 6px;border-radius:4px;font-size:11px">Ctrl+A</kbd> then <kbd style="background:var(--surface3);border:1px solid var(--border2);padding:1px 6px;border-radius:4px;font-size:11px">Ctrl+C</kbd>, then paste below.</div>
-        <textarea id="cart-paste-input" style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;padding:10px 12px;border-radius:var(--radius);font-family:'DM Mono',monospace;min-height:100px;resize:vertical;" placeholder="Paste your cart page text here..."></textarea>
-        <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-          <button class="btn btn-primary" onclick="parseAndLoad()">Parse cart</button>
-          <button class="btn btn-secondary" onclick="document.getElementById('cart-paste-input').value=''">Clear</button>
-          <span id="parse-error" style="font-size:12px;color:var(--red);display:none"></span>
+      <div class="status-card">
+        <div class="status-icon">🟣</div>
+        <div>
+          <div class="status-info-label">Payment pending</div>
+          <div class="status-info-val">2 carts</div>
+        </div>
+      </div>
+      <div class="status-card">
+        <div class="status-icon">🟢</div>
+        <div>
+          <div class="status-info-label">Delivered this month</div>
+          <div class="status-info-val">18 items</div>
         </div>
       </div>
     </div>
-  </div>
-  <div id="cart-review-section" style="display:none">
+
     <div class="card">
-      <div class="card-hdr"><h3>Review cart items</h3><div class="card-hdr-right"><span class="badge badge-pending" id="cart-vendor-badge">Amazon India</span></div></div>
-      <div id="cart-items-list"></div>
-      <div class="cart-total-row"><span class="cart-total-label">Estimated total</span><span class="cart-total-val" id="cart-total">₹0</span></div>
+      <div class="card-hdr"><h3>Recent activity</h3></div>
+      <div id="activity-feed"></div>
+    </div>
+  </div>
+
+  <!-- MASTER INVENTORY -->
+  <div class="page" id="page-inventory">
+    <div class="page-hdr">
+      <div class="page-hdr-left">
+        <h1>Master inventory</h1>
+        <p>Live stock — all categories</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <h3>All items</h3>
+        <div class="card-hdr-right">
+          <input class="search-input" placeholder="Search items..." oninput="filterInventory(this.value)" id="inv-search">
+          <select class="search-input" style="width:140px" onchange="filterInventoryByCat(this.value)" id="cat-filter">
+            <option value="">All categories</option>
+            <option>Raw materials</option>
+            <option>Hardware</option>
+            <option>Tools</option>
+            <option>Accessories</option>
+            <option>Storage utilities</option>
+          </select>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Item ID</th><th>Name</th><th>Category</th>
+            <th>Unit</th><th>Opening</th><th>Current qty</th>
+            <th>Reorder at</th><th>Dept</th><th>Rate/unit</th><th>Total value</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="inv-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- WIP -->
+  <div class="page" id="page-wip">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Work in Progress</h1><p>Items currently allocated to active work orders</p></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><h3>Active WIP items</h3><span class="badge badge-wip">12 items</span></div>
+      <table>
+        <thead><tr><th>WIP ID</th><th>Item</th><th>Qty</th><th>Allocated to</th><th>Work order</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody id="wip-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INWARD OUTWARD LOG -->
+  <div class="page" id="page-log">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Inward / Outward log</h1><p>Complete transaction history</p></div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchLogTab('all',this)">All</div>
+      <div class="tab" onclick="switchLogTab('inward',this)">Inward</div>
+      <div class="tab" onclick="switchLogTab('outward',this)">Outward</div>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Item</th><th>Qty</th><th>By</th><th>Supplier/Dept</th><th>Date</th><th>Notes</th></tr></thead>
+        <tbody id="log-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RAISE REQUEST -->
+  <div class="page" id="page-request">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Raise request</h1><p>Submit a single item request for approval</p></div>
     </div>
     <div class="form-wrap">
       <div class="form-card">
-        <h3>Request details</h3>
+        <h3>New item request</h3>
         <div class="form-grid">
-          <div class="form-group"><label>Your name</label><input type="text" id="cart-member" placeholder="Your name"></div>
-          <div class="form-group"><label>Department</label><select id="cart-dept"><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select></div>
-          <div class="form-group full"><label>Note to lead</label><textarea id="cart-note" placeholder="What is this cart for?"></textarea></div>
+          <div class="form-group"><label>Your name</label><input type="text" id="req-member" placeholder="e.g. Arjun Rajan"></div>
+          <div class="form-group"><label>Department</label>
+            <select id="req-dept"><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select>
+          </div>
+          <div class="form-group"><label>Category</label>
+            <select id="req-cat"><option>Raw materials</option><option>Hardware</option><option>Tools</option><option>Accessories</option><option>Storage utilities</option></select>
+          </div>
+          <div class="form-group"><label>Item name</label><input type="text" id="req-item" placeholder="e.g. M8 hex bolt"></div>
+          <div class="form-group"><label>Quantity</label><input type="number" id="req-qty" placeholder="50"></div>
+          <div class="form-group"><label>Unit</label><input type="text" id="req-unit" placeholder="pcs / m / kg"></div>
+          <div class="form-group"><label>Est. rate/unit (₹)</label><input type="number" id="req-rate" placeholder="0.00"></div>
+          <div class="form-group"><label>Required by</label><input type="date" id="req-date"></div>
+          <div class="form-group full"><label>Purpose</label><textarea id="req-purpose" placeholder="What is this needed for?"></textarea></div>
         </div>
         <div class="form-actions">
-          <button class="btn btn-primary" onclick="submitCart()">Submit for approval</button>
-          <button class="btn btn-secondary" onclick="cancelCart()">Cancel</button>
+          <button class="btn btn-primary" onclick="submitRequest()">Submit request</button>
+          <button class="btn btn-secondary" onclick="clearForm('request')">Clear</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><h3>Payment done — awaiting delivery confirmation (Inward entry)</h3></div>
+      <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Paid on</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="inward-delivered-body"></tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <div class="card-hdr"><h3>Delivered items history</h3></div>
+      <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Delivered on</th><th>Status</th></tr></thead>
+        <tbody id="inward-delivered-history-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CART REQUEST -->
+  <div class="page" id="page-cart">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Cart requests</h1><p>Import cart from Amazon / Robu via browser extension</p></div>
+    </div>
+
+    <!-- Extension import simulation -->
+    <div class="card" id="cart-import-card">
+      <div class="card-hdr">
+        <h3>Import cart</h3>
+        <span class="badge badge-ok" id="ext-status-badge">Extension ready</span>
+      </div>
+      <div style="padding:20px">
+
+        <!-- Method 1: Extension auto-send (primary) -->
+        <div style="margin-bottom:20px;padding:14px 16px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border2)">
+          <div style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Method 1 — Browser extension (primary)</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:10px">Install the ThinkMetal extension in Chrome. On any vendor cart page click the extension icon — items appear here instantly.</div>
+          <div id="ext-waiting" style="font-size:12px;color:var(--green);font-family:'DM Mono',monospace;display:flex;align-items:center;gap:8px">
+            <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;animation:extpulse 2s infinite"></span>
+            <span id="ext-waiting-text">Listening — click the ThinkMetal icon on your cart page</span>
+          </div>
+        </div>
+
+        <!-- Method 2: Paste cart text (fallback) -->
+        <div style="margin-bottom:6px">
+          <div style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Method 2 — Paste cart text (fallback)</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:10px">On any vendor cart page press <kbd style="background:var(--surface3);border:1px solid var(--border2);padding:1px 6px;border-radius:4px;font-size:11px">Ctrl+A</kbd> then <kbd style="background:var(--surface3);border:1px solid var(--border2);padding:1px 6px;border-radius:4px;font-size:11px">Ctrl+C</kbd>, then paste below.</div>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <select id="paste-vendor" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;padding:7px 10px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;flex-shrink:0">
+              <option value="generic">Auto-detect vendor</option>
+              <option value="amazon">Amazon India</option>
+              <option value="robu">Robu.in</option>
+              <option value="generic">Other vendor</option>
+            </select>
+          </div>
+          <textarea id="cart-paste-input"
+            style="width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;padding:10px 12px;border-radius:var(--radius);font-family:'DM Mono',monospace;min-height:120px;resize:vertical;line-height:1.6"
+            placeholder="Paste your cart page text here...&#10;&#10;The parser will extract item names, quantities and prices automatically.&#10;You can review and correct anything before submitting."></textarea>
+          <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+            <button class="btn btn-primary" onclick="parseAndLoad()">Parse cart</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('cart-paste-input').value=''">Clear</button>
+            <span id="parse-error" style="font-size:12px;color:var(--red);display:none"></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Cart review (hidden until import) -->
+    <div id="cart-review-section" style="display:none">
+      <div class="card">
+        <div class="card-hdr">
+          <h3>Review cart items</h3>
+          <div class="card-hdr-right">
+            <span class="badge badge-pending" id="cart-vendor-badge">Amazon India</span>
+          </div>
+        </div>
+        <div id="cart-items-list"></div>
+        <div class="cart-total-row">
+          <span class="cart-total-label">Estimated total</span>
+          <span class="cart-total-val" id="cart-total">₹0</span>
+        </div>
+      </div>
+      <div class="form-wrap">
+        <div class="form-card">
+          <h3>Request details</h3>
+          <div class="form-grid">
+            <div class="form-group"><label>Your name</label><input type="text" id="cart-member" placeholder="Your name"></div>
+            <div class="form-group"><label>Department</label>
+              <select id="cart-dept"><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select>
+            </div>
+            <div class="form-group full"><label>Note to lead</label><textarea id="cart-note" placeholder="What is this cart for?"></textarea></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="submitCart()">Submit for approval</button>
+            <button class="btn btn-secondary" onclick="cancelCart()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Existing cart requests -->
+    <div class="card">
+      <div class="card-hdr"><h3>My cart requests</h3></div>
+      <table>
+        <thead><tr><th>Cart ID</th><th>Source</th><th>Items</th><th>Est. total</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="cart-list-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INWARD ENTRY -->
+  <div class="page" id="page-inward">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Inward entry</h1><p>Record received items and update stock</p></div>
+    </div>
+    <div class="form-wrap">
+      <div class="form-card">
+        <h3>Record delivery</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Linked request (optional)</label>
+            <select id="inw-req">
+              <option value="">— standalone entry —</option>
+              <option value="REQ-0039">REQ-0039 · Soldering iron tip × 2</option>
+              <option value="REQ-0037">REQ-0037 · M6 standoffs × 50</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Received by</label><input type="text" id="inw-by" placeholder="Your name"></div>
+          <div class="form-group"><label>Vendor / invoice name</label><input type="text" id="inw-vendor" placeholder="Name as on invoice"></div>
+          <div class="form-group"><label>Canonical item name</label>
+            <select id="inw-canonical">
+              <option>Thermocouple</option><option>M8 Hex Bolt</option><option>Servo Motor SG90</option>
+              <option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option><option>Soldering Iron Tip</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Qty received</label><input type="number" id="inw-qty" placeholder="0"></div>
+          <div class="form-group"><label>Unit</label><input type="text" id="inw-unit" placeholder="pcs"></div>
+          <div class="form-group"><label>Supplier</label><input type="text" id="inw-supplier" placeholder="Amazon / Robu / vendor"></div>
+          <div class="form-group"><label>Invoice / order no.</label><input type="text" id="inw-invoice" placeholder="INV-2024-001"></div>
+          <div class="form-group"><label>Rate per unit (₹)</label><input type="number" id="inw-rate" placeholder="0.00"></div>
+          <div class="form-group"><label>Date of receipt</label><input type="date" id="inw-date"></div>
+          <div class="form-group full"><label>Notes</label><textarea id="inw-notes" placeholder="Condition, partial delivery, damage etc."></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitInward()">Save inward entry</button>
+          <button class="btn btn-secondary">Clear</button>
         </div>
       </div>
     </div>
   </div>
-  <div class="card">
-    <div class="card-hdr"><h3>My cart requests</h3></div>
-    <table><thead><tr><th>Cart ID</th><th>Source</th><th>Items</th><th>Est. total</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead><tbody id="cart-list-body"></tbody></table>
-  </div>
-</div>
 
-<!-- INWARD ENTRY (awaiting delivery + standalone) -->
-<div class="page" id="page-inward">
-  <div class="page-hdr"><div class="page-hdr-left"><h1>Inward entry</h1><p>Confirm deliveries and record stock received</p></div></div>
+  <!-- OUTWARD / WIP -->
+  <div class="page" id="page-outward">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Outward / WIP</h1><p>Record items used, allocated, or in progress</p></div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchOutTab('usage',this)">Direct usage</div>
+      <div class="tab" onclick="switchOutTab('wip',this)">Work in progress</div>
+      <div class="tab" onclick="switchOutTab('allocate',this)">Allocate to team</div>
+    </div>
 
-  <!-- Awaiting delivery section -->
-  <div class="card" style="margin-bottom:20px">
-    <div class="card-hdr"><h3>Awaiting delivery</h3><span class="badge badge-paid" id="awaiting-delivery-badge">0 pending</span></div>
-    <table>
-      <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Items</th><th>Paid on</th><th>Status</th><th>Action</th></tr></thead>
-      <tbody id="awaiting-delivery-body"></tbody>
-    </table>
-  </div>
-
-  <!-- Inward history -->
-  <div class="card" style="margin-bottom:20px">
-    <div class="card-hdr"><h3>Inward history</h3></div>
-    <table><thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Delivered on</th><th>Items inwarded</th><th>Status</th></tr></thead><tbody id="inward-history-body"></tbody></table>
-  </div>
-
-  <!-- Standalone inward entry form -->
-  <div class="form-wrap">
-    <div class="form-card">
-      <h3>Standalone inward entry</h3>
-      <div class="form-grid">
-        <div class="form-group"><label>Received by</label><input type="text" id="inw-by" placeholder="Your name"></div>
-        <div class="form-group"><label>Vendor / invoice name</label><input type="text" id="inw-vendor" placeholder="Name as on invoice"></div>
-        <div class="form-group"><label>Canonical item name</label>
-          <select id="inw-canonical"><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Servo Motor SG90</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option><option>Soldering Iron Tip</option></select>
+    <div class="form-wrap" id="out-usage">
+      <div class="form-card">
+        <h3>Mark as used</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Member name</label><input type="text" id="out-member" placeholder="Who used this"></div>
+          <div class="form-group"><label>Department</label><select><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select></div>
+          <div class="form-group"><label>Item</label><select id="out-item"><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option><option>Soldering Iron Tip</option></select></div>
+          <div class="form-group"><label>Qty used</label><input type="number" id="out-qty" placeholder="0"></div>
+          <div class="form-group"><label>Unit</label><input type="text" id="out-unit" placeholder="pcs"></div>
+          <div class="form-group"><label>Date</label><input type="date" id="out-date"></div>
+          <div class="form-group full"><label>Purpose</label><textarea placeholder="What was this used for?"></textarea></div>
         </div>
-        <div class="form-group"><label>Qty received</label><input type="number" id="inw-qty" placeholder="0"></div>
-        <div class="form-group"><label>Unit</label><input type="text" id="inw-unit" placeholder="pcs"></div>
-        <div class="form-group"><label>Supplier</label><input type="text" id="inw-supplier" placeholder="Amazon / Robu / vendor"></div>
-        <div class="form-group"><label>Invoice / order no.</label><input type="text" id="inw-invoice" placeholder="INV-2024-001"></div>
-        <div class="form-group"><label>Rate per unit (₹)</label><input type="number" id="inw-rate" placeholder="0.00"></div>
-        <div class="form-group"><label>Date of receipt</label><input type="date" id="inw-date"></div>
-        <div class="form-group full"><label>Notes</label><textarea id="inw-notes" placeholder="Condition, partial delivery, damage etc."></textarea></div>
-      </div>
-      <div class="form-actions">
-        <button class="btn btn-primary" onclick="submitStandaloneInward()">Save inward entry</button>
-        <button class="btn btn-secondary">Clear</button>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitOutward('Usage')">Save outward entry</button>
+          <button class="btn btn-secondary">Clear</button>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- OUTWARD / WIP -->
-<div class="page" id="page-outward">
-  <div class="page-hdr"><div class="page-hdr-left"><h1>Outward / WIP</h1><p>Record items used, allocated, or in progress</p></div></div>
-  <div class="tabs">
-    <div class="tab active" onclick="switchOutTab('usage',this)">Direct usage</div>
-    <div class="tab" onclick="switchOutTab('wip',this)">Work in progress</div>
-    <div class="tab" onclick="switchOutTab('allocate',this)">Allocate to team</div>
-  </div>
-  <div class="form-wrap" id="out-usage">
-    <div class="form-card"><h3>Mark as used</h3>
-      <div class="form-grid">
-        <div class="form-group"><label>Member name</label><input type="text" id="out-member" placeholder="Who used this"></div>
-        <div class="form-group"><label>Department</label><select><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select></div>
-        <div class="form-group"><label>Item</label><select id="out-item"><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option><option>Soldering Iron Tip</option></select></div>
-        <div class="form-group"><label>Qty used</label><input type="number" id="out-qty" placeholder="0"></div>
-        <div class="form-group"><label>Unit</label><input type="text" id="out-unit" placeholder="pcs"></div>
-        <div class="form-group"><label>Date</label><input type="date" id="out-date"></div>
-        <div class="form-group full"><label>Purpose</label><textarea placeholder="What was this used for?"></textarea></div>
+    <div class="form-wrap" id="out-wip" style="display:none">
+      <div class="form-card">
+        <h3>Mark as WIP</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Member</label><input type="text" placeholder="Assigned to"></div>
+          <div class="form-group"><label>Item</label><select><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option></select></div>
+          <div class="form-group"><label>Qty</label><input type="number" placeholder="0"></div>
+          <div class="form-group"><label>Unit</label><input type="text" placeholder="pcs"></div>
+          <div class="form-group full"><label>Work order / task ref</label><input type="text" placeholder="e.g. Arm assembly — joint 3"></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitOutward('WIP')">Mark as WIP</button>
+          <button class="btn btn-secondary">Clear</button>
+        </div>
       </div>
-      <div class="form-actions"><button class="btn btn-primary" onclick="submitOutward('Usage')">Save outward entry</button><button class="btn btn-secondary">Clear</button></div>
     </div>
-  </div>
-  <div class="form-wrap" id="out-wip" style="display:none">
-    <div class="form-card"><h3>Mark as WIP</h3>
-      <div class="form-grid">
-        <div class="form-group"><label>Member</label><input type="text" placeholder="Assigned to"></div>
-        <div class="form-group"><label>Item</label><select><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option></select></div>
-        <div class="form-group"><label>Qty</label><input type="number" placeholder="0"></div>
-        <div class="form-group"><label>Unit</label><input type="text" placeholder="pcs"></div>
-        <div class="form-group full"><label>Work order / task ref</label><input type="text" placeholder="e.g. Arm assembly — joint 3"></div>
-      </div>
-      <div class="form-actions"><button class="btn btn-primary" onclick="submitOutward('WIP')">Mark as WIP</button><button class="btn btn-secondary">Clear</button></div>
-    </div>
-  </div>
-  <div class="form-wrap" id="out-allocate" style="display:none">
-    <div class="form-card"><h3>Allocate to team member</h3>
-      <div class="form-grid">
-        <div class="form-group"><label>Allocate to</label><input type="text" placeholder="Team member name"></div>
-        <div class="form-group"><label>Department</label><select><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select></div>
-        <div class="form-group"><label>Item</label><select><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option></select></div>
-        <div class="form-group"><label>Quantity</label><input type="number" placeholder="0"></div>
-        <div class="form-group full"><label>Notes</label><textarea placeholder="Purpose, expected return date if applicable"></textarea></div>
-      </div>
-      <div class="form-actions"><button class="btn btn-primary" onclick="submitOutward('Allocated')">Allocate item</button><button class="btn btn-secondary">Clear</button></div>
-    </div>
-  </div>
-</div>
 
-<!-- APPROVALS -->
-<div class="page" id="page-approvals">
-  <div class="page-hdr"><div class="page-hdr-left"><h1>Approvals</h1><p>Review and act on pending requests</p></div></div>
-  <div class="card" style="margin-bottom:20px">
-    <div class="card-hdr"><h3>Pending item requests</h3><span class="badge badge-pending" id="pending-count-badge">3 pending</span></div>
-    <table><thead><tr><th>Req ID</th><th>Member</th><th>Item</th><th>Qty</th><th>Purpose</th><th>Est. cost</th><th>Date</th><th>Action</th></tr></thead><tbody id="pending-requests-body"></tbody></table>
+    <div class="form-wrap" id="out-allocate" style="display:none">
+      <div class="form-card">
+        <h3>Allocate to team member</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Allocate to</label><input type="text" placeholder="Team member name"></div>
+          <div class="form-group"><label>Department</label><select><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select></div>
+          <div class="form-group"><label>Item</label><select><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option></select></div>
+          <div class="form-group"><label>Quantity</label><input type="number" placeholder="0"></div>
+          <div class="form-group full"><label>Notes</label><textarea placeholder="Purpose, expected return date if applicable"></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="submitOutward('Allocated')">Allocate item</button>
+          <button class="btn btn-secondary">Clear</button>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="card" style="margin-bottom:20px">
-    <div class="card-hdr"><h3>Pending cart requests</h3><span class="badge badge-pending" id="pending-cart-badge">1 pending</span></div>
-    <table><thead><tr><th>Cart ID</th><th>Member</th><th>Source</th><th>Items</th><th>Total</th><th>Note</th><th>Action</th></tr></thead><tbody id="pending-carts-body"></tbody></table>
-  </div>
-  <div class="card">
-    <div class="card-hdr"><h3>Approved — awaiting payment</h3></div>
-    <table><thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Total</th><th>Approved by</th><th>Date</th></tr></thead><tbody id="approved-body"></tbody></table>
-  </div>
-</div>
 
-<!-- PAYMENTS -->
-<div class="page" id="page-payments">
-  <div class="page-hdr"><div class="page-hdr-left"><h1>Payments</h1><p>Process approved requests and mark payments done</p></div></div>
-  <div class="card" style="margin-bottom:20px">
-    <div class="card-hdr"><h3>Awaiting payment</h3><span class="badge badge-approved" id="awaiting-payment-badge">2 approved</span></div>
-    <table><thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Total</th><th>Approved by</th><th>Date</th><th>Action</th></tr></thead><tbody id="payments-body"></tbody></table>
+  <!-- APPROVALS -->
+  <div class="page" id="page-approvals">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Approvals</h1><p>Review and act on pending requests</p></div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr"><h3>Pending item requests</h3><span class="badge badge-pending" id="pending-count-badge">3 pending</span></div>
+      <table>
+        <thead><tr><th>Req ID</th><th>Member</th><th>Item</th><th>Qty</th><th>Purpose</th><th>Est. cost</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody id="pending-requests-body"></tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr"><h3>Pending cart requests</h3><span class="badge badge-pending" id="pending-cart-badge">1 pending</span></div>
+      <table>
+        <thead><tr><th>Cart ID</th><th>Member</th><th>Source</th><th>Items</th><th>Total</th><th>Note</th><th>Action</th></tr></thead>
+        <tbody id="pending-carts-body"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr"><h3>Approved — awaiting payment</h3></div>
+      <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Item/Cart</th><th>Approved by</th><th>Approved date</th><th>Status</th></tr></thead>
+        <tbody id="approved-body"></tbody>
+      </table>
+    </div>
   </div>
-  <div class="card">
-    <div class="card-hdr"><h3>Payment history</h3></div>
-    <table><thead><tr><th>ID</th><th>Details</th><th>Amount paid</th><th>Invoice no.</th><th>Paid on</th><th>Status</th></tr></thead><tbody id="payment-history-body"></tbody></table>
+
+  <!-- PAYMENTS -->
+  <div class="page" id="page-payments">
+    <div class="page-hdr">
+      <div class="page-hdr-left"><h1>Payments</h1><p>Process approved requests and mark payments done</p></div>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr"><h3>Awaiting payment</h3><span class="badge badge-approved">2 approved</span></div>
+      <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Approved total</th><th>Approved by</th><th>Approved date</th><th>Action</th></tr></thead>
+        <tbody id="payments-body"></tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hdr"><h3>Approved — awaiting delivery</h3></div>
+      <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Amount</th><th>Paid on</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="awaiting-delivery-body"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><h3>Payment history</h3></div>
+      <table>
+        <thead><tr><th>ID</th><th>Item/Cart</th><th>Amount paid</th><th>Invoice no.</th><th>Paid on</th><th>Status</th></tr></thead>
+        <tbody id="payment-history-body"></tbody>
+      </table>
+    </div>
   </div>
-</div>
 
 </div><!-- end main -->
 
-<!-- MODAL: Cart detail -->
+<!-- MODAL: Cart detail view -->
 <div class="modal-overlay" id="cart-detail-modal">
   <div class="modal">
     <h3 id="modal-cart-title">Cart CART-001</h3>
-    <p class="modal-sub" id="modal-cart-meta">Amazon India · 4 items</p>
+    <p id="modal-cart-meta">Amazon India · 4 items</p>
     <div id="modal-cart-items"></div>
-    <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('cart-detail-modal')">Close</button></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('cart-detail-modal')">Close</button>
+    </div>
   </div>
 </div>
 
-<!-- MODAL: Payment -->
+<div class="modal-overlay" id="delivery-checklist-modal">
+  <div class="modal">
+    <h3 id="delivery-checklist-title">Confirm delivery checklist</h3>
+    <p id="delivery-checklist-meta">Tick each item that has been received.</p>
+    <div id="delivery-checklist-items"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('delivery-checklist-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmChecklistDelivery()">Confirm delivery</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Mark payment done -->
 <div class="modal-overlay" id="payment-modal">
   <div class="modal">
     <h3>Mark payment done</h3>
-    <p class="modal-sub" id="payment-modal-desc">Processing payment</p>
+    <p id="payment-modal-desc">Processing payment for request</p>
     <div class="form-grid" style="grid-template-columns:1fr">
       <div class="form-group"><label>Invoice number</label><input type="text" id="pay-invoice" placeholder="INV-2024-001"></div>
       <div class="form-group"><label>Amount paid (₹)</label><input type="number" id="pay-amount" placeholder="0.00"></div>
@@ -491,44 +882,11 @@ option{background:var(--surface2);color:var(--text);}
   </div>
 </div>
 
-<!-- MODAL: Delivery checklist with alias resolution -->
-<div class="modal-overlay" id="delivery-modal">
-  <div class="modal" style="max-width:680px">
-    <h3 id="delivery-modal-title">Confirm delivery</h3>
-    <p class="modal-sub" id="delivery-modal-sub">Check each item received and map to your master inventory name</p>
-
-    <!-- Legend -->
-    <div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap">
-      <span style="font-size:11px;color:var(--text3)">Canonical name tag:</span>
-      <span class="alias-tag alias-auto">● auto-filled from alias</span>
-      <span class="alias-tag alias-manual">● manually mapped</span>
-      <span class="alias-tag alias-new">● new item</span>
-    </div>
-
-    <!-- Checklist header -->
-    <div class="checklist-header">
-      <span>✓</span><span>Vendor item name</span><span>Your inventory name</span><span>Qty</span>
-    </div>
-    <div id="delivery-checklist-body"></div>
-
-    <div style="margin-top:14px;padding:10px 14px;background:var(--surface2);border-radius:var(--radius);font-size:12px;color:var(--text2)">
-      ⚠ Items marked as <strong style="color:var(--accent)">new item</strong> will be created in master inventory on confirmation. Items with <strong style="color:var(--green)">auto-filled</strong> names will update existing stock.
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal('delivery-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="confirmDelivery()">Confirm delivery & inward stock</button>
-    </div>
-  </div>
-</div>
-
 <!-- TOAST -->
 <div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toast-msg"></span></div>
 
 <script>
-// ─── DATA ─────────────────────────────────────────────────────
-
-// Master inventory — canonical names only
+// ─── DUMMY DATA ────────────────────────────────────────────────
 const inventory = [
   { id:'ITEM-001', name:'Thermocouple', cat:'Accessories', unit:'pcs', opening:20, current:8, reorder:5, dept:'Electrical', rate:349 },
   { id:'ITEM-002', name:'M8 Hex Bolt', cat:'Hardware', unit:'pcs', opening:500, current:342, reorder:100, dept:'Mechanical', rate:3 },
@@ -544,32 +902,29 @@ const inventory = [
   { id:'ITEM-012', name:'Digital Caliper', cat:'Tools', unit:'pcs', opening:5, current:4, reorder:1, dept:'QC', rate:2800 },
 ];
 
-// Item alias table — vendor name → canonical name mapping
-// This grows automatically as team maps new vendor names
-const itemAliases = [
-  { vendorName:'K-type Thermocouple Sensor', canonicalName:'Thermocouple', source:'Amazon' },
-  { vendorName:'K-type temp sensor NiCr', canonicalName:'Thermocouple', source:'Robu' },
-  { vendorName:'JST Connector Kit 200pcs', canonicalName:'Terminal Block 2-way', source:'Amazon' },
-  { vendorName:'22AWG Silicone Wire 5m Red', canonicalName:'PTFE Tape 12mm', source:'Amazon' },
-];
-
 const wipItems = [
   { id:'WIP-001', item:'Aluminium Rod 6mm', qty:'3m', assigned:'Deepak S', workorder:'Arm assembly — link 3', date:'16 Apr', status:'Active' },
-  { id:'WIP-002', item:'Cable Ties 200mm', qty:'50 pcs', assigned:'Meena T', workorder:'Cable management', date:'16 Apr', status:'Active' },
+  { id:'WIP-002', item:'Cable Ties 200mm', qty:'50 pcs', assigned:'Meena T', workorder:'Cable management — chassis', date:'16 Apr', status:'Active' },
   { id:'WIP-003', item:'Thermocouple', qty:'2 pcs', assigned:'Priya K', workorder:'Extruder thermal test', date:'15 Apr', status:'Active' },
+  { id:'WIP-004', item:'M8 Hex Bolt', qty:'40 pcs', assigned:'Arjun R', workorder:'Frame assembly v2', date:'14 Apr', status:'Active' },
 ];
 
 const logEntries = [
-  { id:'INW-0012', type:'Inward', canonicalName:'M8 Hex Bolt', vendorName:'M8 Hex Bolt', qty:'200 pcs', by:'Arjun R', source:'Amazon', date:'17 Apr', notes:'Order INV-001' },
-  { id:'OUT-0018', type:'Outward', canonicalName:'Aluminium Rod 6mm', vendorName:'', qty:'3 m', by:'Deepak S', source:'Mechanical', date:'16 Apr', notes:'WIP' },
-  { id:'INW-0011', type:'Inward', canonicalName:'Soldering Iron Tip', vendorName:'Soldering Iron Tip 60W', qty:'2 pcs', by:'Priya K', source:'Robu', date:'16 Apr', notes:'' },
+  { id:'INW-0012', type:'Inward', item:'M8 Hex Bolt', qty:'200 pcs', by:'Arjun R', source:'Amazon', date:'17 Apr', notes:'Order INV-001' },
+  { id:'OUT-0018', type:'Outward', item:'Aluminium Rod 6mm', qty:'3 m', by:'Deepak S', source:'Mechanical', date:'16 Apr', notes:'WIP' },
+  { id:'INW-0011', type:'Inward', item:'Soldering Iron Tip', qty:'2 pcs', by:'Priya K', source:'Robu', date:'16 Apr', notes:'' },
+  { id:'OUT-0017', type:'Outward', item:'Cable Ties 200mm', qty:'50 pcs', by:'Meena T', source:'Operations', date:'15 Apr', notes:'WIP' },
+  { id:'INW-0010', type:'Inward', item:'Terminal Block 2-way', qty:'30 pcs', by:'Karthik M', source:'Amazon', date:'14 Apr', notes:'' },
+  { id:'OUT-0016', type:'Outward', item:'Thermocouple', qty:'2 pcs', by:'Priya K', source:'Electrical', date:'14 Apr', notes:'Testing' },
+  { id:'INW-0009', type:'Inward', item:'PETG Filament 1kg', qty:'4 kg', by:'Arjun R', source:'Vendor', date:'12 Apr', notes:'Partial delivery' },
 ];
 
 const requests = [
   { id:'REQ-0043', member:'Priya K', item:'Servo Motor SG90', qty:'4 pcs', purpose:'Joint actuators — arm rev2', est:1200, date:'17 Apr', status:'Pending' },
   { id:'REQ-0042', member:'Karthik M', item:'PTFE Tape 12mm', qty:'10 rolls', purpose:'Pneumatic sealing', est:350, date:'16 Apr', status:'Pending' },
   { id:'REQ-0041', member:'Ramesh P', item:'Digital Caliper', qty:'1 pcs', purpose:'QC measurement station', est:2800, date:'16 Apr', status:'Pending' },
-  { id:'REQ-0039', member:'Arjun R', item:'Soldering Iron Tip', qty:'2 pcs', purpose:'Replacement', est:300, date:'15 Apr', status:'Approved', approvedBy:'Vijay L', approvedDate:'15 Apr' },
+  { id:'REQ-0039', member:'Arjun R', item:'Soldering Iron Tip', qty:'2 pcs', purpose:'Replacement — worn out', est:300, date:'15 Apr', status:'Approved', approvedBy:'Vijay L' },
+  { id:'REQ-0037', member:'Meena T', item:'M6 Standoffs 20mm', qty:'50 pcs', purpose:'PCB mounting', est:250, date:'14 Apr', status:'Approved', approvedBy:'Vijay L' },
 ];
 
 const cartRequests = [
@@ -582,7 +937,6 @@ const cartRequests = [
     ]
   },
   { id:'CART-002', member:'Priya K', source:'Robu.in', items:3, total:1890, note:'Sensor testing batch', date:'15 Apr', status:'PaymentDone',
-    paymentDate:'28 Apr', invoiceNo:'ROBU-INV-2891', amountPaid:1890,
     lineItems:[
       { name:'DHT22 Temperature Sensor', qty:5, unitPrice:180, total:900 },
       { name:'HC-SR04 Ultrasonic', qty:3, unitPrice:120, total:360 },
@@ -594,40 +948,18 @@ const cartRequests = [
 const activityData = [
   { color:'var(--green)', text:'<strong>Arjun R</strong> received 200× M8 Hex Bolt from Amazon', time:'17 Apr 3:42pm' },
   { color:'var(--amber)', text:'<strong>Priya K</strong> raised request for Servo Motor SG90 × 4', time:'17 Apr 11:20am' },
-  { color:'var(--red)', text:'<strong>Deepak S</strong> marked 3m Aluminium Rod as WIP', time:'16 Apr 2:15pm' },
+  { color:'var(--red)', text:'<strong>Deepak S</strong> marked 3m Aluminium Rod as WIP — Arm assembly', time:'16 Apr 2:15pm' },
   { color:'var(--blue)', text:'<strong>Vijay L</strong> approved REQ-0039 — Soldering Iron Tip', time:'15 Apr 9:30am' },
   { color:'var(--purple)', text:'<strong>Accounts</strong> marked CART-002 payment done — ₹1,890', time:'14 Apr 5:00pm' },
+  { color:'var(--amber)', text:'<strong>Karthik M</strong> raised request for PTFE Tape × 10 rolls', time:'16 Apr 4:10pm' },
 ];
 
+// ─── PAYMENT STATE ────────────────────────────────────────────
 let currentPaymentId = null;
 let currentDeliveryId = null;
 let currentCartData = null;
-let currentCartVendor = '';
-// Delivery checklist state: array of { vendorName, qty, unitPrice, canonicalName, isNew, received }
-let deliveryChecklistState = [];
 
-// ─── ALIAS RESOLUTION ─────────────────────────────────────────
-function resolveAlias(vendorName) {
-  // Case-insensitive lookup in alias table
-  const found = itemAliases.find(a => a.vendorName.toLowerCase() === vendorName.toLowerCase());
-  if (found) return { canonicalName: found.canonicalName, type: 'auto' };
-
-  // Check if vendor name exactly matches a canonical inventory name
-  const exact = inventory.find(i => i.name.toLowerCase() === vendorName.toLowerCase());
-  if (exact) return { canonicalName: exact.name, type: 'auto' };
-
-  // No match — needs manual mapping
-  return { canonicalName: '', type: 'manual' };
-}
-
-function saveAlias(vendorName, canonicalName, source) {
-  const existing = itemAliases.find(a => a.vendorName.toLowerCase() === vendorName.toLowerCase());
-  if (!existing) {
-    itemAliases.push({ vendorName, canonicalName, source: source || 'manual' });
-  }
-}
-
-// ─── RENDER: INVENTORY ────────────────────────────────────────
+// ─── RENDER FUNCTIONS ─────────────────────────────────────────
 function renderInventory(data) {
   const body = document.getElementById('inv-body');
   if (!data.length) { body.innerHTML = '<tr><td colspan="11"><div class="empty"><div class="empty-icon">▦</div><p>No items found</p></div></td></tr>'; return; }
@@ -637,21 +969,27 @@ function renderInventory(data) {
     return `<tr>
       <td class="mono">${r.id}</td>
       <td style="font-weight:500">${r.name}</td>
-      <td>${r.cat}</td><td class="mono">${r.unit}</td>
+      <td>${r.cat}</td>
+      <td class="mono">${r.unit}</td>
       <td class="mono">${r.opening}</td>
       <td class="mono" style="color:${isLow?'var(--red)':'var(--green)'};font-weight:600">${r.current}</td>
-      <td class="mono">${r.reorder}</td><td>${r.dept}</td>
-      <td class="mono">₹${r.rate}</td><td class="mono">₹${tv}</td>
-      <td>${isLow?'<span class="badge badge-low">Low stock</span>':'<span class="badge badge-ok">In stock</span>'}</td>
+      <td class="mono">${r.reorder}</td>
+      <td>${r.dept}</td>
+      <td class="mono">₹${r.rate}</td>
+      <td class="mono">₹${tv}</td>
+      <td>${isLow ? '<span class="badge badge-low">Low stock</span>' : '<span class="badge badge-ok">In stock</span>'}</td>
     </tr>`;
   }).join('');
 }
 
 function renderWIP() {
   document.getElementById('wip-body').innerHTML = wipItems.map(w => `<tr>
-    <td class="mono">${w.id}</td><td style="font-weight:500">${w.item}</td>
-    <td class="mono">${w.qty}</td><td>${w.assigned}</td>
-    <td>${w.workorder}</td><td class="mono">${w.date}</td>
+    <td class="mono">${w.id}</td>
+    <td style="font-weight:500">${w.item}</td>
+    <td class="mono">${w.qty}</td>
+    <td>${w.assigned}</td>
+    <td>${w.workorder}</td>
+    <td class="mono">${w.date}</td>
     <td><span class="badge badge-wip">${w.status}</span></td>
   </tr>`).join('');
 }
@@ -660,12 +998,13 @@ function renderLog(filter) {
   const data = filter && filter !== 'all' ? logEntries.filter(l => l.type.toLowerCase() === filter) : logEntries;
   document.getElementById('log-body').innerHTML = data.map(l => `<tr>
     <td class="mono">${l.id}</td>
-    <td><span class="badge ${l.type==='Inward'?'badge-inward':'badge-outward'}">${l.type}</span></td>
-    <td style="font-weight:500">${l.canonicalName}</td>
-    <td style="color:var(--text2);font-size:12px">${l.vendorName||'—'}</td>
-    <td class="mono">${l.qty}</td><td>${l.by}</td><td>${l.source}</td>
+    <td><span class="badge ${l.type === 'Inward' ? 'badge-inward' : 'badge-outward'}">${l.type}</span></td>
+    <td style="font-weight:500">${l.item}</td>
+    <td class="mono">${l.qty}</td>
+    <td>${l.by}</td>
+    <td>${l.source}</td>
     <td class="mono">${l.date}</td>
-    <td style="color:var(--text2);font-size:12px">${l.notes||''}</td>
+    <td style="color:var(--text2);font-size:12px">${l.notes}</td>
   </tr>`).join('');
 }
 
@@ -673,11 +1012,13 @@ function renderActivity() {
   document.getElementById('activity-feed').innerHTML = activityData.map(a => `
     <div class="activity-item">
       <div class="activity-dot" style="background:${a.color}"></div>
-      <div><div class="activity-text">${a.text}</div><div class="activity-time">${a.time}</div></div>
+      <div>
+        <div class="activity-text">${a.text}</div>
+        <div class="activity-time">${a.time}</div>
+      </div>
     </div>`).join('');
 }
 
-// ─── RENDER: APPROVALS ────────────────────────────────────────
 function renderPendingRequests() {
   const pending = requests.filter(r => r.status === 'Pending');
   document.getElementById('pending-requests-body').innerHTML = pending.length ? pending.map(r => `<tr>
@@ -716,353 +1057,248 @@ function renderApprovedList() {
   let rows = '';
   approvedReqs.forEach(r => {
     rows += `<tr>
-      <td class="mono">${r.id}</td><td><span class="badge badge-approved">Request</span></td>
-      <td style="font-weight:500">${r.item} × ${r.qty}</td>
-      <td class="mono">₹${r.est}</td><td>${r.approvedBy||'Lead'}</td><td class="mono">${r.approvedDate||r.date}</td>
-    </tr>`;
+    <td class="mono">${r.id}</td>
+    <td><span class="badge badge-approved">Request</span></td>
+    <td style="font-weight:500">${r.item}</td>
+    <td>${r.approvedBy || 'Lead'}</td>
+    <td class="mono">${r.approvedDate || r.date}</td>
+    <td><span class="badge badge-approved">Awaiting payment</span></td>
+  </tr>`;
   });
   approvedCarts.forEach(c => {
     rows += `<tr>
-      <td class="mono">${c.id}</td><td><span class="badge badge-pending">${c.source}</span></td>
-      <td style="font-weight:500">${c.items} items — ${c.note}</td>
-      <td class="mono">₹${c.total.toLocaleString('en-IN')}</td><td>${c.approvedBy||'Lead'}</td><td class="mono">${c.approvedDate||c.date}</td>
-    </tr>`;
+    <td class="mono">${c.id}</td>
+    <td><span class="badge badge-pending">${c.source}</span></td>
+    <td style="font-weight:500">${c.items} items — ${c.note}</td>
+    <td>${c.approvedBy || 'Lead'}</td>
+    <td class="mono">${c.approvedDate || c.date}</td>
+    <td><span class="badge badge-approved">Awaiting payment</span></td>
+  </tr>`;
   });
-  document.getElementById('approved-body').innerHTML = rows || '<tr><td colspan="6"><div class="empty"><p>Nothing awaiting payment</p></div></td></tr>';
+  document.getElementById('approved-body').innerHTML = rows || '<tr><td colspan="6"><div class="empty"><p>No approved entries awaiting payment</p></div></td></tr>';
 }
 
-// ─── RENDER: PAYMENTS ─────────────────────────────────────────
 function renderPayments() {
   const approvedReqs = requests.filter(r => r.status === 'Approved');
   const approvedCarts = cartRequests.filter(c => c.status === 'Approved');
   let rows = '';
   approvedReqs.forEach(r => {
     rows += `<tr>
-      <td class="mono">${r.id}</td><td><span class="badge badge-approved">Request</span></td>
+      <td class="mono">${r.id}</td>
+      <td><span class="badge badge-approved">Request</span></td>
       <td style="font-weight:500">${r.item} × ${r.qty}</td>
-      <td class="mono">₹${r.est}</td><td>${r.approvedBy||'Lead'}</td><td class="mono">${r.approvedDate||r.date}</td>
+      <td class="mono">₹${r.est}</td><td>${r.approvedBy || 'Lead'}</td><td class="mono">${r.approvedDate || r.date}</td>
       <td><button class="btn btn-pay btn-sm" onclick="openPaymentModal('${r.id}','${r.item}')">Mark paid</button></td>
     </tr>`;
   });
   approvedCarts.forEach(c => {
     rows += `<tr>
-      <td class="mono">${c.id}</td><td><span class="badge badge-pending">${c.source}</span></td>
+      <td class="mono">${c.id}</td>
+      <td><span class="badge badge-pending">${c.source}</span></td>
       <td style="font-weight:500">${c.items} items — ${c.note}</td>
-      <td class="mono">₹${c.total.toLocaleString('en-IN')}</td><td>${c.approvedBy||'Lead'}</td><td class="mono">${c.approvedDate||c.date}</td>
+      <td class="mono">₹${c.total.toLocaleString('en-IN')}</td><td>${c.approvedBy || 'Lead'}</td><td class="mono">${c.approvedDate || c.date}</td>
       <td><button class="btn btn-pay btn-sm" onclick="openPaymentModal('${c.id}','Cart ${c.id}')">Mark paid</button></td>
     </tr>`;
   });
   document.getElementById('payments-body').innerHTML = rows || '<tr><td colspan="7"><div class="empty"><p>Nothing awaiting payment</p></div></td></tr>';
 
-  const paidItems = [...requests.filter(r=>r.status==='PaymentDone'||r.status==='Delivered'), ...cartRequests.filter(c=>c.status==='PaymentDone'||c.status==='Delivered')];
-  document.getElementById('payment-history-body').innerHTML = paidItems.map(x => `<tr>
-    <td class="mono">${x.id}</td>
-    <td style="font-weight:500">${x.item || (x.items+' items — '+x.note)}</td>
-    <td class="mono">₹${(x.amountPaid||x.est||x.total||0).toLocaleString('en-IN')}</td>
-    <td class="mono">${x.invoiceNo||'—'}</td>
-    <td class="mono">${x.paymentDate||'—'}</td>
-    <td><span class="badge ${x.status==='Delivered'?'badge-delivered':'badge-paid'}">${x.status}</span></td>
-  </tr>`).join('') || '<tr><td colspan="6"><div class="empty"><p>No payment history</p></div></td></tr>';
-
-  const awaitingBadge = document.getElementById('awaiting-payment-badge');
-  if (awaitingBadge) awaitingBadge.textContent = (approvedReqs.length + approvedCarts.length) + ' approved';
-}
-
-// ─── RENDER: INWARD / AWAITING DELIVERY ───────────────────────
-function renderAwaitingDelivery() {
-  const paidReqs = requests.filter(r => r.status === 'PaymentDone');
-  const paidCarts = cartRequests.filter(c => c.status === 'PaymentDone');
-  const total = paidReqs.length + paidCarts.length;
-
-  let rows = '';
-  paidReqs.forEach(r => {
-    rows += `<tr>
-      <td class="mono">${r.id}</td><td><span class="badge badge-approved">Request</span></td>
-      <td style="font-weight:500">${r.item} × ${r.qty}</td>
-      <td class="mono">1 item</td>
-      <td class="mono">${r.paymentDate||'—'}</td>
-      <td><span class="badge badge-paid">Payment done</span></td>
-      <td><button class="btn btn-deliver btn-sm" onclick="openDeliveryModal('${r.id}')">Confirm delivery</button></td>
-    </tr>`;
-  });
-  paidCarts.forEach(c => {
-    rows += `<tr>
-      <td class="mono">${c.id}</td><td><span class="badge badge-pending">${c.source}</span></td>
-      <td style="font-weight:500">${c.note}</td>
-      <td class="mono">${c.items} items</td>
-      <td class="mono">${c.paymentDate||'—'}</td>
-      <td><span class="badge badge-paid">Payment done</span></td>
-      <td style="display:flex;gap:6px;padding:8px 18px">
-        <button class="btn btn-sm btn-secondary" onclick="viewCartDetail('${c.id}')">View list</button>
-        <button class="btn btn-deliver btn-sm" onclick="openDeliveryModal('${c.id}')">Confirm delivery</button>
-      </td>
-    </tr>`;
-  });
-
-  document.getElementById('awaiting-delivery-body').innerHTML = rows || '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📦</div><p>No deliveries pending</p></div></td></tr>';
-
-  const badge = document.getElementById('awaiting-delivery-badge');
-  if (badge) { badge.textContent = total + ' pending'; badge.style.display = total ? 'inline' : 'none'; }
-
-  // Inward badge on nav
-  const inwardBadge = document.getElementById('inward-badge');
-  if (inwardBadge) { inwardBadge.textContent = total; inwardBadge.style.display = total ? 'inline' : 'none'; }
-
-  // Delivery banner on dashboard
-  const banner = document.getElementById('delivery-banner');
-  if (banner) banner.style.display = total > 0 ? 'flex' : 'none';
-  const bannerCount = document.getElementById('delivery-banner-count');
-  if (bannerCount) bannerCount.textContent = total + ' deliver' + (total === 1 ? 'y' : 'ies') + ' pending confirmation';
-
-  // Dashboard stat
-  const dashDelivery = document.getElementById('dash-stat-delivery');
-  if (dashDelivery) dashDelivery.textContent = total + ' item' + (total !== 1 ? 's' : '');
-
-  // Inward history
-  const delivered = [...requests.filter(r=>r.status==='Delivered'), ...cartRequests.filter(c=>c.status==='Delivered')];
-  document.getElementById('inward-history-body').innerHTML = delivered.map(x => `<tr>
-    <td class="mono">${x.id}</td>
-    <td>${x.source ? '<span class="badge badge-pending">'+x.source+'</span>' : '<span class="badge badge-approved">Request</span>'}</td>
-    <td style="font-weight:500">${x.item || x.note}</td>
-    <td class="mono">${x.deliveredDate||'—'}</td>
-    <td class="mono">${x.inwaredCount||x.items||1} items</td>
+  // Payment history
+  const paid = cartRequests.filter(c => c.status === 'Delivered');
+  document.getElementById('payment-history-body').innerHTML = paid.map(c => `<tr>
+    <td class="mono">${c.id}</td>
+    <td>${c.source} — ${c.items} items</td>
+    <td class="mono">₹${c.total.toLocaleString('en-IN')}</td>
+    <td class="mono">INV-AUTO-001</td>
+    <td class="mono">${c.paymentDate || c.date}</td>
     <td><span class="badge badge-delivered">Delivered</span></td>
-  </tr>`).join('') || '<tr><td colspan="6"><div class="empty"><p>No delivery history yet</p></div></td></tr>';
+  </tr>`).join('');
 }
 
-// ─── DELIVERY MODAL — the key feature ─────────────────────────
-function openDeliveryModal(id) {
-  currentDeliveryId = id;
-
-  // Find the request or cart
-  const cart = cartRequests.find(c => c.id === id);
-  const req  = requests.find(r => r.id === id);
-
-  let lineItems = [];
-  let source = '';
-  if (cart) {
-    lineItems = cart.lineItems;
-    source = cart.source;
-    document.getElementById('delivery-modal-title').textContent = `Confirm delivery — ${cart.id}`;
-    document.getElementById('delivery-modal-sub').textContent = `${cart.source} · ${cart.items} items · ₹${cart.total.toLocaleString('en-IN')} paid`;
-  } else if (req) {
-    lineItems = [{ name: req.item, qty: parseInt(req.qty) || 1, unitPrice: req.est, total: req.est }];
-    source = 'Request';
-    document.getElementById('delivery-modal-title').textContent = `Confirm delivery — ${req.id}`;
-    document.getElementById('delivery-modal-sub').textContent = `${req.item} × ${req.qty} — ₹${req.est}`;
-  }
-
-  // Build checklist state — resolve aliases for each item
-  deliveryChecklistState = lineItems.map(item => {
-    const resolved = resolveAlias(item.name);
-    return {
-      vendorName: item.name,
-      qty: item.qty,
-      unitPrice: item.unitPrice || 0,
-      total: item.total || 0,
-      canonicalName: resolved.canonicalName,
-      aliasType: resolved.type, // 'auto' or 'manual'
-      isNew: false,
-      received: true,
-      source
-    };
-  });
-
-  renderDeliveryChecklist();
-  document.getElementById('delivery-modal').classList.add('show');
-}
-
-function renderDeliveryChecklist() {
-  const canonicalOptions = inventory.map(i => `<option value="${i.name}">${i.name}</option>`).join('');
-
-  document.getElementById('delivery-checklist-body').innerHTML = deliveryChecklistState.map((item, i) => {
-    const aliasClass = item.aliasType === 'auto' ? 'auto-filled' : (item.isNew ? 'new-item' : '');
-    const aliasTag = item.aliasType === 'auto'
-      ? '<span class="alias-tag alias-auto">auto</span>'
-      : item.isNew
-        ? '<span class="alias-tag alias-new">new item</span>'
-        : '<span class="alias-tag alias-manual">map required</span>';
-
-    return `<div class="checklist-item ${item.received ? 'received' : ''}" id="cl-row-${i}">
-      <input type="checkbox" ${item.received ? 'checked' : ''}
-        onchange="toggleChecklistItem(${i}, this.checked)"
-        style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer">
-      <div>
-        <div class="checklist-vendor">${item.vendorName} ${aliasTag}</div>
-        <div class="checklist-vendor-sub">₹${item.unitPrice} / unit · ₹${item.total.toLocaleString('en-IN')} total</div>
-      </div>
-      <div class="checklist-canonical">
-        <select class="${aliasClass}" id="canonical-select-${i}" onchange="updateCanonical(${i}, this.value)">
-          <option value="">— select your inventory name —</option>
-          ${canonicalOptions}
-          <option value="__NEW__">+ Add as new item</option>
-        </select>
-        <div id="new-item-form-${i}" style="display:none;margin-top:6px">
-          <input type="text" placeholder="New item name" id="new-item-name-${i}" style="margin-bottom:4px" oninput="updateNewItemName(${i}, this.value)">
-          <select id="new-item-cat-${i}" onchange="updateNewItemCat(${i}, this.value)">
-            <option>Raw materials</option><option>Hardware</option><option>Tools</option><option>Accessories</option><option>Storage utilities</option>
-          </select>
-        </div>
-      </div>
-      <div class="checklist-qty">${item.qty} pcs</div>
-    </div>`;
-  }).join('');
-
-  // Set selected values after render
-  deliveryChecklistState.forEach((item, i) => {
-    const sel = document.getElementById('canonical-select-' + i);
-    if (sel && item.canonicalName && !item.isNew) {
-      sel.value = item.canonicalName;
-    }
-  });
-}
-
-function toggleChecklistItem(i, checked) {
-  deliveryChecklistState[i].received = checked;
-  const row = document.getElementById('cl-row-' + i);
-  if (row) row.classList.toggle('received', checked);
-}
-
-function updateCanonical(i, value) {
-  const newForm = document.getElementById('new-item-form-' + i);
-  const sel = document.getElementById('canonical-select-' + i);
-
-  if (value === '__NEW__') {
-    deliveryChecklistState[i].isNew = true;
-    deliveryChecklistState[i].canonicalName = '';
-    deliveryChecklistState[i].aliasType = 'new';
-    if (newForm) newForm.style.display = 'block';
-    if (sel) sel.className = 'new-item';
-  } else {
-    deliveryChecklistState[i].isNew = false;
-    deliveryChecklistState[i].canonicalName = value;
-    deliveryChecklistState[i].aliasType = 'manual';
-    if (newForm) newForm.style.display = 'none';
-    if (sel) sel.className = value ? '' : '';
-  }
-}
-
-function updateNewItemName(i, value) {
-  deliveryChecklistState[i].newItemName = value;
-  deliveryChecklistState[i].canonicalName = value;
-}
-
-function updateNewItemCat(i, value) {
-  deliveryChecklistState[i].newItemCat = value;
-}
-
-function confirmDelivery() {
-  const id = currentDeliveryId;
-  const cart = cartRequests.find(c => c.id === id);
-  const req  = requests.find(r => r.id === id);
-
-  // Validate — all received items must have a canonical name
-  const receivedItems = deliveryChecklistState.filter(item => item.received);
-  const unmapped = receivedItems.filter(item => !item.canonicalName || item.canonicalName.trim() === '');
-  if (unmapped.length > 0) {
-    toast('⚠ Please map all received items to your inventory name before confirming');
-    return;
-  }
-
-  const today = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
-  const todayISO = new Date().toISOString().split('T')[0];
-
-  receivedItems.forEach(item => {
-    // Save alias for future auto-fill
-    saveAlias(item.vendorName, item.canonicalName, item.source);
-
-    // If new item — add to master inventory
-    if (item.isNew && item.newItemName) {
-      const newId = 'ITEM-' + String(inventory.length + 1).padStart(3, '0');
-      inventory.push({
-        id: newId, name: item.newItemName || item.canonicalName,
-        cat: item.newItemCat || 'Accessories', unit: 'pcs',
-        opening: item.qty, current: item.qty,
-        reorder: 1, dept: 'General', rate: item.unitPrice || 0
-      });
-    } else {
-      // Update existing master inventory stock
-      const inv = inventory.find(x => x.name === item.canonicalName);
-      if (inv) inv.current += item.qty;
-    }
-
-    // Add to inward log
-    const logId = 'INW-00' + (logEntries.length + 10);
-    logEntries.unshift({
-      id: logId, type: 'Inward',
-      canonicalName: item.canonicalName,
-      vendorName: item.vendorName,
-      qty: item.qty + ' pcs',
-      by: cart ? cart.member : (req ? req.member : 'Team'),
-      source: item.source,
-      date: today,
-      notes: 'From ' + id
-    });
-
-    // Add to activity
-    activityData.unshift({
-      color: 'var(--green)',
-      text: `<strong>${cart?.member||req?.member||'Team'}</strong> confirmed delivery — ${item.qty}× ${item.canonicalName} (${item.vendorName})`,
-      time: 'Just now'
-    });
-  });
-
-  // Update status
-  if (cart) {
-    cart.status = 'Delivered';
-    cart.deliveredDate = todayISO;
-    cart.inwaredCount = receivedItems.length;
-  }
-  if (req) {
-    req.status = 'Delivered';
-    req.deliveredDate = todayISO;
-  }
-
-  closeModal('delivery-modal');
-  renderAll();
-  toast('✓ Delivery confirmed — ' + receivedItems.length + ' items inwarded to stock. Aliases saved for next time.');
-}
-
-// ─── CART ACTIONS ─────────────────────────────────────────────
 function renderCartList() {
   document.getElementById('cart-list-body').innerHTML = cartRequests.map(c => {
     const statusMap = { Pending:'badge-pending', Approved:'badge-approved', PaymentDone:'badge-paid', Delivered:'badge-delivered', Rejected:'badge-rejected' };
     let action = '';
-    if (c.status === 'PaymentDone') action = `<button class="btn btn-deliver btn-sm" onclick="openDeliveryModal('${c.id}')">Confirm delivery</button>`;
-    else action = `<button class="btn btn-sm btn-secondary" onclick="viewCartDetail('${c.id}')">View</button>`;
+    if (c.status === 'PaymentDone') action = `<button class="btn btn-deliver btn-sm" onclick="openDeliveryChecklist('${c.id}')">Confirm delivery</button>`;
     return `<tr>
       <td class="mono">${c.id}</td>
-      <td><span class="badge badge-pending">${c.source}</span></td>
+      <td><span class="badge badge-pending" style="font-size:10px">${c.source}</span></td>
       <td class="mono">${c.items}</td>
       <td class="mono">₹${c.total.toLocaleString('en-IN')}</td>
       <td class="mono">${c.date}</td>
       <td><span class="badge ${statusMap[c.status]}">${c.status}</span></td>
-      <td>${action}</td>
+      <td>${action || '<button class="btn btn-sm btn-secondary" onclick="viewCartDetail(\''+c.id+'\')">View</button>'}</td>
     </tr>`;
   }).join('');
 }
 
+function renderInwardDeliveries() {
+  const paidReqs = requests.filter(r => r.status === 'PaymentDone');
+  const paidCarts = cartRequests.filter(c => c.status === 'PaymentDone');
+  let rows = '';
+  paidReqs.forEach(r => {
+    rows += `<tr>
+      <td class="mono">${r.id}</td>
+      <td><span class="badge badge-approved">Request</span></td>
+      <td style="font-weight:500">${r.item} × ${r.qty}</td>
+      <td class="mono">${r.paymentDate || '-'}</td>
+      <td><span class="badge badge-paid">Awaiting delivery</span></td>
+      <td><button class="btn btn-deliver btn-sm" onclick="markDelivered('${r.id}')">Mark delivered</button></td>
+    </tr>`;
+  });
+  paidCarts.forEach(c => {
+    rows += `<tr>
+      <td class="mono">${c.id}</td>
+      <td><span class="badge badge-pending">${c.source}</span></td>
+      <td style="font-weight:500">${c.items} items — ${c.note}</td>
+      <td class="mono">${c.paymentDate || '-'}</td>
+      <td><span class="badge badge-paid">Awaiting delivery</span></td>
+      <td style="display:flex;gap:6px;padding:8px 18px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-secondary" onclick="openDeliveryChecklist('${c.id}')">View list</button>
+        <button class="btn btn-deliver btn-sm" onclick="openDeliveryChecklist('${c.id}')">Confirm delivery</button>
+      </td>
+    </tr>`;
+  });
+  document.getElementById('inward-delivered-body').innerHTML = rows || '<tr><td colspan="6"><div class="empty"><p>No payment-done entries awaiting delivery confirmation</p></div></td></tr>';
+
+  const deliveredReqs = requests.filter(r => r.status === 'Delivered');
+  const deliveredCarts = cartRequests.filter(c => c.status === 'Delivered');
+  let historyRows = '';
+  deliveredReqs.forEach(r => {
+    historyRows += `<tr>
+      <td class="mono">${r.id}</td>
+      <td><span class="badge badge-approved">Request</span></td>
+      <td style="font-weight:500">${r.item} × ${r.qty}</td>
+      <td class="mono">${r.deliveredDate || '-'}</td>
+      <td><span class="badge badge-delivered">Delivered</span></td>
+    </tr>`;
+  });
+  deliveredCarts.forEach(c => {
+    historyRows += `<tr>
+      <td class="mono">${c.id}</td>
+      <td><span class="badge badge-pending">${c.source}</span></td>
+      <td style="font-weight:500">${c.items} items — ${c.note}</td>
+      <td class="mono">${c.deliveredDate || '-'}</td>
+      <td><span class="badge badge-delivered">Delivered</span></td>
+    </tr>`;
+  });
+  document.getElementById('inward-delivered-history-body').innerHTML = historyRows || '<tr><td colspan="5"><div class="empty"><p>No delivered history yet</p></div></td></tr>';
+}
+
+function renderCharts() {
+  const cats = ['Raw mat.','Hardware','Tools','Accessories','Storage'];
+  const vals = [40, 70, 18, 52, 17];
+  const colors = ['var(--blue)','var(--green)','var(--amber)','var(--accent)','var(--purple)'];
+  const max = Math.max(...vals);
+  document.getElementById('bar-chart').innerHTML = cats.map((c,i) => `
+    <div class="bar-wrap">
+      <div class="bar-val">${vals[i]}</div>
+      <div class="bar" style="height:${Math.round(vals[i]/max*75)}px;background:${colors[i]}"></div>
+      <div class="bar-lbl">${c}</div>
+    </div>`).join('');
+
+  const pipe = ['Pending','Approved','Paid','Delivered'];
+  const pv = [3, 2, 4, 18];
+  const pc = ['var(--amber)','var(--blue)','var(--purple)','var(--green)'];
+  const pm = Math.max(...pv);
+  document.getElementById('pipeline-chart').innerHTML = pipe.map((p,i) => `
+    <div class="bar-wrap">
+      <div class="bar-val">${pv[i]}</div>
+      <div class="bar" style="height:${Math.round(pv[i]/pm*75)}px;background:${pc[i]}"></div>
+      <div class="bar-lbl">${p}</div>
+    </div>`).join('');
+}
+
+// ─── ACTIONS ──────────────────────────────────────────────────
 function approveReq(id) {
   const r = requests.find(x => x.id === id);
   if (!r) return;
-  r.status = 'Approved'; r.approvedBy = 'Lead'; r.approvedDate = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
-  renderAll(); toast('✓ ' + id + ' approved — forwarded to accounts');
+  r.status = 'Approved'; r.approvedBy = 'Lead'; r.approvedDate = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  renderPendingRequests(); renderApprovedList(); renderPayments();
+  updateBadges();
+  toast('✓ ' + id + ' approved — forwarded to accounts');
 }
+
 function rejectReq(id) {
   const r = requests.find(x => x.id === id);
-  if (!r) return; r.status = 'Rejected';
-  renderAll(); toast('Request ' + id + ' rejected');
+  if (!r) return;
+  r.status = 'Rejected';
+  renderPendingRequests(); updateBadges();
+  toast('Request ' + id + ' rejected');
 }
+
 function approveCart(id) {
   const c = cartRequests.find(x => x.id === id);
   if (!c) return;
-  c.status = 'Approved'; c.approvedBy = 'Lead'; c.approvedDate = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
-  renderAll(); toast('✓ ' + id + ' approved — forwarded to accounts');
+  c.status = 'Approved';
+  c.approvedBy = 'Lead';
+  c.approvedDate = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  renderPendingCarts(); renderApprovedList(); renderPayments(); renderCartList(); updateBadges();
+  toast('✓ ' + id + ' approved — forwarded to accounts for payment');
 }
+
 function rejectCart(id) {
   const c = cartRequests.find(x => x.id === id);
-  if (!c) return; c.status = 'Rejected';
-  renderAll(); toast('Cart ' + id + ' rejected');
+  if (!c) return;
+  c.status = 'Rejected';
+  renderPendingCarts(); renderCartList(); updateBadges();
+  toast('Cart ' + id + ' rejected');
+}
+
+function markDelivered(id) {
+  const r = requests.find(x => x.id === id);
+  if (!r) return;
+  r.status = 'Delivered';
+  r.deliveredDate = new Date().toISOString().split('T')[0];
+  const entry = { id:'INW-00'+(logEntries.length+10), type:'Inward', item:r.item, qty:r.qty, by:r.member, source:'Delivery', date:'Today', notes:'From REQ' };
+  logEntries.unshift(entry);
+  renderApprovedList(); renderPayments(); renderInwardDeliveries(); renderLog('all');
+  toast('✓ Marked delivered — inward register updated');
+}
+
+function confirmDelivery(id) {
+  const c = cartRequests.find(x => x.id === id);
+  if (!c) return;
+  c.status = 'Delivered';
+  c.deliveredDate = new Date().toISOString().split('T')[0];
+  c.lineItems.forEach(item => {
+    logEntries.unshift({ id:'INW-00'+(logEntries.length+10), type:'Inward', item:item.name, qty:item.qty+' pcs', by:c.member, source:c.source, date:'Today', notes:'From '+id });
+  });
+  renderCartList(); renderPayments(); renderInwardDeliveries(); renderLog('all');
+  toast('✓ Delivery confirmed — ' + c.items + ' items inwarded to stock');
+}
+
+function openDeliveryChecklist(id) {
+  const c = cartRequests.find(x => x.id === id);
+  if (!c) return;
+  currentDeliveryId = id;
+  if (!c.receivedItems || c.receivedItems.length !== c.lineItems.length) c.receivedItems = c.lineItems.map(() => false);
+  document.getElementById('delivery-checklist-title').textContent = `Confirm delivery — ${c.id}`;
+  document.getElementById('delivery-checklist-meta').textContent = `${c.source} · Mark delivered items before confirmation`;
+  document.getElementById('delivery-checklist-items').innerHTML = c.lineItems.map((l, i) => `
+    <div class="cart-item-row">
+      <input type="checkbox" ${c.receivedItems[i] ? 'checked' : ''} onchange="toggleDeliveredItem(${i}, this.checked)"
+        style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer">
+      <div class="cart-item-info">
+        <div class="cart-item-name">${l.name}</div>
+        <div class="cart-item-meta">Qty: ${l.qty} × ₹${l.unitPrice}</div>
+      </div>
+      <div class="cart-item-price">₹${l.total.toLocaleString('en-IN')}</div>
+    </div>`).join('');
+  document.getElementById('delivery-checklist-modal').classList.add('show');
+}
+
+function toggleDeliveredItem(index, checked) {
+  const c = cartRequests.find(x => x.id === currentDeliveryId);
+  if (!c) return;
+  c.receivedItems[index] = checked;
+}
+
+function confirmChecklistDelivery() {
+  const c = cartRequests.find(x => x.id === currentDeliveryId);
+  if (!c) return;
+  if (c.receivedItems.some(done => !done)) return toast('⚠ Please check all delivered items before confirming');
+  closeModal('delivery-checklist-modal');
+  confirmDelivery(c.id);
 }
 
 function openPaymentModal(id, desc) {
@@ -1074,60 +1310,56 @@ function openPaymentModal(id, desc) {
 
 function confirmPayment() {
   const invoice = document.getElementById('pay-invoice').value;
-  const amount  = document.getElementById('pay-amount').value;
+  const amount = document.getElementById('pay-amount').value;
   if (!invoice || !amount) { toast('Please fill invoice number and amount'); return; }
-  const paidOn = document.getElementById('pay-date').value;
   const r = requests.find(x => x.id === currentPaymentId);
   const c = cartRequests.find(x => x.id === currentPaymentId);
+  const paidOn = document.getElementById('pay-date').value || new Date().toISOString().split('T')[0];
   if (r) { r.status = 'PaymentDone'; r.paymentDate = paidOn; r.invoiceNo = invoice; r.amountPaid = parseFloat(amount); }
   if (c) { c.status = 'PaymentDone'; c.paymentDate = paidOn; c.invoiceNo = invoice; c.amountPaid = parseFloat(amount); }
   closeModal('payment-modal');
-  renderAll();
-  toast('✓ Payment recorded — moved to inward entry for delivery confirmation');
+  renderApprovedList(); renderPayments(); renderCartList(); renderInwardDeliveries(); updateBadges();
+  toast('✓ Payment recorded — moved to Inward entry queue for delivery confirmation');
 }
 
 function submitRequest() {
   const member = document.getElementById('req-member').value;
-  const item   = document.getElementById('req-item').value;
-  const qty    = document.getElementById('req-qty').value;
+  const item = document.getElementById('req-item').value;
+  const qty = document.getElementById('req-qty').value;
   if (!member || !item || !qty) { toast('Please fill all required fields'); return; }
-  const id = 'REQ-00' + (44 + requests.length);
+  const id = 'REQ-00' + (44 + requests.filter(r=>r.status==='Pending').length);
   requests.unshift({ id, member, item, qty: qty + ' ' + (document.getElementById('req-unit').value||'pcs'),
-    purpose: document.getElementById('req-purpose').value,
-    est: parseInt(document.getElementById('req-rate').value||0) * parseInt(qty),
+    purpose: document.getElementById('req-purpose').value, est: parseInt(document.getElementById('req-rate').value||0) * parseInt(qty),
     date:'Today', status:'Pending' });
-  renderAll(); toast('✓ Request submitted — awaiting lead approval');
+  renderPendingRequests(); updateBadges();
+  toast('✓ Request submitted — awaiting lead approval');
 }
 
-function submitStandaloneInward() {
+function submitInward() {
   const item = document.getElementById('inw-canonical').value;
-  const qty  = parseInt(document.getElementById('inw-qty').value);
-  const by   = document.getElementById('inw-by').value;
-  const vendorName = document.getElementById('inw-vendor').value || item;
+  const qty = document.getElementById('inw-qty').value;
+  const by = document.getElementById('inw-by').value;
   if (!item || !qty || !by) { toast('Please fill required fields'); return; }
   const inv = inventory.find(x => x.name === item);
-  if (inv) { inv.current += qty; }
-  saveAlias(vendorName, item, document.getElementById('inw-supplier').value);
-  logEntries.unshift({
-    id:'INW-00'+(logEntries.length+10), type:'Inward',
-    canonicalName: item, vendorName: vendorName,
-    qty: qty + ' ' + (document.getElementById('inw-unit').value||'pcs'),
-    by, source: document.getElementById('inw-supplier').value||'Manual', date:'Today',
-    notes: document.getElementById('inw-notes').value
-  });
-  renderAll(); toast('✓ Inward entry saved — ' + item + ' stock updated');
+  if (inv) inv.current += parseInt(qty);
+  logEntries.unshift({ id:'INW-00'+(logEntries.length+10), type:'Inward', item, qty: qty + ' ' + document.getElementById('inw-unit').value,
+    by, source: document.getElementById('inw-supplier').value, date:'Today', notes: document.getElementById('inw-notes').value });
+  renderInventory(inventory); renderLog('all');
+  toast('✓ Inward entry saved — stock updated for ' + item);
 }
 
 function submitOutward(type) {
-  const item = document.getElementById('out-item')?.value;
-  const qty  = parseInt(document.getElementById('out-qty')?.value||'0');
-  const by   = document.getElementById('out-member')?.value||'Team';
+  const item = document.getElementById('out-item') ? document.getElementById('out-item').value : '';
+  const qty = document.getElementById('out-qty') ? document.getElementById('out-qty').value : '0';
+  const by = document.getElementById('out-member') ? document.getElementById('out-member').value : '';
   if (!item || !qty) { toast('Please fill required fields'); return; }
   const inv = inventory.find(x => x.name === item);
-  if (inv) inv.current = Math.max(0, inv.current - qty);
-  logEntries.unshift({ id:'OUT-00'+(logEntries.length+10), type:'Outward', canonicalName:item, vendorName:'', qty:qty+' pcs', by, source:'Internal', date:'Today', notes:type });
-  if (type==='WIP') wipItems.unshift({ id:'WIP-00'+(wipItems.length+1), item, qty:qty+' pcs', assigned:by, workorder:'New task', date:'Today', status:'Active' });
-  renderAll(); toast('✓ ' + type + ' entry saved');
+  if (inv) inv.current = Math.max(0, inv.current - parseInt(qty));
+  logEntries.unshift({ id:'OUT-00'+(logEntries.length+10), type:'Outward', item, qty: qty + ' pcs',
+    by: by || 'Team', source:'Internal', date:'Today', notes: type });
+  if (type === 'WIP') wipItems.unshift({ id:'WIP-00'+(wipItems.length+1), item, qty: qty+' pcs', assigned: by||'Team', workorder:'New task', date:'Today', status:'Active' });
+  renderInventory(inventory); renderLog('all'); renderWIP();
+  toast('✓ ' + type + ' entry saved — stock updated');
 }
 
 function submitCart() {
@@ -1136,16 +1368,18 @@ function submitCart() {
   if (!member) { toast('Please enter your name'); return; }
   const included = currentCartData.filter(i => !i.removed);
   const total = included.reduce((s, i) => s + i.total, 0);
-  cartRequests.unshift({
+  const newCart = {
     id: 'CART-00' + (cartRequests.length + 1),
     member, source: currentCartVendor, items: included.length,
     total, note: document.getElementById('cart-note').value,
-    date:'Today', status:'Pending', lineItems: included
-  });
+    date: 'Today', status: 'Pending', lineItems: included
+  };
+  cartRequests.unshift(newCart);
   document.getElementById('cart-review-section').style.display = 'none';
   document.getElementById('cart-import-card').style.display = 'block';
   currentCartData = null;
-  renderAll(); toast('✓ Cart submitted — ' + included.length + ' items, ₹' + total.toLocaleString('en-IN'));
+  renderCartList(); renderPendingCarts(); updateBadges();
+  toast('✓ Cart submitted for approval — ' + included.length + ' items, ₹' + total.toLocaleString('en-IN'));
 }
 
 function cancelCart() {
@@ -1154,11 +1388,273 @@ function cancelCart() {
   currentCartData = null;
 }
 
+let currentCartVendor = '';
+
+// ─── GENERIC CART TEXT PARSER (mirrors parsers/generic.js) ───
+// Runs entirely in the browser on pasted cart text.
+// Same logic as the extension's generic.js — no DOM access needed here,
+// we parse raw text line by line instead.
+// ─── STRICT CART TEXT PARSER ─────────────────────────────────
+// Rebuilt to avoid picking up nav text, category names, and random numbers.
+// Key rules:
+//   1. Product name must be ≥ 5 words OR ≥ 25 chars with mixed case
+//   2. Price must be ≥ ₹10 and ≤ ₹5,00,000 (filters out pin codes, counts, IDs)
+//   3. Name and price must appear within a tight 3-line window
+//   4. Blacklist of common non-product lines is much more aggressive
+//   5. Vendor-specific mode uses known structural patterns
+
+function parseCartText(rawText, vendorHint) {
+  const vendor = vendorHint && vendorHint !== 'generic'
+    ? vendorHint
+    : detectVendor(rawText);
+
+  // Route to vendor-specific parser first
+  if (vendor === 'Amazon India') return { items: parseAmazonText(rawText), vendor };
+  if (vendor === 'Robu.in')      return { items: parseRobuText(rawText), vendor };
+
+  // Generic strict parser for everything else
+  return { items: parseGenericText(rawText), vendor };
+}
+
+// ── AMAZON TEXT PARSER ──────────────────────────────────────
+// Amazon cart text has a very consistent structure:
+// [product title — usually 1 long line]
+// [brand/sold by line]  ← optional
+// [₹ price]
+// [Qty: N]  OR  [quantity selector line]
+function parseAmazonText(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 1);
+  const items = [];
+  const priceRe = /^₹\s*([\d,]+(?:\.\d{1,2})?)$/;
+  const qtyRe   = /(?:^|\b)(?:qty|quantity)[:\s]+(\d+)/i;
+  const skipRe  = /^(your shopping cart|subtotal|total|proceed to|add to|save for|delete|share|see more|estimate|free delivery|fulfilled by|sold by|ships from|in stock|only \d+ left|amazon|prime|eligible|import|cashback|coupon|offer|sponsored|sign in|hello|account|returns|order|wish list|gift|search|all|browsing|recently|deals|home|electronics|computers|books|clothing|beauty|health|sports|toys|auto|industrial|music|movies|software|video|alexa|echo|kindle|fire)/i;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Product name heuristic: long line, has multiple word types, not a skip line
+    if (skipRe.test(line)) continue;
+    if (line.length < 20) continue;                    // too short to be a product name
+    if (line.match(/^[₹\d]/)) continue;               // starts with price or number
+    if (!line.match(/[a-zA-Z]{4,}/)) continue;         // must have real words
+    if (line.split(' ').length < 3) continue;          // must be multi-word
+
+    // Look ahead up to 5 lines for a price
+    let price = 0, qty = 1, priceIdx = -1;
+
+    for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
+      const ahead = lines[j];
+
+      // Stop if we hit another long product-like line (next item started)
+      if (ahead.length > 30 && !ahead.match(/^₹/) && j > i + 2) break;
+
+      const pm = ahead.match(priceRe);
+      if (pm) {
+        price = parseFloat(pm[1].replace(/,/g, ''));
+        priceIdx = j;
+      }
+      const qm = ahead.match(qtyRe);
+      if (qm) qty = parseInt(qm[1]) || 1;
+    }
+
+    // Price sanity: real products cost between ₹10 and ₹5,00,000
+    if (price < 10 || price > 500000 || priceIdx === -1) continue;
+
+    const unitPrice = (qty > 1 && price % qty === 0) ? price / qty : price;
+
+    const clean = line.replace(/\s+/g, ' ').trim().substring(0, 120);
+    if (!items.some(x => x.name.substring(0, 25) === clean.substring(0, 25))) {
+      items.push({ name: clean, qty, unitPrice, total: unitPrice * qty, removed: false, currency: 'INR' });
+    }
+    i = priceIdx; // jump past the price line
+  }
+  return items;
+}
+
+// ── ROBU TEXT PARSER ────────────────────────────────────────
+// Robu cart text structure:
+// [product name]
+// [₹ price]   or   [price × qty = subtotal]
+function parseRobuText(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 1);
+  const items = [];
+  const priceRe = /₹\s*([\d,]+(?:\.\d{1,2})?)/;
+  const qtyRe   = /(?:^|\b)(\d+)\s*(?:qty|x|×|nos|pcs|pc)\b/i;
+  const skipRe  = /^(cart|checkout|continue|update|remove|coupon|apply|total|subtotal|shipping|tax|robu|my account|login|register|home|shop|blog|contact|wishlist|compare|search|category|sort|filter|price|brand|availability)/i;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (skipRe.test(line)) continue;
+    if (line.length < 10) continue;
+    if (line.match(/^[₹\d]/)) continue;
+    if (line.split(' ').length < 2) continue;
+
+    let price = 0, qty = 1, priceIdx = -1;
+    for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
+      const ahead = lines[j];
+      if (ahead.length > 25 && !ahead.match(/₹/) && j > i + 2) break;
+      const pm = ahead.match(priceRe);
+      if (pm && priceIdx === -1) {
+        price = parseFloat(pm[1].replace(/,/g, ''));
+        priceIdx = j;
+      }
+      const qm = ahead.match(qtyRe) || line.match(qtyRe);
+      if (qm) qty = parseInt(qm[1]) || 1;
+    }
+    if (price < 10 || price > 500000 || priceIdx === -1) continue;
+    const unitPrice = (qty > 1 && price % qty === 0) ? price / qty : price;
+    const clean = line.replace(/\s+/g, ' ').trim().substring(0, 120);
+    if (!items.some(x => x.name.substring(0, 25) === clean.substring(0, 25))) {
+      items.push({ name: clean, qty, unitPrice, total: unitPrice * qty, removed: false, currency: 'INR' });
+    }
+    i = priceIdx;
+  }
+  return items;
+}
+
+// ── GENERIC STRICT PARSER ───────────────────────────────────
+// For unknown vendors. Much stricter than before:
+// Name must be ≥ 4 words AND ≥ 20 chars to filter out nav/category text.
+function parseGenericText(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 1);
+  const items = [];
+  const priceRe = /₹\s*([\d,]+(?:\.\d{1,2})?)/;
+  const qtyRe   = /(?:qty|quantity|x|×)[:\s]+(\d+)/i;
+  const skipRe  = /^(home|shop|cart|checkout|login|register|account|search|sort|filter|category|brand|total|subtotal|shipping|tax|coupon|apply|remove|update|delete|save|share|wishlist|compare|contact|about|blog|faq|help|policy|terms|privacy|copyright|all rights|follow us|subscribe|newsletter|facebook|instagram|twitter|whatsapp|youtube)/i;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (skipRe.test(line)) continue;
+    if (line.match(/^[₹\d]/)) continue;
+    if (line.length < 20) continue;                    // strict minimum length
+    const words = line.split(/\s+/);
+    if (words.length < 4) continue;                    // must be ≥ 4 words
+    if (!line.match(/[a-zA-Z]{4,}/)) continue;
+
+    let price = 0, qty = 1, priceIdx = -1;
+    for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
+      const ahead = lines[j];
+      if (ahead.length > 30 && !ahead.match(/₹/) && j > i + 1) break;
+      const pm = ahead.match(priceRe);
+      if (pm && priceIdx === -1) { price = parseFloat(pm[1].replace(/,/g,'')); priceIdx = j; }
+      const qm = ahead.match(qtyRe);
+      if (qm) qty = parseInt(qm[1]) || 1;
+    }
+    if (price < 10 || price > 500000 || priceIdx === -1) continue;
+    const unitPrice = (qty > 1 && price % qty === 0) ? price / qty : price;
+    const clean = line.replace(/\s+/g, ' ').trim().substring(0, 120);
+    if (!items.some(x => x.name.substring(0, 25) === clean.substring(0, 25))) {
+      items.push({ name: clean, qty, unitPrice, total: unitPrice * qty, removed: false, currency: 'INR' });
+    }
+    i = priceIdx;
+  }
+  return items;
+}
+
+function detectVendor(text) {
+  if (text.match(/amazon\.in|amazon india/i)) return 'Amazon India';
+  if (text.match(/robu\.in|robu\.in/i))       return 'Robu.in';
+  if (text.match(/flipkart/i))                return 'Flipkart';
+  if (text.match(/indiamart/i))               return 'IndiaMart';
+  if (text.match(/snapdeal/i))                return 'Snapdeal';
+  return 'Other vendor';
+}
+
+// ─── METHOD 1: postMessage listener (extension → web app) ────
+// Works whether this tab is newly opened by the extension OR already open.
+// Extension calls: window.postMessage({ type:'THINKMETAL_CART', items:[], vendor:'' }, '*')
+// background.js uses chrome.tabs.sendMessage OR injects a postMessage call.
+window.addEventListener('message', (event) => {
+  // Only trust messages with our known type — ignore everything else
+  if (!event.data || event.data.type !== 'THINKMETAL_CART') return;
+
+  console.log('[ThinkMetal] Cart received from extension:', event.data);
+
+  const { items, vendor } = event.data;
+  if (!Array.isArray(items) || items.length === 0) {
+    console.warn('[ThinkMetal] Items array empty or missing');
+    return;
+  }
+
+  // If we're not on the cart page, navigate there first
+  const cartNav = document.getElementById('nav-cart');
+  if (cartNav && !cartNav.classList.contains('active')) {
+    nav('cart', cartNav);
+  }
+
+  // Small delay so the page renders before we show the review screen
+  setTimeout(() => {
+    loadCartItems(items, vendor || 'Extension import');
+    // Update Method 1 status to show success
+    const waitEl = document.getElementById('ext-waiting-text');
+    if (waitEl) waitEl.textContent = '✓ Cart received from extension — ' + items.length + ' items';
+  }, 100);
+});
+
+// Called when member clicks "Parse cart"
+function parseAndLoad() {
+  const raw = document.getElementById('cart-paste-input').value.trim();
+  const vendorSel = document.getElementById('paste-vendor').value;
+  const errEl = document.getElementById('parse-error');
+  errEl.style.display = 'none';
+
+  if (!raw) {
+    errEl.textContent = 'Please paste your cart text first.';
+    errEl.style.display = 'inline';
+    return;
+  }
+
+  const { items, vendor } = parseCartText(raw, vendorSel === 'generic' ? null : vendorSel);
+
+  if (items.length === 0) {
+    errEl.textContent = 'Could not extract any items. Try selecting all text on the cart page more carefully.';
+    errEl.style.display = 'inline';
+    return;
+  }
+
+  loadCartItems(items, vendor);
+}
+
+// Called from URL param (real extension handoff) OR paste parser
+function loadCartItems(items, vendor) {
+  currentCartVendor = vendor;
+  currentCartData = items.map(i => ({ ...i, removed: false }));
+  document.getElementById('cart-vendor-badge').textContent = vendor;
+  document.getElementById('cart-import-card').style.display = 'none';
+  document.getElementById('cart-review-section').style.display = 'block';
+  renderCartItems();
+  toast('✓ ' + items.length + ' items extracted from ' + vendor + ' — review before submitting');
+}
+
+// ─── URL PARAM READER (real extension fires this) ─────────────
+// Extension opens: yourapp.html?cartdata=BASE64&vendor=Amazon+India
+// Web app reads it on load and goes straight to review screen.
+function checkUrlCartData() {
+  const params = new URLSearchParams(window.location.search);
+  const cartdata = params.get('cartdata');
+  const vendor = params.get('vendor') || 'Extension import';
+
+  if (cartdata) {
+    try {
+      const decoded = JSON.parse(atob(cartdata));
+      if (Array.isArray(decoded) && decoded.length > 0) {
+        // Navigate to cart page first
+        nav('cart', document.getElementById('nav-cart'));
+        loadCartItems(decoded, vendor);
+        // Clean URL so refresh doesn't re-trigger
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    } catch(e) {
+      console.warn('Cart URL param parse failed:', e);
+    }
+  }
+}
+
 function renderCartItems() {
   const list = document.getElementById('cart-items-list');
   list.innerHTML = currentCartData.map((item, i) => `
-    <div class="cart-item-row ${item.removed?'removed':''}" id="cart-row-${i}">
-      <input type="checkbox" ${item.removed?'':'checked'} onchange="toggleCartItem(${i},this.checked)"
+    <div class="cart-item-row ${item.removed ? 'removed' : ''}" id="cart-row-${i}">
+      <input type="checkbox" ${item.removed ? '' : 'checked'} onchange="toggleCartItem(${i}, this.checked)"
         style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer">
       <div class="cart-item-info">
         <div class="cart-item-name">${item.name}</div>
@@ -1168,14 +1664,16 @@ function renderCartItems() {
     </div>`).join('');
   updateCartTotal();
 }
+
 function toggleCartItem(i, checked) {
   currentCartData[i].removed = !checked;
-  document.getElementById('cart-row-'+i).classList.toggle('removed',!checked);
+  document.getElementById('cart-row-'+i).classList.toggle('removed', !checked);
   updateCartTotal();
 }
+
 function updateCartTotal() {
-  const total = currentCartData.filter(i=>!i.removed).reduce((s,i)=>s+i.total,0);
-  document.getElementById('cart-total').textContent = '₹'+total.toLocaleString('en-IN');
+  const total = currentCartData.filter(i => !i.removed).reduce((s, i) => s + i.total, 0);
+  document.getElementById('cart-total').textContent = '₹' + total.toLocaleString('en-IN');
 }
 
 function viewCartDetail(id) {
@@ -1194,173 +1692,92 @@ function viewCartDetail(id) {
   document.getElementById('cart-detail-modal').classList.add('show');
 }
 
-// ─── CART TEXT PARSER ──────────────────────────────────────────
-function parseCartText(rawText) {
-  const lines = rawText.split('\n').map(l=>l.trim()).filter(l=>l.length>1);
-  const items = [];
-  const priceRe = /₹\s*([\d,]+(?:\.\d{1,2})?)/;
-  const skipRe = /^(home|shop|cart|checkout|login|total|subtotal|shipping|tax|coupon|remove|delete|save|share|wishlist|proceed|continue)/i;
-  for (let i=0; i<lines.length; i++) {
-    const line = lines[i];
-    if (skipRe.test(line)||line.match(/^[₹\d]/)||line.length<15||line.split(' ').length<3) continue;
-    let price=0, qty=1, priceIdx=-1;
-    for (let j=i+1; j<Math.min(i+5,lines.length); j++) {
-      const pm = lines[j].match(priceRe);
-      if (pm && priceIdx===-1) { price=parseFloat(pm[1].replace(/,/g,'')); priceIdx=j; }
-      const qm = lines[j].match(/(?:qty|quantity)[:\s]+(\d+)/i);
-      if (qm) qty=parseInt(qm[1])||1;
-    }
-    if (price<10||price>500000||priceIdx===-1) continue;
-    const clean=line.replace(/\s+/g,' ').trim().substring(0,120);
-    if (!items.some(x=>x.name.substring(0,25)===clean.substring(0,25)))
-      items.push({ name:clean, qty, unitPrice:price, total:price*qty, removed:false, currency:'INR' });
-    i=priceIdx;
-  }
-  return items;
-}
-
-function parseAndLoad() {
-  const raw = document.getElementById('cart-paste-input').value.trim();
-  const errEl = document.getElementById('parse-error');
-  errEl.style.display = 'none';
-  if (!raw) { errEl.textContent='Please paste your cart text first.'; errEl.style.display='inline'; return; }
-  const items = parseCartText(raw);
-  if (items.length===0) { errEl.textContent='Could not extract items. Try selecting all text on the cart page.'; errEl.style.display='inline'; return; }
-  loadCartItems(items, 'Pasted cart');
-}
-
-function loadCartItems(items, vendor) {
-  currentCartVendor = vendor;
-  currentCartData = items.map(i=>({...i, removed:false}));
-  document.getElementById('cart-vendor-badge').textContent = vendor;
-  document.getElementById('cart-import-card').style.display = 'none';
-  document.getElementById('cart-review-section').style.display = 'block';
-  renderCartItems();
-  toast('✓ '+items.length+' items from '+vendor+' — review before submitting');
-}
-
-window.addEventListener('message', (event) => {
-  if (!event.data || event.data.type !== 'THINKMETAL_CART') return;
-  const { items, vendor } = event.data;
-  if (!Array.isArray(items) || items.length === 0) return;
-  const cartNav = document.getElementById('nav-cart');
-  if (cartNav && !cartNav.classList.contains('active')) nav('cart', cartNav);
-  setTimeout(() => {
-    loadCartItems(items, vendor || 'Extension import');
-    const waitEl = document.getElementById('ext-waiting-text');
-    if (waitEl) waitEl.textContent = '✓ Cart received — ' + items.length + ' items';
-  }, 100);
-});
-
-function checkUrlCartData() {
-  const params = new URLSearchParams(window.location.search);
-  const cartdata = params.get('cartdata');
-  const vendor = params.get('vendor') || 'Extension import';
-  if (cartdata) {
-    try {
-      const decoded = JSON.parse(atob(cartdata));
-      if (Array.isArray(decoded) && decoded.length > 0) {
-        nav('cart', document.getElementById('nav-cart'));
-        loadCartItems(decoded, vendor);
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-    } catch(e) {}
-  }
-}
-
-// ─── CHARTS ───────────────────────────────────────────────────
-function renderCharts() {
-  const cats=['Raw mat.','Hardware','Tools','Access.','Storage'];
-  const vals=[40,70,18,52,17];
-  const colors=['var(--blue)','var(--green)','var(--amber)','var(--accent)','var(--purple)'];
-  const max=Math.max(...vals);
-  document.getElementById('bar-chart').innerHTML=cats.map((c,i)=>`
-    <div class="bar-wrap"><div class="bar-val">${vals[i]}</div>
-    <div class="bar" style="height:${Math.round(vals[i]/max*75)}px;background:${colors[i]}"></div>
-    <div class="bar-lbl">${c}</div></div>`).join('');
-  const pipe=['Pending','Approved','Paid','Delivered'];
-  const pv=[3,2,4,18];
-  const pc=['var(--amber)','var(--blue)','var(--purple)','var(--green)'];
-  const pm=Math.max(...pv);
-  document.getElementById('pipeline-chart').innerHTML=pipe.map((p,i)=>`
-    <div class="bar-wrap"><div class="bar-val">${pv[i]}</div>
-    <div class="bar" style="height:${Math.round(pv[i]/pm*75)}px;background:${pc[i]}"></div>
-    <div class="bar-lbl">${p}</div></div>`).join('');
-}
-
 // ─── NAV & UI ─────────────────────────────────────────────────
 function nav(page, el) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
   el.classList.add('active');
 }
 
 function setRole(role) {
   const rules = {
-    member:   { show:['nav-dashboard','nav-inventory','nav-wip','nav-log','nav-request','nav-cart','nav-inward'], hide:['nav-outward','nav-approvals','nav-payments'] },
-    lead:     { show:['nav-dashboard','nav-inventory','nav-wip','nav-log','nav-request','nav-cart','nav-inward','nav-approvals'], hide:['nav-outward','nav-payments'] },
+    member: { show:['nav-dashboard','nav-inventory','nav-wip','nav-log','nav-request','nav-cart','nav-inward'], hide:['nav-outward','nav-approvals','nav-payments'] },
+    lead: { show:['nav-dashboard','nav-inventory','nav-wip','nav-log','nav-request','nav-cart','nav-inward','nav-approvals'], hide:['nav-outward','nav-payments'] },
     accounts: { show:['nav-dashboard','nav-inventory','nav-log','nav-inward','nav-outward','nav-approvals','nav-payments'], hide:['nav-request','nav-cart','nav-wip'] },
   };
-  document.querySelectorAll('.nav-item[id]').forEach(el=>el.classList.remove('disabled'));
-  rules[role].hide.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.add('disabled'); });
+  const r = rules[role];
+  document.querySelectorAll('.nav-item[id]').forEach(el => el.classList.remove('disabled'));
+  r.hide.forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('disabled'); });
+  const inwardNav = document.getElementById('nav-inward');
+  if (inwardNav) inwardNav.classList.remove('disabled');
+  document.getElementById('delivery-banner').style.display = role === 'member' ? 'flex' : 'none';
 }
 
 function switchLogTab(filter, el) {
-  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active'); renderLog(filter);
-}
-function switchOutTab(tab, el) {
-  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  ['out-usage','out-wip','out-allocate'].forEach(id=>{ document.getElementById(id).style.display=id==='out-'+tab?'block':'none'; });
+  renderLog(filter);
 }
+
+function switchOutTab(tab, el) {
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['out-usage','out-wip','out-allocate'].forEach(id => {
+    document.getElementById(id).style.display = id === 'out-' + tab ? 'block' : 'none';
+  });
+}
+
 function filterInventory(q) {
-  const cat=document.getElementById('cat-filter').value;
-  renderInventory(inventory.filter(r=>(!q||r.name.toLowerCase().includes(q.toLowerCase()))&&(!cat||r.cat===cat)));
+  const cat = document.getElementById('cat-filter').value;
+  const filtered = inventory.filter(r =>
+    (!q || r.name.toLowerCase().includes(q.toLowerCase())) &&
+    (!cat || r.cat === cat)
+  );
+  renderInventory(filtered);
 }
-function filterInventoryByCat() { filterInventory(document.getElementById('inv-search').value); }
+
+function filterInventoryByCat(cat) {
+  const q = document.getElementById('inv-search').value;
+  filterInventory(q);
+}
 
 function updateBadges() {
-  const pending = requests.filter(r=>r.status==='Pending').length + cartRequests.filter(c=>c.status==='Pending').length;
-  const paying  = requests.filter(r=>r.status==='Approved').length + cartRequests.filter(c=>c.status==='Approved').length;
-  const ab=document.getElementById('approval-badge'); ab.textContent=pending; ab.style.display=pending?'inline':'none';
-  const pb=document.getElementById('payment-badge');  pb.textContent=paying;  pb.style.display=paying?'inline':'none';
-  const dp=document.getElementById('dash-pending'); if(dp) dp.textContent=pending;
-  const dsp=document.getElementById('dash-stat-pending'); if(dsp) dsp.textContent=pending+' requests';
-  const dspay=document.getElementById('dash-stat-payment'); if(dspay) dspay.textContent=paying+' carts';
+  const pendingCount = requests.filter(r => r.status === 'Pending').length + cartRequests.filter(c => c.status === 'Pending').length;
+  const payCount = requests.filter(r => r.status === 'Approved').length + cartRequests.filter(c => c.status === 'Approved').length;
+  const ab = document.getElementById('approval-badge');
+  const pb = document.getElementById('payment-badge');
+  ab.textContent = pendingCount; ab.style.display = pendingCount ? 'inline' : 'none';
+  pb.textContent = payCount; pb.style.display = payCount ? 'inline' : 'none';
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
 let toastTimer;
 function toast(msg) {
-  const t=document.getElementById('toast');
-  document.getElementById('toast-msg').textContent=msg;
-  t.classList.add('show'); clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ─── RENDER ALL ───────────────────────────────────────────────
-function renderAll() {
-  renderInventory(inventory);
-  renderWIP();
-  renderLog('all');
-  renderActivity();
-  renderPendingRequests();
-  renderPendingCarts();
-  renderApprovedList();
-  renderPayments();
-  renderCartList();
-  renderAwaitingDelivery();
-  updateBadges();
-}
+function clearForm(f) {}
 
 // ─── INIT ─────────────────────────────────────────────────────
-renderAll();
+renderInventory(inventory);
+renderWIP();
+renderLog('all');
+renderActivity();
+renderPendingRequests();
+renderPendingCarts();
+renderApprovedList();
+renderPayments();
+renderCartList();
+renderInwardDeliveries();
 renderCharts();
 setRole('member');
-checkUrlCartData();
+checkUrlCartData(); // reads ?cartdata= param from extension handoff
 </script>
 </body>
 </html>

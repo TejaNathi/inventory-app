@@ -308,7 +308,7 @@ function parseIndustryBuying() {
       // Take the last price shown — usually the discounted/current price
       const unitPrice = prices[prices.length - 1];
 
-      items.push(makeItem(name, qty, unitPrice));
+      items.push(makeItem(name, qty, unitPrice,));
     } catch (e) {}
   });
 
