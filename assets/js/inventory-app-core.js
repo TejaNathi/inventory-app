@@ -512,6 +512,53 @@ function renderOutwardInventory(
 
 }
 
+async function loadOutwardPage() {
+
+  try {
+
+    const token =
+      localStorage.getItem(
+        'token'
+      );
+
+    const projectRes =
+      await fetch(
+
+        'http://127.0.0.1:3000/api/projects',
+
+        {
+
+          headers: {
+
+            Authorization:
+              `Bearer ${token}`
+
+          }
+
+        }
+
+      );
+
+    const projects =
+      await projectRes.json();
+
+    renderOutwardInventory(
+
+      inventoryRows,
+      projects
+
+    );
+
+  }
+
+  catch (err) {
+
+    console.error(err);
+
+  }
+
+}
+
 function renderCharts() {
   const cats = ['Raw mat.','Hardware','Tools','Accessories','Storage'];
   const vals = [0, 0, 0, 0, 0];
