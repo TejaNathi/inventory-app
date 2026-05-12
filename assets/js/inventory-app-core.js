@@ -21,48 +21,31 @@ const user = JSON.parse(
   localStorage.getItem('user')
 );
 
-let socket = null;
 
-console.log("user", user);
+console.log("user",user);
 
-if (typeof io === 'function') {
+socket.on(
 
-  socket = io(
-    'http://localhost:3000'
-  );
+  'connect',
 
-  socket.on(
+  () => {
 
-    'connect',
+    console.log(
+      'socket connected',
+      socket.id
+    );
 
-    () => {
+    socket.emit(
 
-      const activeUser = JSON.parse(
-        localStorage.getItem('user')
-      );
+      'join-role',
 
-      console.log(
-        'socket connected',
-        socket.id
-      );
+      user.role
 
-      if (activeUser?.role) {
+    );
 
-        socket.emit(
+  }
 
-          'join-role',
-
-          activeUser.role
-
-        );
-
-      }
-
-    }
-
-  );
-
-}
+);
 
 
 
