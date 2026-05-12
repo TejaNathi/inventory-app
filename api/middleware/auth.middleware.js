@@ -1,3 +1,7 @@
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'test_secret';
+
 export function authed(
   req,
   res,

@@ -13,6 +13,25 @@ import {
 from '../models/inventory.model.js';
 
 
+function normalizeDepartmentCode(department) {
+
+  const value = String(department || '')
+    .trim();
+
+  const map = {
+    mechanical: 'MEC',
+    electrical: 'EMB',
+    embedded: 'EMB',
+    'embedded systems': 'EMB',
+    software: 'SOF',
+    operations: 'OPE'
+  };
+
+  return map[value.toLowerCase()]
+    || value.slice(0, 3).toUpperCase();
+
+}
+
 
 // ---------------------
 // CREATE INVENTORY ITEM
@@ -27,9 +46,13 @@ export async function createInventoryItemController(
 
     const result =
 
-      await createInventoryItem(
-        req.body
-      );
+      await createInventoryItem({
+        ...req.body,
+        department_code:
+          normalizeDepartmentCode(
+            req.body.department_code
+          )
+      });
 
     res.json(result);
 
@@ -74,10 +97,9 @@ if (!department) {
 
 }
  const department_code =
-
-      department
-        .slice(0,3)
-        .toUpperCase();
+      normalizeDepartmentCode(
+        department
+      );
 
     console.log(
       'USER DEPARTMENT:',
