@@ -1,0 +1,21 @@
+{
+  "name": "thinkmetal-inventory-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "pg": "^8.20.0"
+  },
+  "description": "Small Express API that sits between the browser and Supabase Postgres.",
+  "main": "db.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

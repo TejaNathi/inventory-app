@@ -8,13 +8,27 @@
 <link rel="stylesheet" href="./inventory-app.css">
 </head>
 <body>
+  <div id="login-screen">
 
+  <h2>ThinkMetal Inventory</h2>
+
+  <button onclick="openAuth('login')">
+    Login
+  </button>
+
+  <button onclick="openAuth('register')">
+    Register
+  </button>
+
+</div>
+  <div id="app-shell" style="display:none;">
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">THINKMETAL</div>
     <div class="logo-sub">Inventory system</div>
   </div>
+
 
   <div class="nav-section">
     <div class="nav-label">Overview</div>
@@ -48,22 +62,31 @@
     </div>
     <div class="nav-item" onclick="nav('approvals',this)" id="nav-approvals">
       <span class="nav-icon">✓</span> Approvals
-      <span class="nav-badge" id="approval-badge">3</span>
+      <span class="nav-badge" id="approval-badge" style="display:none">0</span>
     </div>
     <div class="nav-item" onclick="nav('payments',this)" id="nav-payments">
       <span class="nav-icon">₹</span> Payments
-      <span class="nav-badge" id="payment-badge">2</span>
+      <span class="nav-badge" id="payment-badge" style="display:none">0</span>
     </div>
   </div>
 
-  <div class="role-section">
-    <div class="role-label">Role</div>
-    <select class="role-select" id="role-select" onchange="setRole(this.value)">
-      <option value="member">Member</option>
-      <option value="lead">Team lead</option>
-      <option value="accounts">Accounts</option>
-    </select>
+<div class="role-section" id="account-section">
+
+  <div id="guest-buttons">
+    <div class="role-label">Account</div>
+
+    <button onclick="openAuth('login')">Login</button>
+    <button onclick="openAuth('register')">Register</button>
   </div>
+
+  <div id="user-panel" style="display:none;">
+    <div id="user-name"></div>
+    <div id="user-role"></div>
+
+    <button onclick="logout()">Logout</button>
+  </div>
+
+</div>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -82,7 +105,7 @@
     <div class="delivery-banner" id="delivery-banner">
       <div class="delivery-banner-icon">📦</div>
       <div class="delivery-banner-text">
-        <strong>2 deliveries pending confirmation</strong> — Items from approved cart requests are on the way. Confirm when received.
+        <strong>No deliveries pending confirmation</strong>
       </div>
       <button class="btn btn-sm btn-secondary" onclick="nav('cart',document.getElementById('nav-cart'))">View</button>
     </div>
@@ -90,22 +113,22 @@
     <div class="metrics">
       <div class="metric accent">
         <div class="metric-label">Total items</div>
-        <div class="metric-value">148</div>
-        <div class="metric-sub">across 5 categories</div>
+        <div class="metric-value">0</div>
+        <div class="metric-sub">across 0 categories</div>
       </div>
       <div class="metric red">
         <div class="metric-label">Low stock</div>
-        <div class="metric-value">6</div>
+        <div class="metric-value">0</div>
         <div class="metric-sub">below reorder level</div>
       </div>
       <div class="metric amber">
         <div class="metric-label">Pending approvals</div>
-        <div class="metric-value">3</div>
+        <div class="metric-value">0</div>
         <div class="metric-sub">awaiting lead action</div>
       </div>
       <div class="metric green">
         <div class="metric-label">WIP items</div>
-        <div class="metric-value">12</div>
+        <div class="metric-value">0</div>
         <div class="metric-sub">currently in progress</div>
       </div>
     </div>
@@ -126,21 +149,21 @@
         <div class="status-icon">🟡</div>
         <div>
           <div class="status-info-label">Pending approval</div>
-          <div class="status-info-val">3 requests</div>
+          <div class="status-info-val">0 requests</div>
         </div>
       </div>
       <div class="status-card">
         <div class="status-icon">🟣</div>
         <div>
           <div class="status-info-label">Payment pending</div>
-          <div class="status-info-val">2 carts</div>
+          <div class="status-info-val">0 carts</div>
         </div>
       </div>
       <div class="status-card">
         <div class="status-icon">🟢</div>
         <div>
           <div class="status-info-label">Delivered this month</div>
-          <div class="status-info-val">18 items</div>
+          <div class="status-info-val">0 items</div>
         </div>
       </div>
     </div>
@@ -187,19 +210,167 @@
     </div>
   </div>
 
-  <!-- WIP -->
-  <div class="page" id="page-wip">
-    <div class="page-hdr">
-      <div class="page-hdr-left"><h1>Work in Progress</h1><p>Items currently allocated to active work orders</p></div>
+<!-- WIP PAGE -->
+
+<div
+  class="page"
+  id="page-wip"
+>
+
+  <div class="wip-page">
+
+    <!-- HEADER -->
+
+    <div class="wip-header">
+
+      <div>
+
+        <h2>
+          WIP Projects
+        </h2>
+
+        <p>
+          Track project material consumption
+        </p>
+
+      </div>
+
+      <button
+  class="primary-btn"
+  onclick="openNewProjectModal()"
+>
+  + Create New Project
+</button>
     </div>
-    <div class="card">
-      <div class="card-hdr"><h3>Active WIP items</h3><span class="badge badge-wip">12 items</span></div>
-      <table>
-        <thead><tr><th>WIP ID</th><th>Item</th><th>Qty</th><th>Allocated to</th><th>Work order</th><th>Date</th><th>Status</th></tr></thead>
-        <tbody id="wip-body"></tbody>
-      </table>
+
+
+    <!-- PROJECT LIST -->
+
+   <div
+  class="wip-project-list"
+  id="wip-project-list"
+>
+
+      <!-- PROJECT CARD -->
+
+      <div class="project-card">
+
+        <!-- TOP -->
+
+        <div class="project-top">
+
+          <div>
+
+            <div class="project-title">
+              Project 1
+            </div>
+
+            <div class="project-subtitle">
+              Branch: Chennai
+            </div>
+
+          </div>
+
+          <button
+            class="danger-btn"
+          >
+            Delete Project
+          </button>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <table class="wip-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Item Code
+              </th>
+
+              <th>
+                Category
+              </th>
+
+              <th>
+                Unit
+              </th>
+
+              <th>
+                Qty
+              </th>
+
+              <th>
+                Date
+              </th>
+
+              <th>
+                Branch
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr>
+
+              <td>
+                001-MEC-HD-MTR
+              </td>
+
+              <td>
+                Hardware
+              </td>
+
+              <td>
+                pcs
+              </td>
+
+              <td>
+                2
+              </td>
+
+              <td>
+                2026-05-12
+              </td>
+
+              <td>
+                Chennai
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+
+        <!-- ACTIONS -->
+
+        <div class="project-actions">
+
+          <button
+            class="secondary-btn"
+          >
+            + Add Item
+          </button>
+
+        </div>
+
+      </div>
+
     </div>
+
   </div>
+
+</div>
 
   <!-- INWARD OUTWARD LOG -->
   <div class="page" id="page-log">
@@ -213,7 +384,7 @@
     </div>
     <div class="card">
       <table>
-        <thead><tr><th>ID</th><th>Type</th><th>Item</th><th>Qty</th><th>By</th><th>Supplier/Dept</th><th>Date</th><th>Notes</th></tr></thead>
+        <thead><tr><th>ID</th><th>Type</th><th>Itemalias</th><th>Qty</th><th>By</th><th>Supplier/Dept</th><th>Date</th><th>itemname</th></tr></thead>
         <tbody id="log-body"></tbody>
       </table>
     </div>
@@ -369,8 +540,6 @@
             <label>Linked request (optional)</label>
             <select id="inw-req">
               <option value="">— standalone entry —</option>
-              <option value="REQ-0039">REQ-0039 · Soldering iron tip × 2</option>
-              <option value="REQ-0037">REQ-0037 · M6 standoffs × 50</option>
             </select>
           </div>
           <div class="form-group"><label>Received by</label><input type="text" id="inw-by" placeholder="Your name"></div>
@@ -397,70 +566,99 @@
     </div>
   </div>
 
+
   <!-- OUTWARD / WIP -->
-  <div class="page" id="page-outward">
-    <div class="page-hdr">
-      <div class="page-hdr-left"><h1>Outward / WIP</h1><p>Record items used, allocated, or in progress</p></div>
-    </div>
-    <div class="tabs">
-      <div class="tab active" onclick="switchOutTab('usage',this)">Direct usage</div>
-      <div class="tab" onclick="switchOutTab('wip',this)">Work in progress</div>
-      <div class="tab" onclick="switchOutTab('allocate',this)">Allocate to team</div>
+<div class="page" id="page-outward">
+
+  <div class="page-hdr">
+
+    <div class="page-hdr-left">
+
+      <h1>
+        Outward / WIP
+      </h1>
+
+      <button
+        class="btn btn-primary"
+        onclick="submitOutwardEntries()"
+        style="margin-top:12px"
+      >
+
+        Submit Outward
+
+      </button>
+
     </div>
 
-    <div class="form-wrap" id="out-usage">
-      <div class="form-card">
-        <h3>Mark as used</h3>
-        <div class="form-grid">
-          <div class="form-group"><label>Member name</label><input type="text" id="out-member" placeholder="Who used this"></div>
-          <div class="form-group"><label>Department</label><select><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select></div>
-          <div class="form-group"><label>Item</label><select id="out-item"><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option><option>Soldering Iron Tip</option></select></div>
-          <div class="form-group"><label>Qty used</label><input type="number" id="out-qty" placeholder="0"></div>
-          <div class="form-group"><label>Unit</label><input type="text" id="out-unit" placeholder="pcs"></div>
-          <div class="form-group"><label>Date</label><input type="date" id="out-date"></div>
-          <div class="form-group full"><label>Purpose</label><textarea placeholder="What was this used for?"></textarea></div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="submitOutward('Usage')">Save outward entry</button>
-          <button class="btn btn-secondary">Clear</button>
-        </div>
-      </div>
+    <div class="card-hdr-right">
+
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search inventory..."
+        oninput="filterOutwardInventory(this.value)"
+      >
+
     </div>
 
-    <div class="form-wrap" id="out-wip" style="display:none">
-      <div class="form-card">
-        <h3>Mark as WIP</h3>
-        <div class="form-grid">
-          <div class="form-group"><label>Member</label><input type="text" placeholder="Assigned to"></div>
-          <div class="form-group"><label>Item</label><select><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option></select></div>
-          <div class="form-group"><label>Qty</label><input type="number" placeholder="0"></div>
-          <div class="form-group"><label>Unit</label><input type="text" placeholder="pcs"></div>
-          <div class="form-group full"><label>Work order / task ref</label><input type="text" placeholder="e.g. Arm assembly — joint 3"></div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="submitOutward('WIP')">Mark as WIP</button>
-          <button class="btn btn-secondary">Clear</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-wrap" id="out-allocate" style="display:none">
-      <div class="form-card">
-        <h3>Allocate to team member</h3>
-        <div class="form-grid">
-          <div class="form-group"><label>Allocate to</label><input type="text" placeholder="Team member name"></div>
-          <div class="form-group"><label>Department</label><select><option>Mechanical</option><option>Electrical</option><option>Software</option><option>Operations</option></select></div>
-          <div class="form-group"><label>Item</label><select><option>Thermocouple</option><option>M8 Hex Bolt</option><option>Aluminium Rod 6mm</option><option>PETG Filament 1kg</option></select></div>
-          <div class="form-group"><label>Quantity</label><input type="number" placeholder="0"></div>
-          <div class="form-group full"><label>Notes</label><textarea placeholder="Purpose, expected return date if applicable"></textarea></div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="submitOutward('Allocated')">Allocate item</button>
-          <button class="btn btn-secondary">Clear</button>
-        </div>
-      </div>
-    </div>
   </div>
+
+  <div class="page-hdr">
+
+    <div class="page-hdr-left">
+
+      <h1>
+        Outward / WIP
+      </h1>
+
+      <p>
+        Record inventory usage and WIP allocation
+      </p>
+
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <div class="card-hdr">
+
+      <h3>
+        Master inventory outward
+      </h3>
+
+    </div>
+
+    <table>
+
+      <thead>
+
+        <tr>
+          <th>Select</th>
+
+          <th>Item</th>
+
+          <th>Current Stock</th>
+
+          <th>Outward Type</th>
+
+          <th>Project</th>
+
+          <th>Qty Required</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody id="outward-body">
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
 
   <!-- APPROVALS -->
   <div class="page" id="page-approvals">
@@ -469,7 +667,7 @@
     </div>
 
     <div class="card" style="margin-bottom:20px">
-      <div class="card-hdr"><h3>Pending item requests</h3><span class="badge badge-pending" id="pending-count-badge">3 pending</span></div>
+      <div class="card-hdr"><h3>Pending item requests</h3><span class="badge badge-pending" id="pending-count-badge">0 pending</span></div>
       <table>
         <thead><tr><th>Req ID</th><th>Member</th><th>Item</th><th>Qty</th><th>Purpose</th><th>Est. cost</th><th>Date</th><th>Action</th></tr></thead>
         <tbody id="pending-requests-body"></tbody>
@@ -477,7 +675,7 @@
     </div>
 
     <div class="card" style="margin-bottom:20px">
-      <div class="card-hdr"><h3>Pending cart requests</h3><span class="badge badge-pending" id="pending-cart-badge">1 pending</span></div>
+      <div class="card-hdr"><h3>Pending cart requests</h3><span class="badge badge-pending" id="pending-cart-badge">0 pending</span></div>
       <table>
         <thead><tr><th>Cart ID</th><th>Member</th><th>Source</th><th>Items</th><th>Total</th><th>Note</th><th>Action</th></tr></thead>
         <tbody id="pending-carts-body"></tbody>
@@ -499,7 +697,7 @@
       <div class="page-hdr-left"><h1>Payments</h1><p>Process approved requests and mark payments done</p></div>
     </div>
     <div class="card" style="margin-bottom:20px">
-      <div class="card-hdr"><h3>Awaiting payment</h3><span class="badge badge-approved">2 approved</span></div>
+      <div class="card-hdr"><h3>Awaiting payment</h3><span class="badge badge-approved">0 approved</span></div>
       <table>
         <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Approved total</th><th>Approved by</th><th>Approved date</th><th>Action</th></tr></thead>
         <tbody id="payments-body"></tbody>
@@ -526,8 +724,8 @@
 <!-- MODAL: Cart detail view -->
 <div class="modal-overlay" id="cart-detail-modal">
   <div class="modal">
-    <h3 id="modal-cart-title">Cart CART-001</h3>
-    <p id="modal-cart-meta">Amazon India · 4 items</p>
+    <h3 id="modal-cart-title">Cart details</h3>
+    <p id="modal-cart-meta">No cart selected</p>
     <div id="modal-cart-items"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('cart-detail-modal')">Close</button>
@@ -563,10 +761,160 @@
     </div>
   </div>
 </div>
+<!-- NEW PROJECT MODAL -->
+
+<!-- NEW PROJECT MODAL -->
+
+<div
+  id="new-project-modal"
+  class="modal-overlay"
+>
+
+  <div class="modal">
+
+    <h3>
+      Create Project
+    </h3>
+
+    <p>
+      Create a new WIP project
+    </p>
+
+    <div class="form-grid">
+
+      <!-- PROJECT NAME -->
+
+      <div class="form-group">
+
+        <label>
+          Project Name
+        </label>
+
+        <input
+          type="text"
+          id="project-name"
+          placeholder="Project name"
+        >
+
+      </div>
+
+
+      <!-- NOTES -->
+
+      <div class="form-group full">
+
+        <label>
+          Notes
+        </label>
+
+        <textarea
+          id="project-notes"
+          placeholder="Project purpose"
+        ></textarea>
+
+      </div>
+
+    </div>
+
+
+    <!-- BUTTONS -->
+
+    <div class="modal-actions">
+
+      <button
+        class="btn btn-secondary"
+        onclick="closeNewProjectModal()"
+      >
+
+        Cancel
+
+      </button>
+
+      <button
+        class="btn btn-primary"
+        onclick="createNewProject()"
+      >
+
+        Create Project
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toast-msg"></span></div>
 
+</div> <!-- end app-shell -->
+<!-- AUTH MODAL -->
+<div id="auth-modal" style="display:none;">
+  <div>
+    <h3 id="auth-title">Login</h3>
+
+    <!-- register only -->
+    <input
+  id="auth-name"
+  placeholder="Full name"
+  style="display:none;"
+/>
+
+<input
+  id="auth-email"
+  placeholder="Email"
+/>
+
+<input
+  id="auth-password"
+  type="password"
+  placeholder="Password"
+/>
+
+<div
+  class="form-group"
+  id="auth-department-group"
+  style="display:none;"
+>
+
+  <label>
+    Department
+  </label>
+
+  <select id="auth-department">
+
+    <option value="Mechanical">
+      Mechanical
+    </option>
+
+    <option value="Embedded Systems">
+      Embedded Systems
+    </option>
+
+    <option value="Software">
+      Software
+    </option>
+
+    <option value="Operations">
+      Operations
+    </option>
+
+  </select>
+
+</div>
+
+<button onclick="submitAuth()">
+  Submit
+</button>
+
+<button onclick="closeAuth()">
+  Cancel
+</button>
+</div>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="./deliverychecklist.js"></script>
 <script src="./inventory-app.js"></script>
 </body>
 </html>
+
