@@ -66,7 +66,17 @@ async function fetchChecklistItems(
 
   );
 
-  return await res.json();
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+
+    throw new Error(
+      data.error || 'Failed loading checklist items'
+    );
+
+  }
+
+  return Array.isArray(data) ? data : [];
 
 }
 
@@ -76,7 +86,7 @@ async function fetchInventoryFamilies(
 
   const res = await fetch(
 
-    'http://127.0.0.1:3000/api/inventory-view ',
+    'http://127.0.0.1:3000/api/inventory-view',
 
     {
 
@@ -91,7 +101,17 @@ async function fetchInventoryFamilies(
 
   );
 
-  return await res.json();
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+
+    throw new Error(
+      data.error || 'Failed loading inventory families'
+    );
+
+  }
+
+  return Array.isArray(data) ? data : [];
 
 }
 
@@ -150,7 +170,7 @@ async function openDeliveryChecklist(
     console.error(err);
 
     toast(
-      'Failed loading checklist'
+      err.message || 'Failed loading checklist'
     );
 
   }
@@ -181,19 +201,27 @@ function renderDeliveryChecklist(
 
     'Verify delivered items';
 
+  const checklistItems = Array.isArray(items)
+    ? items
+    : [];
+
+  const familyOptions = Array.isArray(inventoryFamilies)
+    ? inventoryFamilies
+    : [];
+
   document.getElementById(
 
     'delivery-checklist-items'
 
   ).innerHTML =
 
-    items.map(item =>
+    checklistItems.map(item =>
 
       renderChecklistRow(
 
         item,
 
-        inventoryFamilies
+        familyOptions
 
       )
 
