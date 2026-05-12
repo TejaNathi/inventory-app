@@ -17,10 +17,6 @@ let currentDeliveryId = null;
 let currentCartData = null;
 let inventoryRows = [...inventory];
 let inventoryLoadedFromApi = false;
-const socket = io(
-  'http://localhost:3000'
-);
-
 const user = JSON.parse(
   localStorage.getItem('user')
 );
@@ -2894,33 +2890,6 @@ function toast(msg) {
 
 function clearForm(f) {}
 
-// ─── INIT ─────────────────────────────────────────────────────
-renderInventory(inventoryRows);
-renderWIP();
-renderLog('all');
-renderActivity();
-renderPendingRequests();
-renderPendingCarts();
-renderApprovedList();
-renderPayments();
-renderCartList();
-renderInwardDeliveries();
-renderCharts();
-renderOutwardInventory();
-
-checkUrlCartData(); // reads ?cartdata= param from extension handoff
-
-window.inventoryAppServices = {
-  getCurrentDeliveryId: () => currentDeliveryId,
-  setCurrentDeliveryId: (id) => { currentDeliveryId = id; },
-  toast,
-  closeModal,
-  entermasterinventory,
-  loadCartRequests,
-  loadPayments,
-  loadLogEntries
-};
-
 window.openDeliveryChecklist =
   openDeliveryChecklist;
 
@@ -2987,3 +2956,32 @@ Object.assign(window, {
   handleInventoryFamilyChange,
   syncLastFamily
 });
+
+
+window.inventoryAppServices = {
+  getCurrentDeliveryId: () => currentDeliveryId,
+  setCurrentDeliveryId: (id) => { currentDeliveryId = id; },
+  toast,
+  closeModal,
+  entermasterinventory,
+  loadCartRequests,
+  loadPayments,
+  loadLogEntries
+};
+
+
+// ─── INIT ─────────────────────────────────────────────────────
+renderInventory(inventoryRows);
+renderWIP();
+renderLog('all');
+renderActivity();
+renderPendingRequests();
+renderPendingCarts();
+renderApprovedList();
+renderPayments();
+renderCartList();
+renderInwardDeliveries();
+renderCharts();
+renderOutwardInventory();
+
+checkUrlCartData(); // reads ?cartdata= param from extension handoff
