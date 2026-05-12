@@ -1,0 +1,195 @@
+/* CART REVIEW */
+
+/* DELIVERY CHECKLIST */
+
+.delivery-grid {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 14px;
+
+  padding: 16px;
+
+  background: var(--surface2);
+
+  border: 1px solid var(--border2);
+
+  border-radius: var(--radius-lg);
+
+  margin-bottom: 16px;
+
+}
+
+.delivery-grid:hover {
+
+  background: var(--surface3);
+
+}
+
+.delivery-grid.removed {
+
+  opacity: 0.35;
+
+}
+
+.cart-item-info {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+}
+
+.cart-item-name {
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  line-height: 1.4;
+
+}
+
+.cart-item-meta {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 12px;
+
+  color: var(--text2);
+
+  font-family: 'DM Mono', monospace;
+
+}
+
+.received-qty-input {
+
+  width: 100px !important;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border2);
+
+  color: var(--text);
+
+  padding: 8px 10px;
+
+  border-radius: var(--radius);
+
+}
+
+.delivery-grid select,
+
+.delivery-grid input[type="text"],
+
+.delivery-grid input[type="number"] {
+
+  width: 100%;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border2);
+
+  color: var(--text);
+
+  padding: 10px 12px;
+
+  border-radius: var(--radius);
+
+  font-size: 13px;
+
+}
+
+.delivery-grid select:focus,
+
+.delivery-grid input:focus,
+
+.received-qty-input:focus {
+
+  outline: none;
+
+  border-color: var(--accent);
+
+}
+
+.new-family-form {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+
+  margin-top: 8px;
+
+}
+
+.new-family-form input {
+
+  background: var(--surface);
+
+  border: 1px solid var(--border2);
+
+  color: var(--text);
+
+  padding: 10px 12px;
+
+  border-radius: var(--radius);
+
+}
+
+.cart-item-price {
+
+  font-family: 'DM Mono', monospace;
+
+  font-size: 13px;
+
+  color: var(--accent);
+
+  text-align: right;
+
+}
+
+.cart-total-row {
+
+  padding: 12px 18px;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+}
+
+.cart-total-label {
+
+  font-size: 12px;
+
+  color: var(--text2);
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.06em;
+
+}
+
+.cart-total-val {
+
+  font-family: 'DM Mono', monospace;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  color: var(--accent);
+
+}
