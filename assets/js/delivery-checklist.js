@@ -4,6 +4,41 @@ const setCurrentDeliveryId = (id) => appServices().setCurrentDeliveryId?.(id);
 const toast = (message) => appServices().toast?.(message);
 const closeModal = (id) => appServices().closeModal?.(id);
 
+function getDepartmentCode(department) {
+
+  const value = String(department || '')
+    .trim();
+
+  const map = {
+    mechanical: 'MEC',
+    electrical: 'EMB',
+    embedded: 'EMB',
+    'embedded systems': 'EMB',
+    software: 'SOF',
+    operations: 'OPE'
+  };
+
+  return map[value.toLowerCase()]
+    || value.slice(0, 3).toUpperCase();
+
+}
+
+function getLoggedInUserDepartment() {
+
+  try {
+
+    return JSON.parse(
+      localStorage.getItem('user') || '{}'
+    ).department;
+
+  } catch (err) {
+
+    return '';
+
+  }
+
+}
+
 let lastCreatedFamily = {
 
   group: '',
@@ -531,30 +566,70 @@ async function handleInventoryFamilyChange(
   newFamilyForm.style.display =
     'none';
 
+  if (!select.value) {
+
+    canonicalSelect.innerHTML = `
+      <option value="">
+        Select Canonical Name
+      </option>
+    `;
+
+    canonicalInput.style.display =
+      'none';
+
+    return;
+
+  }
+
   const token =
     localStorage.getItem(
       'token'
     );
 
-  const res = await fetch(
+  let aliases = [];
 
-    `http://127.0.0.1:3000/api/item-aliases/${select.value}`,
+  try {
 
-    {
+    const res = await fetch(
 
-      headers: {
+      `http://127.0.0.1:3000/api/item-aliases/${select.value}`,
 
-        Authorization:
-          `Bearer ${token}`
+      {
+
+        headers: {
+
+          Authorization:
+            `Bearer ${token}`
+
+        }
 
       }
 
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+
+      throw new Error(
+        data.error || 'Failed loading canonical names'
+      );
+
     }
 
-  );
+    aliases = Array.isArray(data)
+      ? data
+      : [];
 
-  const aliases =
-    await res.json();
+  } catch (err) {
+
+    console.error(err);
+
+    toast(
+      err.message || 'Failed loading canonical names'
+    );
+
+  }
 
   canonicalSelect.innerHTML = `
 
@@ -575,7 +650,6 @@ async function handleInventoryFamilyChange(
     <option value="new">
 
       + New Canonical
-
     </option>
 
   `;
@@ -617,9 +691,10 @@ async function createInventoryFamily(
 ) {
 
   const department =
-    row.dataset.department
-      .slice(0,3)
-      .toUpperCase();
+    getDepartmentCode(
+      getLoggedInUserDepartment()
+        || row.dataset.department
+    );
 
   const category =
     row.querySelector(
