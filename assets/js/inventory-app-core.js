@@ -409,13 +409,15 @@ function renderOutwardInventory(
     document.getElementById(
       'outward-body'
     );
+    console.log("items",items);
 
   body.innerHTML = items.map(item => `
 
 
+
     <tr
 
-  data-item-id="${item.item_id}"
+  data-item-id="${item.id}"
 
   data-item-code="${item.item_code}"
 
@@ -1673,7 +1675,6 @@ async function submitOutwardEntries() {
       }
 
 
-
       const outward_type =
 
         row.querySelector(
@@ -1692,7 +1693,7 @@ async function submitOutwardEntries() {
           '.outward-qty'
         ).value;
 
-
+console.log("rowdata withid or without id",rows)
 
       // WIP VALIDATION
 
@@ -1716,36 +1717,36 @@ async function submitOutwardEntries() {
 
       outwardItems.push({
 
-        item_id:
-          row.dataset.itemId,
+  item_id:
+    row.dataset.itemId,
 
-            item_code:
+  item_code:
     row.dataset.itemCode,
 
-        canonical_name:
-          row.dataset.canonical,
+  canonical_name:
+    row.dataset.canonical,
 
-        unit:
-          row.dataset.unit,
+  unit:
+    row.dataset.unit,
 
-        rate_per_unit:
-          row.dataset.rate,
+  rate_per_unit:
+    row.dataset.rate,
 
-        outward_type,
+  outward_type,
 
-        qty_used,
+  qty_used,
 
-        project_id:
-          project_id || null,
+  project_id:
+    project_id || null,
 
-        notes: '',
+  notes: '',
 
-        work_order_ref: ''
+  work_order_ref: ''
 
-      });
+});
 
     }
-
+ console.log("itemid",outwardItems);
 
 
     if (!outwardItems.length) {

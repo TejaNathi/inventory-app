@@ -19,6 +19,7 @@ export async function createOutwardEntry(
       INSERT INTO outward_register (
 
         item_id,
+        item_code,
         member_id,
         unit,
         outward_type,
@@ -28,8 +29,7 @@ export async function createOutwardEntry(
         notes,
         project_id,
         canonical_name,
-        rate_per_unit,
-        item_code
+        rate_per_unit
 
       )
 
@@ -41,8 +41,8 @@ export async function createOutwardEntry(
         $4,
         $5,
         $6,
-        NOW(),
         $7,
+        NOW(),
         $8,
         $9,
         $10,
@@ -57,6 +57,8 @@ export async function createOutwardEntry(
       [
 
         outward.item_id,
+
+        outward.item_code,
 
         outward.member_id,
 
@@ -74,9 +76,7 @@ export async function createOutwardEntry(
 
         outward.canonical_name,
 
-        outward.rate_per_unit,
-
-        outward.item_code
+        outward.rate_per_unit
 
       ]
 
@@ -85,7 +85,6 @@ export async function createOutwardEntry(
   return result.rows[0];
 
 }
-
 
 
 // ======================
