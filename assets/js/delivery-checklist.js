@@ -39,8 +39,6 @@ function getLoggedInUserDepartment() {
 
 }
 
-const createdFamilyCache = new Map();
-
 let lastCreatedFamily = {
 
   group: '',
