@@ -20,9 +20,9 @@ function normalizeDepartmentCode(department) {
 
   const map = {
     mechanical: 'MEC',
-    electrical: 'EMB',
+    electrical: 'ELE',
     embedded: 'EMB',
-    'embedded systems': 'EMB',
+    'embedded_systems': 'ELE',
     software: 'SOF',
     operations: 'OPE'
   };

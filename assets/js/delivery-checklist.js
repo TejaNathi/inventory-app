@@ -705,12 +705,26 @@ async function createInventoryFamily(
     row.querySelector(
       '.group-code-input'
     ).value
+      .trim()
       .toUpperCase();
 
   const canonical_name =
     row.querySelector(
       '.new-canonical-input'
-    ).value;
+    ).value.trim();
+
+  const cacheKey = [
+    department,
+    category,
+    group,
+    canonical_name.toLowerCase()
+  ].join('|');
+
+  if (createdFamilyCache.has(cacheKey)) {
+
+    return createdFamilyCache.get(cacheKey);
+
+  }
 
   const res = await fetch(
     'http://127.0.0.1:3000/api/inventory-items',
@@ -737,6 +751,21 @@ async function createInventoryFamily(
     }
   );
 
+  const newFamily = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+
+    throw new Error(
+      newFamily.error || 'Failed creating inventory family'
+    );
+
+  }
+
+  createdFamilyCache.set(
+    cacheKey,
+    newFamily
+  );
+
   // SAVE LAST VALUES
 
   lastCreatedFamily = {
@@ -755,7 +784,7 @@ async function createInventoryFamily(
 
   };
 
-  return await res.json();
+  return newFamily;
 
 }
 async function createCanonicalAlias(
