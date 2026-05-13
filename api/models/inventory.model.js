@@ -6,9 +6,47 @@ from '../db.js';
 // CREATE INVENTORY ITEM
 // ---------------------
 
+export async function findInventoryItemByFamily(
+  item
+) {
+
+  const result =
+    await query(
+      `
+      SELECT *
+      FROM inventory_items
+      WHERE LOWER(TRIM(department_code)) = LOWER(TRIM($1))
+        AND LOWER(TRIM(category_code)) = LOWER(TRIM($2))
+        AND LOWER(TRIM(group_code)) = LOWER(TRIM($3))
+        AND LOWER(TRIM(canonical_name)) = LOWER(TRIM($4))
+      LIMIT 1
+      `,
+      [
+        item.department_code,
+        item.category_code,
+        item.group_code,
+        item.canonical_name
+      ]
+    );
+
+  return result.rows[0];
+
+}
+
 export async function createInventoryItem(
   item
 ) {
+
+  const existingItem =
+    await findInventoryItemByFamily(
+      item
+    );
+
+  if (existingItem) {
+
+    return existingItem;
+
+  }
 
   // AUTO SERIAL
 
@@ -131,6 +169,29 @@ console.log(
 export async function createAlias(
   alias
 ) {
+
+  const existingAlias =
+    await query(
+      `
+      SELECT *
+      FROM item_aliases
+      WHERE item_id = $1
+        AND LOWER(TRIM(canonical_name)) = LOWER(TRIM($2))
+        AND LOWER(TRIM(vendor_name)) = LOWER(TRIM($3))
+      LIMIT 1
+      `,
+      [
+        alias.item_id,
+        alias.canonical_name,
+        alias.vendor_name
+      ]
+    );
+
+  if (existingAlias.rows[0]) {
+
+    return existingAlias.rows[0];
+
+  }
 
   const result =
     await query(
