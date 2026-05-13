@@ -4,6 +4,53 @@ const setCurrentDeliveryId = (id) => appServices().setCurrentDeliveryId?.(id);
 const toast = (message) => appServices().toast?.(message);
 const closeModal = (id) => appServices().closeModal?.(id);
 
+function getDepartmentCode(department) {
+
+  const value = String(department || '')
+    .trim();
+
+  const map = {
+    mechanical: 'MEC',
+    electrical: 'EMB',
+    embedded: 'EMB',
+    'embedded systems': 'EMB',
+    software: 'SOF',
+    operations: 'OPE'
+  };
+
+  return map[value.toLowerCase()]
+    || value.slice(0, 3).toUpperCase();
+
+}
+
+function getLoggedInUserDepartment() {
+
+  try {
+
+    return JSON.parse(
+      localStorage.getItem('user') || '{}'
+    ).department;
+
+  } catch (err) {
+
+    return '';
+
+  }
+
+}
+
+function getCreatedFamilyCache() {
+
+  if (!window.inventoryCreatedFamilyCache) {
+
+    window.inventoryCreatedFamilyCache = new Map();
+
+  }
+
+  return window.inventoryCreatedFamilyCache;
+
+}
+
 let lastCreatedFamily = {
 
   group: '',
@@ -66,7 +113,17 @@ async function fetchChecklistItems(
 
   );
 
-  return await res.json();
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+
+    throw new Error(
+      data.error || 'Failed loading checklist items'
+    );
+
+  }
+
+  return Array.isArray(data) ? data : [];
 
 }
 
@@ -76,7 +133,7 @@ async function fetchInventoryFamilies(
 
   const res = await fetch(
 
-    'http://127.0.0.1:3000/api/inventory-view ',
+    'http://127.0.0.1:3000/api/inventory-view',
 
     {
 
@@ -91,7 +148,17 @@ async function fetchInventoryFamilies(
 
   );
 
-  return await res.json();
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+
+    throw new Error(
+      data.error || 'Failed loading inventory families'
+    );
+
+  }
+
+  return Array.isArray(data) ? data : [];
 
 }
 
@@ -102,6 +169,8 @@ async function openDeliveryChecklist(
 ) {
 
   try {
+
+    getCreatedFamilyCache().clear();
 
     setCurrentDeliveryId(
       cartId
@@ -150,7 +219,7 @@ async function openDeliveryChecklist(
     console.error(err);
 
     toast(
-      'Failed loading checklist'
+      err.message || 'Failed loading checklist'
     );
 
   }
@@ -181,19 +250,27 @@ function renderDeliveryChecklist(
 
     'Verify delivered items';
 
+  const checklistItems = Array.isArray(items)
+    ? items
+    : [];
+
+  const familyOptions = Array.isArray(inventoryFamilies)
+    ? inventoryFamilies
+    : [];
+
   document.getElementById(
 
     'delivery-checklist-items'
 
   ).innerHTML =
 
-    items.map(item =>
+    checklistItems.map(item =>
 
       renderChecklistRow(
 
         item,
 
-        inventoryFamilies
+        familyOptions
 
       )
 
@@ -503,30 +580,70 @@ async function handleInventoryFamilyChange(
   newFamilyForm.style.display =
     'none';
 
+  if (!select.value) {
+
+    canonicalSelect.innerHTML = `
+      <option value="">
+        Select Canonical Name
+      </option>
+    `;
+
+    canonicalInput.style.display =
+      'none';
+
+    return;
+
+  }
+
   const token =
     localStorage.getItem(
       'token'
     );
 
-  const res = await fetch(
+  let aliases = [];
 
-    `http://127.0.0.1:3000/api/item-aliases/${select.value}`,
+  try {
 
-    {
+    const res = await fetch(
 
-      headers: {
+      `http://127.0.0.1:3000/api/item-aliases/${select.value}`,
 
-        Authorization:
-          `Bearer ${token}`
+      {
+
+        headers: {
+
+          Authorization:
+            `Bearer ${token}`
+
+        }
 
       }
 
+    );
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+
+      throw new Error(
+        data.error || 'Failed loading canonical names'
+      );
+
     }
 
-  );
+    aliases = Array.isArray(data)
+      ? data
+      : [];
 
-  const aliases =
-    await res.json();
+  } catch (err) {
+
+    console.error(err);
+
+    toast(
+      err.message || 'Failed loading canonical names'
+    );
+
+  }
 
   canonicalSelect.innerHTML = `
 
@@ -547,7 +664,6 @@ async function handleInventoryFamilyChange(
     <option value="new">
 
       + New Canonical
-
     </option>
 
   `;
@@ -589,9 +705,10 @@ async function createInventoryFamily(
 ) {
 
   const department =
-    row.dataset.department
-      .slice(0,3)
-      .toUpperCase();
+    getDepartmentCode(
+      getLoggedInUserDepartment()
+        || row.dataset.department
+    );
 
   const category =
     row.querySelector(
@@ -602,12 +719,28 @@ async function createInventoryFamily(
     row.querySelector(
       '.group-code-input'
     ).value
+      .trim()
       .toUpperCase();
 
   const canonical_name =
     row.querySelector(
       '.new-canonical-input'
-    ).value;
+    ).value.trim();
+
+  const cacheKey = [
+    department,
+    category,
+    group,
+    canonical_name.toLowerCase()
+  ].join('|');
+
+  const familyCache = getCreatedFamilyCache();
+
+  if (familyCache.has(cacheKey)) {
+
+    return familyCache.get(cacheKey);
+
+  }
 
   const res = await fetch(
     'http://127.0.0.1:3000/api/inventory-items',
@@ -634,6 +767,21 @@ async function createInventoryFamily(
     }
   );
 
+  const newFamily = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+
+    throw new Error(
+      newFamily.error || 'Failed creating inventory family'
+    );
+
+  }
+
+  familyCache.set(
+    cacheKey,
+    newFamily
+  );
+
   // SAVE LAST VALUES
 
   lastCreatedFamily = {
@@ -652,7 +800,7 @@ async function createInventoryFamily(
 
   };
 
-  return await res.json();
+  return newFamily;
 
 }
 async function createCanonicalAlias(

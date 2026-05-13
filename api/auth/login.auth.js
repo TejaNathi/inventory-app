@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { query } from '../db.js';
 
-const JWT_SECRET = 'test_secret';
+const JWT_SECRET = process.env.JWT_SECRET || 'test_secret';
 
 export async function logIn(req, res) {
 
