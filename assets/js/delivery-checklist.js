@@ -158,6 +158,8 @@ async function openDeliveryChecklist(
 
   try {
 
+    getCreatedFamilyCache().clear();
+
     setCurrentDeliveryId(
       cartId
     );
