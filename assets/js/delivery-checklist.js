@@ -39,18 +39,6 @@ function getLoggedInUserDepartment() {
 
 }
 
-function getCreatedFamilyCache() {
-
-  if (!window.inventoryCreatedFamilyCache) {
-
-    window.inventoryCreatedFamilyCache = new Map();
-
-  }
-
-  return window.inventoryCreatedFamilyCache;
-
-}
-
 let lastCreatedFamily = {
 
   group: '',
@@ -734,11 +722,9 @@ async function createInventoryFamily(
     canonical_name.toLowerCase()
   ].join('|');
 
-  const familyCache = getCreatedFamilyCache();
+  if (createdFamilyCache.has(cacheKey)) {
 
-  if (familyCache.has(cacheKey)) {
-
-    return familyCache.get(cacheKey);
+    return createdFamilyCache.get(cacheKey);
 
   }
 
@@ -777,7 +763,7 @@ async function createInventoryFamily(
 
   }
 
-  familyCache.set(
+  createdFamilyCache.set(
     cacheKey,
     newFamily
   );

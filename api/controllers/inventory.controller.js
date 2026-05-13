@@ -20,9 +20,9 @@ function normalizeDepartmentCode(department) {
 
   const map = {
     mechanical: 'MEC',
-    electrical: 'EMB',
+    electrical: 'ELE',
     embedded: 'EMB',
-    'embedded systems': 'EMB',
+    'embedded_systems': 'ELE',
     software: 'SOF',
     operations: 'OPE'
   };
@@ -48,21 +48,10 @@ export async function createInventoryItemController(
 
       await createInventoryItem({
         ...req.body,
-        canonical_name:
-          String(req.body.canonical_name || '')
-            .trim(),
         department_code:
           normalizeDepartmentCode(
             req.body.department_code
-          ),
-        category_code:
-          String(req.body.category_code || '')
-            .trim()
-            .toUpperCase(),
-        group_code:
-          String(req.body.group_code || '')
-            .trim()
-            .toUpperCase()
+          )
       });
 
     res.json(result);
