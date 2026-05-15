@@ -512,52 +512,6 @@ function renderOutwardInventory(
 
 }
 
-async function loadOutwardPage() {
-
-  try {
-
-    const token =
-      localStorage.getItem(
-        'token'
-      );
-
-    const projectRes =
-      await fetch(
-
-        'http://127.0.0.1:3000/api/projects',
-
-        {
-
-          headers: {
-
-            Authorization:
-              `Bearer ${token}`
-
-          }
-
-        }
-
-      );
-
-    const projects =
-      await projectRes.json();
-
-    renderOutwardInventory(
-
-      inventoryRows,
-      projects
-
-    );
-
-  }
-
-  catch (err) {
-
-    console.error(err);
-
-  }
-
-}
 
 function renderCharts() {
   const cats = ['Raw mat.','Hardware','Tools','Accessories','Storage'];
@@ -1675,74 +1629,6 @@ function renderInwardDeliveries(carts = []) {
 
 }
 
-function renderInwardDeliveries(carts = []) {
-
-  const body = document.getElementById(
-    'inward-delivered-body'
-  );
-
-  if (!carts.length) {
-
-    body.innerHTML = `
-      <tr>
-        <td colspan="6">
-          <div class="empty">
-            <p>
-              No entries awaiting delivery
-            </p>
-          </div>
-        </td>
-      </tr>
-    `;
-
-    return;
-  }
-
-  body.innerHTML = carts.map(c => `
-
-    <tr>
-
-      <td class="mono">
-        ${c.cart_id}
-      </td>
-
-      <td>
-        <span class="badge badge-approved">
-          ${c.source}
-        </span>
-      </td>
-
-      <td>
-        ₹${Number(c.total)
-          .toLocaleString('en-IN')}
-      </td>
-
-      <td class="mono">
-        ${c.payment_date || '-'}
-      </td>
-
-      <td>
-        <span class="badge badge-paid">
-          Awaiting delivery
-        </span>
-      </td>
-
-      <td>
-
-        <button
-          class="btn btn-deliver btn-sm"
-          onclick="openDeliveryChecklist('${c.cart_id}')"
-        >
-          Confirm delivery
-        </button>
-
-      </td>
-
-    </tr>
-
-  `).join('');
-
-}
 
 async function submitOutwardEntries() {
 
