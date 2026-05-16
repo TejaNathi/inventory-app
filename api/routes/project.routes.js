@@ -1,26 +1,19 @@
-import express
-from 'express';
+import express from "express";
 
 import {
-
   createProjectController,
-  getProjectsController
+  getProjectsController,
+  getWIPProjectsController,
+} from "../controllers/project.controller.js";
 
-}
+const projects = express.Router();
 
-from '../controllers/project.controller.js';
+projects.post("/", createProjectController);
 
-const projects =
-  express.Router();
-
-projects.post(
-  '/',
-  createProjectController
-);
-
+projects.get("/", getProjectsController);
 projects.get(
-  '/',
-  getProjectsController
-);
+  "/wip",
 
+  getWIPProjectsController,
+);
 export default projects;

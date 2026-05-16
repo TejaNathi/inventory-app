@@ -3,289 +3,151 @@ const getCurrentDeliveryId = () => appServices().getCurrentDeliveryId?.();
 const setCurrentDeliveryId = (id) => appServices().setCurrentDeliveryId?.(id);
 const toast = (message) => appServices().toast?.(message);
 const closeModal = (id) => appServices().closeModal?.(id);
-
+const API_URL = "http://192.168.0.206:3000";
 function getDepartmentCode(department) {
-
-  const value = String(department || '')
-    .trim();
+  const value = String(department || "").trim();
 
   const map = {
-    mechanical: 'MEC',
-    electrical: 'EMB',
-    embedded: 'EMB',
-    'embedded systems': 'EMB',
-    software: 'SOF',
-    operations: 'OPE'
+    mechanical: "MEC",
+    electrical: "EMB",
+    embedded: "EMB",
+    "embedded systems": "EMB",
+    software: "SOF",
+    operations: "OPE",
   };
 
-  return map[value.toLowerCase()]
-    || value.slice(0, 3).toUpperCase();
-
+  return map[value.toLowerCase()] || value.slice(0, 3).toUpperCase();
 }
 
 function getLoggedInUserDepartment() {
-
   try {
-
-    return JSON.parse(
-      localStorage.getItem('user') || '{}'
-    ).department;
-
+    return JSON.parse(localStorage.getItem("user") || "{}").department;
   } catch (err) {
-
-    return '';
-
+    return "";
   }
-
-}
-
-function getCreatedFamilyCache() {
-
-  if (!window.inventoryCreatedFamilyCache) {
-
-    window.inventoryCreatedFamilyCache = new Map();
-
-  }
-
-  return window.inventoryCreatedFamilyCache;
-
 }
 
 let lastCreatedFamily = {
+  group: "",
 
-  group: '',
+  canonical: "",
 
-  canonical: '',
+  category: "",
 
-  category: '',
-
-  unit: ''
-
+  unit: "",
 };
 function syncLastFamily(row) {
-
   lastCreatedFamily = {
+    group: row.querySelector(".group-code-input").value,
 
-    group:
-      row.querySelector(
-        '.group-code-input'
-      ).value,
+    canonical: row.querySelector(".new-canonical-input").value,
 
-    canonical:
-      row.querySelector(
-        '.new-canonical-input'
-      ).value,
+    category: row.querySelector(".category-select").value,
 
-    category:
-      row.querySelector(
-        '.category-select'
-      ).value,
-
-    unit:
-      row.querySelector(
-        '.unit-select'
-      ).value
-
+    unit: row.querySelector(".unit-select").value,
   };
-
 }
 
-
-async function fetchChecklistItems(
-  cartId,
-  token
-) {
-
+async function fetchChecklistItems(cartId, token) {
   const res = await fetch(
-
-    `http://127.0.0.1:3000/api/cart/${cartId}/delivery-checklist`,
+    `${API_URL}/api/cart/${cartId}/delivery-checklist`,
 
     {
-
       headers: {
-
-        Authorization:
-          `Bearer ${token}`
-
-      }
-
-    }
-
+        Authorization: `Bearer ${token}`,
+      },
+    },
   );
 
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-
-    throw new Error(
-      data.error || 'Failed loading checklist items'
-    );
-
+    throw new Error(data.error || "Failed loading checklist items");
   }
 
   return Array.isArray(data) ? data : [];
-
 }
 
-async function fetchInventoryFamilies(
-  token
-) {
-
+async function fetchInventoryFamilies(token) {
   const res = await fetch(
-
-    'http://127.0.0.1:3000/api/inventory-view',
+    `${API_URL}/api/inventory-view`,
 
     {
-
       headers: {
-
-        Authorization:
-          `Bearer ${token}`
-
-      }
-
-    }
-
+        Authorization: `Bearer ${token}`,
+      },
+    },
   );
 
   const data = await res.json().catch(() => ({}));
+  console.log("familsdata", data);
 
   if (!res.ok) {
-
-    throw new Error(
-      data.error || 'Failed loading inventory families'
-    );
-
+    throw new Error(data.error || "Failed loading inventory families");
   }
 
   return Array.isArray(data) ? data : [];
-
 }
 
-
-
-async function openDeliveryChecklist(
-  cartId
-) {
-
+async function openDeliveryChecklist(cartId) {
   try {
+    setCurrentDeliveryId(cartId);
 
-    getCreatedFamilyCache().clear();
+    const token = localStorage.getItem("token");
 
-    setCurrentDeliveryId(
-      cartId
-    );
+    const [items, inventoryFamilies] = await Promise.all([
+      fetchChecklistItems(cartId, token),
 
-    const token =
-      localStorage.getItem(
-        'token'
-      );
-
-    const [
-
-      items,
-
-      inventoryFamilies
-
-    ] = await Promise.all([
-
-      fetchChecklistItems(
-        cartId,
-        token
-      ),
-
-      fetchInventoryFamilies(
-        token
-      )
-
+      fetchInventoryFamilies(token),
     ]);
 
     renderDeliveryChecklist(
-
       items,
 
-      inventoryFamilies
-
+      inventoryFamilies,
     );
 
-    document.getElementById(
-      'delivery-checklist-modal'
-    ).classList.add('show');
-
-  }
-
-  catch (err) {
-
+    document.getElementById("delivery-checklist-modal").classList.add("show");
+  } catch (err) {
     console.error(err);
 
-    toast(
-      err.message || 'Failed loading checklist'
-    );
-
+    toast(err.message || "Failed loading checklist");
   }
-
 }
 
 function renderDeliveryChecklist(
-
   items,
 
-  inventoryFamilies
-
+  inventoryFamilies,
 ) {
+  document.getElementById("delivery-checklist-title").textContent =
+    "Confirm Delivery";
 
-  document.getElementById(
+  document.getElementById("delivery-checklist-meta").textContent =
+    "Verify delivered items";
 
-    'delivery-checklist-title'
-
-  ).textContent =
-
-    'Confirm Delivery';
-
-  document.getElementById(
-
-    'delivery-checklist-meta'
-
-  ).textContent =
-
-    'Verify delivered items';
-
-  const checklistItems = Array.isArray(items)
-    ? items
-    : [];
+  const checklistItems = Array.isArray(items) ? items : [];
 
   const familyOptions = Array.isArray(inventoryFamilies)
     ? inventoryFamilies
     : [];
 
-  document.getElementById(
-
-    'delivery-checklist-items'
-
-  ).innerHTML =
-
-    checklistItems.map(item =>
-
+  document.getElementById("delivery-checklist-items").innerHTML = checklistItems
+    .map((item) =>
       renderChecklistRow(
-
         item,
 
-        familyOptions
-
-      )
-
-    ).join('');
-
+        familyOptions,
+      ),
+    )
+    .join("");
 }
 
 function renderChecklistRow(
-
   item,
 
-  inventoryFamilies
-
+  inventoryFamilies,
 ) {
-
   return `
 
 <div
@@ -363,7 +225,9 @@ function renderChecklistRow(
 
     </option>
 
-    ${inventoryFamilies.map(f => `
+    ${inventoryFamilies
+      .map(
+        (f) => `
 
       <option value="${f.item_id}">
 
@@ -371,7 +235,9 @@ function renderChecklistRow(
 
       </option>
 
-    `).join('')}
+    `,
+      )
+      .join("")}
 
     <option value="new">
 
@@ -498,43 +364,22 @@ function renderChecklistRow(
 </div>
 
 `;
-
 }
-async function handleInventoryFamilyChange(
-  select
-) {
+async function handleInventoryFamilyChange(select) {
+  const row = select.closest(".delivery-grid");
 
-  const row =
-    select.closest(
-      '.delivery-grid'
-    );
+  const canonicalSelect = row.querySelector(".canonical-select");
 
-  const canonicalSelect =
-    row.querySelector(
-      '.canonical-select'
-    );
+  const canonicalInput = row.querySelector(".new-canonical-text");
 
-  const canonicalInput =
-
-    row.querySelector(
-      '.new-canonical-text'
-    );
-
-  const newFamilyForm =
-    row.querySelector(
-      '.new-family-form'
-    );
+  const newFamilyForm = row.querySelector(".new-family-form");
 
   // -------------------
   // NEW FAMILY
   // -------------------
 
-  if (
-    select.value === 'new'
-  ) {
-
-    newFamilyForm.style.display =
-      'block';
+  if (select.value === "new") {
+    newFamilyForm.style.display = "block";
 
     canonicalSelect.innerHTML = `
 
@@ -544,105 +389,66 @@ async function handleInventoryFamilyChange(
 
     `;
 
-    canonicalInput.style.display =
-      'none';
+    canonicalInput.style.display = "none";
 
     // AUTO PREFILL
 
-    row.querySelector(
-      '.group-code-input'
-    ).value =
-      lastCreatedFamily.group;
+    row.querySelector(".group-code-input").value = lastCreatedFamily.group;
 
-    row.querySelector(
-      '.new-canonical-input'
-    ).value =
+    row.querySelector(".new-canonical-input").value =
       lastCreatedFamily.canonical;
 
-    row.querySelector(
-      '.category-select'
-    ).value =
-      lastCreatedFamily.category;
+    row.querySelector(".category-select").value = lastCreatedFamily.category;
 
-    row.querySelector(
-      '.unit-select'
-    ).value =
-      lastCreatedFamily.unit;
+    row.querySelector(".unit-select").value = lastCreatedFamily.unit;
 
     return;
-
   }
 
   // -------------------
   // EXISTING FAMILY
   // -------------------
 
-  newFamilyForm.style.display =
-    'none';
+  newFamilyForm.style.display = "none";
 
   if (!select.value) {
-
     canonicalSelect.innerHTML = `
       <option value="">
         Select Canonical Name
       </option>
     `;
 
-    canonicalInput.style.display =
-      'none';
+    canonicalInput.style.display = "none";
 
     return;
-
   }
 
-  const token =
-    localStorage.getItem(
-      'token'
-    );
+  const token = localStorage.getItem("token");
 
   let aliases = [];
 
   try {
-
     const res = await fetch(
-
-      `http://127.0.0.1:3000/api/item-aliases/${select.value}`,
+      `${API_URL}/api/item-aliases/${select.value}`,
 
       {
-
         headers: {
-
-          Authorization:
-            `Bearer ${token}`
-
-        }
-
-      }
-
+          Authorization: `Bearer ${token}`,
+        },
+      },
     );
 
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-
-      throw new Error(
-        data.error || 'Failed loading canonical names'
-      );
-
+      throw new Error(data.error || "Failed loading canonical names");
     }
 
-    aliases = Array.isArray(data)
-      ? data
-      : [];
-
+    aliases = Array.isArray(data) ? data : [];
   } catch (err) {
-
     console.error(err);
 
-    toast(
-      err.message || 'Failed loading canonical names'
-    );
-
+    toast(err.message || "Failed loading canonical names");
   }
 
   canonicalSelect.innerHTML = `
@@ -651,7 +457,9 @@ async function handleInventoryFamilyChange(
       Select Canonical
     </option>
 
-    ${aliases.map(a => `
+    ${aliases
+      .map(
+        (a) => `
 
       <option value="${a.canonical_name}">
 
@@ -659,7 +467,9 @@ async function handleInventoryFamilyChange(
 
       </option>
 
-    `).join('')}
+    `,
+      )
+      .join("")}
 
     <option value="new">
 
@@ -672,553 +482,363 @@ async function handleInventoryFamilyChange(
   // SHOW INPUT IF NEW
   // -------------------
 
-  canonicalSelect.onchange =
-    () => {
-
-      if (
-        canonicalSelect.value
-        === 'new'
-      ) {
-
-        canonicalInput.style.display =
-          'block';
-
-      }
-
-      else {
-
-        canonicalInput.style.display =
-          'none';
-
-      }
-
-    };
-
+  canonicalSelect.onchange = () => {
+    if (canonicalSelect.value === "new") {
+      canonicalInput.style.display = "block";
+    } else {
+      canonicalInput.style.display = "none";
+    }
+  };
 }
 
 async function createInventoryFamily(
-
   row,
 
-  token
-
+  token,
 ) {
-
-  const department =
-    getDepartmentCode(
-      getLoggedInUserDepartment()
-        || row.dataset.department
-    );
-
-  const category =
-    row.querySelector(
-      '.category-select'
-    ).value;
-
-  const group =
-    row.querySelector(
-      '.group-code-input'
-    ).value
-      .trim()
-      .toUpperCase();
-
-  const canonical_name =
-    row.querySelector(
-      '.new-canonical-input'
-    ).value.trim();
-
-  const cacheKey = [
-    department,
-    category,
-    group,
-    canonical_name.toLowerCase()
-  ].join('|');
-
-  const familyCache = getCreatedFamilyCache();
-
-  if (familyCache.has(cacheKey)) {
-
-    return familyCache.get(cacheKey);
-
-  }
-
-  const res = await fetch(
-    'http://127.0.0.1:3000/api/inventory-items',
-    {
-      method: 'POST',
-
-      headers: {
-        'Content-Type':
-          'application/json',
-
-        Authorization:
-          `Bearer ${token}`
-      },
-
-      body: JSON.stringify({
-        canonical_name,
-        department_code:
-          department,
-        category_code:
-          category,
-        group_code:
-          group
-      })
-    }
+  const department = getDepartmentCode(
+    getLoggedInUserDepartment() || row.dataset.department,
   );
 
-  const newFamily = await res.json().catch(() => ({}));
+  const category = row.querySelector(".category-select").value;
 
-  if (!res.ok) {
+  const group = row.querySelector(".group-code-input").value.toUpperCase();
 
-    throw new Error(
-      newFamily.error || 'Failed creating inventory family'
-    );
+  const canonical_name = row.querySelector(".new-canonical-input").value;
 
-  }
+  const res = await fetch(`${API_BASE_URL}/api/inventory-items`, {
+    method: "POST",
 
-  familyCache.set(
-    cacheKey,
-    newFamily
-  );
+    headers: {
+      "Content-Type": "application/json",
+
+      Authorization: `Bearer ${token}`,
+    },
+
+    body: JSON.stringify({
+      canonical_name,
+      department_code: department,
+      category_code: category,
+      group_code: group,
+    }),
+  });
 
   // SAVE LAST VALUES
 
   lastCreatedFamily = {
-
     group,
 
-    canonical:
-      canonical_name,
+    canonical: canonical_name,
 
     category,
 
-    unit:
-      row.querySelector(
-        '.unit-select'
-      ).value
-
+    unit: row.querySelector(".unit-select").value,
   };
 
-  return newFamily;
-
+  return await res.json();
 }
 async function createCanonicalAlias(
-
   item_id,
 
   canonical_name,
 
   vendor_name,
 
-  token
-
+  token,
 ) {
-
   const res = await fetch(
-
-    'http://127.0.0.1:3000/api/item-aliases',
+    `${API_URL}/api/item-aliases`,
 
     {
-
-      method: 'POST',
+      method: "POST",
 
       headers: {
+        "Content-Type": "application/json",
 
-        'Content-Type':
-          'application/json',
-
-        Authorization:
-          `Bearer ${token}`
-
+        Authorization: `Bearer ${token}`,
       },
 
       body: JSON.stringify({
-
         item_id,
 
         canonical_name,
 
         vendor_name,
 
-        source: 'delivery'
-
-      })
-
-    }
-
+        source: "delivery",
+      }),
+    },
   );
 
   return await res.json();
-
 }
 
 async function collectChecklistItem(
-
   row,
 
-  token
-
+  token,
 ) {
+  const inventorySelect = row.querySelector(".inventory-family-select");
 
-  const inventorySelect =
-    row.querySelector(
-      '.inventory-family-select'
-    );
+  const canonicalSelect = row.querySelector(".canonical-select");
 
-  const canonicalSelect =
-    row.querySelector(
-      '.canonical-select'
-    );
+  let item_id = inventorySelect.value;
 
-  let item_id =
-    inventorySelect.value;
+  let canonical_name = canonicalSelect.value;
 
-  let canonical_name =
-    canonicalSelect.value;
-
-  const vendor_name =
-    row.dataset.itemName;
-
+  const vendor_name = row.dataset.itemName;
 
   // -------------------
   // NEW FAMILY
   // -------------------
 
-  if (
-    item_id === 'new'
-  ) {
+  if (item_id === "new") {
+    const newFamily = await createInventoryFamily(row, token);
 
-   const newFamily =
+    // UPDATE DROPDOWN UI
 
-  await createInventoryFamily(
-    row,
-    token
-  );
+    const option = document.createElement("option");
 
-// UPDATE DROPDOWN UI
+    option.value = newFamily.item_id;
 
-const option =
-  document.createElement(
-    'option'
-  );
+    option.textContent = newFamily.item_code;
 
-option.value =
-  newFamily.item_id;
+    // insert before "+ Create New Family"
 
-option.textContent =
-  newFamily.item_code;
+    inventorySelect.insertBefore(
+      option,
 
-// insert before "+ Create New Family"
+      inventorySelect.querySelector('option[value="new"]'),
+    );
 
-inventorySelect.insertBefore(
+    // auto select new item
 
-  option,
+    inventorySelect.value = newFamily.item_id;
 
-  inventorySelect.querySelector(
-    'option[value="new"]'
-  )
+    item_id = newFamily.item_id;
 
-);
-
-// auto select new item
-
-inventorySelect.value =
-  newFamily.item_id;
-
-
-
-    item_id =
-      newFamily.item_id;
-
-    canonical_name =
-      row.querySelector(
-        '.new-canonical-input'
-      ).value;
+    canonical_name = row.querySelector(".new-canonical-input").value;
 
     await createCanonicalAlias(
-
       item_id,
 
       canonical_name,
 
       vendor_name,
 
-      token
-
+      token,
     );
-
   }
-
 
   // -------------------
   // NEW CANONICAL
   // -------------------
 
-  if (
-  canonicalSelect.value === 'new'
-) {
+  if (canonicalSelect.value === "new") {
+    canonical_name = row.querySelector(".new-canonical-text").value;
 
-  canonical_name =
+    await createCanonicalAlias(
+      item_id,
 
-    row.querySelector(
-      '.new-canonical-text'
-    ).value;
+      canonical_name,
 
-  await createCanonicalAlias(
+      vendor_name,
 
+      token,
+    );
+  }
+
+  return {
     item_id,
+
+    item_code: inventorySelect.options[inventorySelect.selectedIndex].text,
 
     canonical_name,
 
-    vendor_name,
+    cart_line_id: row.dataset.lineId,
 
-    token
+    item_name: row.dataset.itemName,
 
-  );
+    rate_per_unit: row.dataset.rate,
 
+    supplier: row.dataset.supplier,
+
+    department: row.dataset.department,
+
+    invoice_no: row.dataset.invoice_no,
+
+    qty_received: row.querySelector(".received-qty-input").value,
+
+    category: row.querySelector(".category-select").value,
+
+    unit: row.querySelector(".unit-select").value,
+  };
 }
 
-
-return {
-
-  item_id,
-
-  item_code:
-
-    inventorySelect.options[
-      inventorySelect.selectedIndex
-    ].text,
-
-  canonical_name,
-
-  cart_line_id:
-    row.dataset.lineId,
-
-  item_name:
-    row.dataset.itemName,
-
-  rate_per_unit:
-    row.dataset.rate,
-
-  supplier:
-    row.dataset.supplier,
-
-  department:
-    row.dataset.department,
-
-  invoice_no:
-    row.dataset.invoice_no,
-
-  qty_received:
-
-    row.querySelector(
-      '.received-qty-input'
-    ).value,
-
-  category:
-
-    row.querySelector(
-      '.category-select'
-    ).value,
-
-  unit:
-
-    row.querySelector(
-      '.unit-select'
-    ).value
-
-
-
-
-};
-
-
-
-}
-
-
-
-
-
-
-async function collectChecklistRows(
-  token
-) {
-
-  const rows =
-    document.querySelectorAll(
-      '.delivery-grid'
-    );
+async function collectChecklistRows(token) {
+  const rows = document.querySelectorAll(".delivery-grid");
 
   const inwardItems = [];
 
+  // FAMILY CACHE
+
+  const familyCache = {};
+
   for (const row of rows) {
+    const inventorySelect = row.querySelector(".inventory-family-select");
 
-    const item =
+    // -------------------
+    // NEW FAMILY CACHE KEY
+    // -------------------
 
-      await collectChecklistItem(
-
-        row,
-
-        token
-
+    if (inventorySelect.value === "new") {
+      const department = getDepartmentCode(
+        getLoggedInUserDepartment() || row.dataset.department,
       );
-console.log("item",item);
+
+      const category = row.querySelector(".category-select").value;
+
+      const group = row.querySelector(".group-code-input").value.toUpperCase();
+
+      const familyKey = `
+
+        ${department}
+        -
+        ${category}
+        -
+        ${group}
+
+      `;
+
+      // -------------------
+      // FAMILY ALREADY CREATED
+      // -------------------
+
+      if (familyCache[familyKey]) {
+        inventorySelect.value = familyCache[familyKey].item_id;
+      }
+    }
+
+    const item = await collectChecklistItem(
+      row,
+
+      token,
+    );
+
+    // -------------------
+    // SAVE CREATED FAMILY
+    // -------------------
+
+    if (inventorySelect.value === "new") {
+      const department = getDepartmentCode(
+        getLoggedInUserDepartment() || row.dataset.department,
+      );
+
+      const category = row.querySelector(".category-select").value;
+
+      const group = row.querySelector(".group-code-input").value.toUpperCase();
+
+      const familyKey = `
+
+        ${department}
+        -
+        ${category}
+        -
+        ${group}
+
+      `;
+
+      familyCache[familyKey] = {
+        item_id: item.item_id,
+
+        item_code: item.item_code,
+      };
+    }
+
     inwardItems.push(item);
-
   }
-console.log(
-  document.querySelectorAll(
-    '.delivery-grid'
-  )
-);
+
   return inwardItems;
-
 }
-
 
 async function confirmChecklistDelivery() {
-
   try {
+    const token = localStorage.getItem("token");
 
-    const token =
-      localStorage.getItem(
-        'token'
-      );
+    const inwardItems = await collectChecklistRows(token);
 
-    const inwardItems =
+    console.log("inwardItems", inwardItems);
 
-      await collectChecklistRows(
-        token
-      );
+    const inwardRes = await fetch(
+      `${API_URL}/api/cart/inward`,
 
-    console.log(
-      'inwardItems',
-      inwardItems
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+
+          Authorization: `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          cart_id: getCurrentDeliveryId(),
+
+          inwardItems,
+        }),
+      },
     );
 
-   const inwardRes = await fetch(
+    if (!inwardRes.ok) {
+      const err = await inwardRes.json();
 
-  'http://127.0.0.1:3000/api/cart/inward',
+      console.error("Inward error", err);
 
-  {
-
-    method: 'POST',
-
-    headers: {
-
-      'Content-Type':
-        'application/json',
-
-      Authorization:
-        `Bearer ${token}`
-
-    },
-
-    body: JSON.stringify({
-
-      cart_id:
-        getCurrentDeliveryId(),
-
-      inwardItems
-
-    })
-
-  }
-
-);
-
-if (!inwardRes.ok) {
-
-  const err =
-    await inwardRes.json();
-
-  console.error(
-    'Inward error',
-    err
-  );
-
-  throw new Error(
-    'Failed inward entry'
-  );
-
-}
+      throw new Error("Failed inward entry");
+    }
 
     await appServices().entermasterinventory(
-
       inwardItems,
 
-      token
-
+      token,
     );
 
-    await markCartDelivered(
-      token
-    );
+    await markCartDelivered(token);
 
-    closeModal(
-      'delivery-checklist-modal'
-    );
+    closeModal("delivery-checklist-modal");
 
-    toast(
-      '✓ Delivery confirmed'
-    );
+    toast("✓ Delivery confirmed");
 
     await appServices().loadCartRequests();
 
     await appServices().loadPayments();
 
     await appServices().loadLogEntries();
-
-  }
-
-  catch (err) {
-
+  } catch (err) {
     console.error(err);
 
-    toast(
-      'Failed confirming delivery'
-    );
-
+    toast("Failed confirming delivery");
   }
-
 }
 
-
-async function markCartDelivered(
-  token
-) {
-
+async function markCartDelivered(token) {
   const res = await fetch(
-
-    `http://127.0.0.1:3000/api/cart/${getCurrentDeliveryId()}/deliver`,
+    `${API_URL}/api/cart/${getCurrentDeliveryId()}/deliver`,
 
     {
-
-      method: 'PATCH',
+      method: "PATCH",
 
       headers: {
-
-        Authorization:
-          `Bearer ${token}`
-
-      }
-
-    }
-
+        Authorization: `Bearer ${token}`,
+      },
+    },
   );
 
   if (!res.ok) {
-
-    throw new Error(
-      'Failed delivery update'
-    );
-
+    throw new Error("Failed delivery update");
   }
 
   return await res.json();
-
 }
 
 export {
@@ -1234,5 +854,5 @@ export {
   collectChecklistItem,
   collectChecklistRows,
   confirmChecklistDelivery,
-  markCartDelivered
+  markCartDelivered,
 };

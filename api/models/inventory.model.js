@@ -1,89 +1,84 @@
-import { query }
-from '../db.js';
+import { query } from "../db.js";
 
+// ─────────────────────────────────────────────
+// FIND EXISTING FAMILY
+// ─────────────────────────────────────────────
 
-// ---------------------
-// CREATE INVENTORY ITEM
-// ---------------------
+export async function findInventoryItemByFamily(item) {
+  const result = await query(
+    `
 
-export async function findInventoryItemByFamily(
-  item
-) {
-
-  const result =
-    await query(
-      `
       SELECT *
+
       FROM inventory_items
-      WHERE LOWER(TRIM(department_code)) = LOWER(TRIM($1))
-        AND LOWER(TRIM(category_code)) = LOWER(TRIM($2))
-        AND LOWER(TRIM(group_code)) = LOWER(TRIM($3))
-        AND LOWER(TRIM(canonical_name)) = LOWER(TRIM($4))
+
+      WHERE
+
+        LOWER(TRIM(department_code))
+        =
+        LOWER(TRIM($1))
+
+        AND
+
+        LOWER(TRIM(category_code))
+        =
+        LOWER(TRIM($2))
+
+        AND
+
+        LOWER(TRIM(group_code))
+        =
+        LOWER(TRIM($3))
+
       LIMIT 1
+
       `,
-      [
-        item.department_code,
-        item.category_code,
-        item.group_code,
-        item.canonical_name
-      ]
-    );
+
+    [item.department_code, item.category_code, item.group_code],
+  );
 
   return result.rows[0];
-
 }
 
-export async function createInventoryItem(
-  item
-) {
+// ─────────────────────────────────────────────
+// CREATE INVENTORY FAMILY
+// ─────────────────────────────────────────────
 
-  const existingItem =
-    await findInventoryItemByFamily(
-      item
-    );
+export async function createInventoryItem(item) {
+  // CHECK IF FAMILY EXISTS
+
+  const existingItem = await findInventoryItemByFamily(item);
+
+  // RETURN EXISTING FAMILY
 
   if (existingItem) {
-
     return existingItem;
-
   }
 
   // AUTO SERIAL
 
-  const seqResult =
-    await query(
+  const seqResult = await query(
+    `
 
-      `
       SELECT nextval(
         'inventory_code_seq'
       ) AS serial
-      `
-    );
 
-  const serial =
+      `,
+  );
 
-    String(
-      seqResult.rows[0].serial
-    ).padStart(3, '0');
+  const serial = String(seqResult.rows[0].serial).padStart(3, "0");
 
-  // FINAL CODE
+  // FINAL ITEM CODE
 
-  const item_code =
+  const item_code = `${serial}-${item.department_code}-${item.category_code}-${
+    item.group_code
+  }`;
 
-    `${serial}-${
-      item.department_code
-    }-${
-      item.category_code
-    }-${
-      item.group_code
-    }`;
+  // INSERT NEW FAMILY
 
-  // INSERT
-
-  const result =
-    await query(
-
-      `
+  const result = await query(
+    `
 
       INSERT INTO inventory_items (
 
@@ -109,39 +104,34 @@ export async function createInventoryItem(
 
       `,
 
-      [
+    [
+      item_code,
 
-        item_code,
+      // FIRST ITEM NAME
+      // becomes canonical
 
-        item.canonical_name,
+      item.canonical_name,
 
-        item.department_code,
+      item.department_code,
 
-        item.category_code,
+      item.category_code,
 
-        item.group_code
-
-      ]
-
-    );
+      item.group_code,
+    ],
+  );
 
   return result.rows[0];
-
 }
 
+// ─────────────────────────────────────────────
+// GET INVENTORY ITEMS
+// ─────────────────────────────────────────────
 
+export async function getInventoryItems(department_code) {
+  console.log("FILTER:", department_code);
 
-export async function getInventoryItems(
-  department_code
-) {
-console.log(
-  'FILTER:',
-  department_code
-);
-  const result =
-    await query(
-
-      `
+  const result = await query(
+    `
 
       SELECT *
 
@@ -155,56 +145,65 @@ console.log(
 
       `,
 
-      [department_code]
-
-    );
+    [department_code],
+  );
 
   return result.rows;
-
 }
 
+// ─────────────────────────────────────────────
+// CREATE ALIAS
+// ─────────────────────────────────────────────
 
+export async function createAlias(alias) {
+  // CHECK EXISTING ALIAS
 
+  const existingAlias = await query(
+    `
 
-export async function createAlias(
-  alias
-) {
-
-  const existingAlias =
-    await query(
-      `
       SELECT *
+
       FROM item_aliases
-      WHERE item_id = $1
-        AND LOWER(TRIM(canonical_name)) = LOWER(TRIM($2))
-        AND LOWER(TRIM(vendor_name)) = LOWER(TRIM($3))
+
+      WHERE
+
+        item_id = $1
+
+        AND
+
+        LOWER(TRIM(canonical_name))
+        =
+        LOWER(TRIM($2))
+
+        AND
+
+        LOWER(TRIM(vendor_name))
+        =
+        LOWER(TRIM($3))
+
       LIMIT 1
+
       `,
-      [
-        alias.item_id,
-        alias.canonical_name,
-        alias.vendor_name
-      ]
-    );
+
+    [alias.item_id, alias.canonical_name, alias.vendor_name],
+  );
+
+  // RETURN EXISTING
 
   if (existingAlias.rows[0]) {
-
     return existingAlias.rows[0];
-
   }
 
-  const result =
-    await query(
+  // CREATE NEW ALIAS
 
-      `
+  const result = await query(
+    `
+
       INSERT INTO item_aliases (
 
         item_id,
-
         canonical_name,
-
         vendor_name,
-
         source
 
       )
@@ -219,39 +218,23 @@ export async function createAlias(
       )
 
       RETURNING *
+
       `,
 
-      [
-
-        alias.item_id,
-
-        alias.canonical_name,
-
-        alias.vendor_name,
-
-        alias.source
-
-      ]
-
-    );
+    [alias.item_id, alias.canonical_name, alias.vendor_name, alias.source],
+  );
 
   return result.rows[0];
-
 }
 
-
-// ---------------------
+// ─────────────────────────────────────────────
 // GET ALIASES
-// ---------------------
+// ─────────────────────────────────────────────
 
-export async function getAliasesByItemId(
-  item_id
-) {
+export async function getAliasesByItemId(item_id) {
+  const result = await query(
+    `
 
-  const result =
-    await query(
-
-      `
       SELECT *
 
       FROM item_aliases
@@ -259,13 +242,11 @@ export async function getAliasesByItemId(
       WHERE item_id = $1
 
       ORDER BY canonical_name
+
       `,
 
-      [item_id]
-
-    );
+    [item_id],
+  );
 
   return result.rows;
-
 }
-
