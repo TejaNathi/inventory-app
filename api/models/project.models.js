@@ -1,25 +1,5 @@
 import { pool, query } from "../db.js";
 
-async function getMasterStockColumn(clientOrPool = null) {
-  const runner = clientOrPool || { query };
-  const result = await runner.query(
-    `
-    SELECT column_name
-    FROM information_schema.columns
-    WHERE table_name = 'master_inventory'
-      AND column_name IN ('current_qty', 'current_stock')
-    `,
-  );
-
-  const names = new Set(result.rows.map((r) => r.column_name));
-
-  if (names.has('current_qty')) return 'current_qty';
-  if (names.has('current_stock')) return 'current_stock';
-
-  throw new Error('master_inventory stock column not found');
-}
-
-
 export async function createProject(project) {
   const result = await query(
     `
@@ -82,54 +62,8 @@ export async function getWIPProjects() {
 }
 
 export async function deleteProject(projectId) {
-  const client = await pool.connect();
-
-  try {
-    await client.query("BEGIN");
-
-    const stockColumn = await getMasterStockColumn(client);
-
-    await client.query(
-      `
-      WITH removed AS (
-        DELETE FROM outward_register
-        WHERE project_id = $1
-          AND outward_type = 'wip'
-        RETURNING item_id, qty_used
-      )
-      UPDATE master_inventory mi
-      SET ${stockColumn} = COALESCE(mi.${stockColumn}, 0) + COALESCE(agg.qty_total, 0)
-      FROM (
-        SELECT item_id, SUM(qty_used) AS qty_total
-        FROM removed
-        GROUP BY item_id
-      ) agg
-      WHERE mi.item_id = agg.item_id
-      `,
-      [projectId],
-    );
-
-    await client.query(
-      `
-      UPDATE outward_register
-      SET project_id = NULL
-      WHERE project_id = $1
-        AND outward_type != 'wip'
-      `,
-      [projectId],
-    );
-
-    await client.query("DELETE FROM projects WHERE project_id = $1", [projectId]);
-
-    await client.query("COMMIT");
-
-    return { ok: true };
-  } catch (err) {
-    await client.query("ROLLBACK");
-    throw err;
-  } finally {
-    client.release();
-  }
+  await query("DELETE FROM projects WHERE project_id = $1", [projectId]);
+  return { ok: true };
 }
 
 export async function moveWipItemToProject(outwardId, targetProjectId) {
@@ -148,7 +82,6 @@ export async function moveWipItemToProject(outwardId, targetProjectId) {
 }
 
 export async function returnWipItemToMaster(outwardId) {
-  const stockColumn = await getMasterStockColumn();
   const result = await query(
     `
     WITH moved AS (
@@ -158,7 +91,7 @@ export async function returnWipItemToMaster(outwardId) {
       RETURNING item_id, qty_used
     )
     UPDATE master_inventory mi
-    SET ${stockColumn} = COALESCE(mi.${stockColumn}, 0) + COALESCE(m.qty_used, 0)
+    SET current_qty = COALESCE(mi.current_qty, 0) + COALESCE(m.qty_used, 0)
     FROM moved m
     WHERE mi.item_id = m.item_id
     RETURNING mi.*
