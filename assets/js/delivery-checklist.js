@@ -3,7 +3,7 @@ const getCurrentDeliveryId = () => appServices().getCurrentDeliveryId?.();
 const setCurrentDeliveryId = (id) => appServices().setCurrentDeliveryId?.(id);
 const toast = (message) => appServices().toast?.(message);
 const closeModal = (id) => appServices().closeModal?.(id);
-const API_URL = "http://192.168.0.206:3000";
+import { API_URL } from "../js/config.js";
 function getDepartmentCode(department) {
   const value = String(department || "").trim();
 
@@ -506,7 +506,7 @@ async function createInventoryFamily(
 
   const canonical_name = row.querySelector(".new-canonical-input").value;
 
-  const res = await fetch(`${API_BASE_URL}/api/inventory-items`, {
+  const res = await fetch(`${API_URL}/api/inventory-items`, {
     method: "POST",
 
     headers: {
@@ -681,10 +681,17 @@ async function collectChecklistRows(token) {
   const inwardItems = [];
 
   // FAMILY CACHE
-
   const familyCache = {};
 
   for (const row of rows) {
+    const checked = row.querySelector(".delivery-check")?.checked;
+
+    // IMPORTANT:
+    // if item is unchecked, skip it
+    if (!checked) {
+      continue;
+    }
+
     const inventorySelect = row.querySelector(".inventory-family-select");
 
     // -------------------
@@ -701,13 +708,11 @@ async function collectChecklistRows(token) {
       const group = row.querySelector(".group-code-input").value.toUpperCase();
 
       const familyKey = `
-
         ${department}
         -
         ${category}
         -
         ${group}
-
       `;
 
       // -------------------
@@ -719,11 +724,7 @@ async function collectChecklistRows(token) {
       }
     }
 
-    const item = await collectChecklistItem(
-      row,
-
-      token,
-    );
+    const item = await collectChecklistItem(row, token);
 
     // -------------------
     // SAVE CREATED FAMILY
@@ -739,18 +740,15 @@ async function collectChecklistRows(token) {
       const group = row.querySelector(".group-code-input").value.toUpperCase();
 
       const familyKey = `
-
         ${department}
         -
         ${category}
         -
         ${group}
-
       `;
 
       familyCache[familyKey] = {
         item_id: item.item_id,
-
         item_code: item.item_code,
       };
     }
@@ -767,27 +765,26 @@ async function confirmChecklistDelivery() {
 
     const inwardItems = await collectChecklistRows(token);
 
+    if (!inwardItems.length) {
+      toast("Select at least one delivered item");
+      return;
+    }
+
     console.log("inwardItems", inwardItems);
 
-    const inwardRes = await fetch(
-      `${API_URL}/api/cart/inward`,
+    const inwardRes = await fetch(`${API_URL}/api/cart/inward`, {
+      method: "POST",
 
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-
-          Authorization: `Bearer ${token}`,
-        },
-
-        body: JSON.stringify({
-          cart_id: getCurrentDeliveryId(),
-
-          inwardItems,
-        }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-    );
+
+      body: JSON.stringify({
+        cart_id: getCurrentDeliveryId(),
+        inwardItems,
+      }),
+    });
 
     if (!inwardRes.ok) {
       const err = await inwardRes.json();
@@ -797,11 +794,12 @@ async function confirmChecklistDelivery() {
       throw new Error("Failed inward entry");
     }
 
-    await appServices().entermasterinventory(
+    const updatedItems = await appServices().entermasterinventory(
       inwardItems,
-
       token,
     );
+
+    appServices().patchInventoryRows(updatedItems);
 
     await markCartDelivered(token);
 
@@ -810,9 +808,7 @@ async function confirmChecklistDelivery() {
     toast("✓ Delivery confirmed");
 
     await appServices().loadCartRequests();
-
     await appServices().loadPayments();
-
     await appServices().loadLogEntries();
   } catch (err) {
     console.error(err);
@@ -820,7 +816,6 @@ async function confirmChecklistDelivery() {
     toast("Failed confirming delivery");
   }
 }
-
 async function markCartDelivered(token) {
   const res = await fetch(
     `${API_URL}/api/cart/${getCurrentDeliveryId()}/deliver`,

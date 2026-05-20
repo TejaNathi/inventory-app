@@ -48,6 +48,7 @@ export async function submitCart(req, res) {
         member: cart.member_name,
 
         total: cart.total,
+        cart: cart,
       },
     );
   } catch (err) {
@@ -90,7 +91,11 @@ export async function approveCart(req, res) {
 
     res.json(cart);
 
-    io.to("role:accounts").to("role:member").emit("cart:approved");
+    io.to("role:accounts").to("role:member").emit("cart:approved", {
+      cart_id: cart.cart_id,
+      status: cart.status,
+      cart: cart,
+    });
   } catch (err) {
     console.error(err);
 

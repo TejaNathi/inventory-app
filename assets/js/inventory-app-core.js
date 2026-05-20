@@ -11,8 +11,8 @@ import {
   closeNewProjectModal,
   createNewProject,
 } from "./wip.js";
-
-const API_BASE_URL = "http://192.168.0.206:3000";
+import { API_URL } from "../js/config.js";
+const API_BASE_URL = API_URL;
 
 window.openNewProjectModal = openNewProjectModal;
 
@@ -37,35 +37,131 @@ let inventoryRows = [...inventory];
 let inventoryLoadedFromApi = false;
 const user = JSON.parse(localStorage.getItem("user") || "null");
 
-let socket = null;
-
 console.log("user", user);
 
-if (typeof io === "function" && user) {
+let socket = null;
+let isFirstConnect = true;
+
+function getJoinPayload() {
+  const activeUser = JSON.parse(localStorage.getItem("user") || "null");
+
+  if (!activeUser) {
+    return null;
+  }
+
+  return {
+    role: activeUser.role,
+    department: activeUser.department,
+    user_id: activeUser.id,
+  };
+}
+
+function connectSocket() {
+  if (typeof io !== "function") {
+    console.warn("Socket.io client not loaded");
+    return;
+  }
+
+  if (socket) {
+    return;
+  }
+
   socket = io(API_BASE_URL, {
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionAttempts: Infinity,
   });
 
-  // extract join payload so you reuse it
-  const joinPayload = {
-    role: user.role,
-    department: user.department,
-    user_id: user.id,
-  };
-
-  // first connection
-  socket.on("connect", () => {
+  socket.on("connect", async () => {
     console.log("socket connected:", socket.id);
-    socket.emit("join", joinPayload);
+
+    const joinPayload = getJoinPayload();
+
+    if (joinPayload) {
+      socket.emit("join", joinPayload);
+    }
+
+    if (!isFirstConnect) {
+      toast("Reconnected — syncing latest data");
+
+      try {
+        await Promise.all([
+          loadMasterInventory(),
+          loadProjects(),
+          loadCartRequests(),
+          loadPayments(),
+          loadLogEntries(),
+        ]);
+
+        await loadOutwardPage();
+      } catch (err) {
+        console.error("Reconnect sync failed", err);
+      }
+    }
+
+    isFirstConnect = false;
   });
 
-  // every reconnect after a drop
-  socket.on("reconnect", () => {
-    console.log("socket reconnected — rejoining");
-    socket.emit("join", joinPayload);
+  socket.on("cart:submitted", ({ cart }) => {
+    cartRequests.unshift(cart);
+
+    const pending = cartRequests.filter((c) => c.status === "pending");
+
+    renderPendingCarts(pending);
+
+    toast("New cart submitted");
   });
+
+  socket.on("cart:approved", ({ cart }) => {
+    const idx = cartRequests.findIndex((c) => c.cart_id === cart.cart_id);
+
+    if (idx !== -1) {
+      cartRequests[idx] = cart;
+    } else {
+      cartRequests.unshift(cart);
+    }
+
+    renderCartList(cartRequests);
+    renderPayments(cartRequests);
+    renderApprovedList(cartRequests.filter((c) => c.status === "approved"));
+
+    toast("Cart approved");
+  });
+
+  socket.on("paymentdone", async () => {
+    await initAppData();
+
+    toast("Payment done");
+  });
+
+  socket.on("inventory:updated", (data) => {
+    console.log("inventory:updated received", data);
+
+    if (!inventoryLoadedFromApi) {
+      loadMasterInventory();
+      return;
+    }
+
+    patchInventoryRows(data.updatedItems);
+
+    toast("Inventory updated");
+  });
+
+  socket.on(
+    "outward:created",
+
+    async (data) => {
+      console.log("outward socket received", data);
+
+      if (data.socketId === socket.id) {
+        return;
+      }
+
+      await applyOutwardPatch(data.outwardItems || []);
+
+      toast("Inventory updated");
+    },
+  );
 }
 
 async function apiGet(path) {
@@ -76,22 +172,18 @@ async function apiGet(path) {
 }
 
 function mapInventoryFromApi(row) {
-  console.log("RAW JSON:", row.current_qty);
   return {
     id: row.item_id,
     name: row.canonical_name,
     cat: row.category,
     unit: row.unit,
-    opening: Number(row.opening_stock),
-    current: Number(row.current_qty),
+    opening: Number(row.opening_stock || 0),
+    current: Number(row.current_qty ?? row.current_stock), // fallback
     reorder: Number(row.reorder_level),
     dept: row.department,
     rate: Number(row.rate_per_unit),
     item_code: row.item_code,
-
-    // 🆕 new fields
-    openingValue: Number(row.opening_value),
-    //  currentValue: Number(row.current_value),
+    openingValue: Number(row.opening_value || 0),
   };
 }
 
@@ -136,7 +228,7 @@ function renderInventory(data) {
       const tv = Number((r.current || 0) * (r.rate || 0)).toLocaleString(
         "en-IN",
       );
-      return `<tr>
+      return `<tr data-item-id="${r.id}">
       <td class="mono">${r.item_code}</td>
       <td style="font-weight:500">${r.name}</td>
 
@@ -152,6 +244,67 @@ function renderInventory(data) {
     </tr>`;
     })
     .join("");
+}
+
+// one single place that builds a row's HTML
+// used by renderInventory, updateInventoryRow, appendInventoryRow
+function buildRowHtml(r) {
+  const isLow = r.current <= r.reorder;
+  const tv = Number((r.current || 0) * (r.rate || 0)).toLocaleString("en-IN");
+  return `<tr data-item-id="${r.id}">
+    <td class="mono">${r.item_code}</td>
+    <td style="font-weight:500">${r.name}</td>
+    <td>${r.cat}</td>
+    <td class="mono">${r.unit}</td>
+    <td class="mono">${r.opening}</td>
+    <td class="mono" style="color:${isLow ? "var(--red)" : "var(--green)"};font-weight:600">${r.current}</td>
+    <td class="mono">${r.reorder}</td>
+    <td>${r.dept}</td>
+    <td class="mono">₹${r.rate}</td>
+    <td class="mono">₹${tv}</td>
+    <td>${isLow ? '<span class="badge badge-low">Low stock</span>' : '<span class="badge badge-ok">In stock</span>'}</td>
+  </tr>`;
+}
+function updateInventoryRow(r) {
+  // find the exact tr by the item id we put on it
+  const tr = document.querySelector(`#inv-body tr[data-item-id="${r.id}"]`);
+
+  if (!tr) return; // row not in DOM yet, appendInventoryRow handles this
+
+  // replace just that row's html — rest of table untouched
+  tr.outerHTML = buildRowHtml(r);
+}
+
+function appendInventoryRow(r) {
+  const body = document.getElementById("inv-body");
+
+  // if the table was showing the empty state, clear it first
+  const emptyRow = body.querySelector(".empty");
+  if (emptyRow) emptyRow.closest("tr").remove();
+
+  // new items go at the top so the user sees them immediately
+  body.insertAdjacentHTML("afterbegin", buildRowHtml(r));
+}
+
+function patchInventoryRows(updatedItems) {
+  // updatedItems is the array coming back from your server
+  // each item is in DB shape, so map it first
+  updatedItems.forEach((apiItem) => {
+    const mapped = mapInventoryFromApi(apiItem);
+
+    // find this item's position in the in-memory array
+    const idx = inventoryRows.findIndex((r) => r.id === mapped.id);
+
+    if (idx !== -1) {
+      // item already exists in memory — update it in place
+      inventoryRows[idx] = mapped;
+      updateInventoryRow(mapped); // patch that one DOM row
+    } else {
+      // genuinely new item — add to memory and DOM
+      inventoryRows.push(mapped);
+      appendInventoryRow(mapped);
+    }
+  });
 }
 
 function renderLog(filter) {
@@ -777,40 +930,81 @@ async function submitAuth() {
     alert("Request failed");
   }
 }
+async function initAppData() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return;
+  }
+
+  try {
+    // 1. Load master inventory first
+    await loadMasterInventory();
+
+    // 2. Load carts
+    const res = await fetch(`${API_BASE_URL}/api/cart`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const carts = await res.json();
+
+    cartRequests.length = 0;
+
+    carts.forEach((c) => {
+      cartRequests.push(c);
+    });
+
+    renderCartList(cartRequests);
+
+    renderPendingCarts(cartRequests.filter((c) => c.status === "pending"));
+
+    renderPayments(cartRequests);
+
+    renderApprovedList(cartRequests.filter((c) => c.status === "approved"));
+
+    renderInwardDeliveries(
+      cartRequests.filter((c) => c.status === "paymentdone"),
+    );
+
+    // 3. Load log entries
+    await loadLogEntries();
+
+    // 4. Load outward page also in init
+    await loadOutwardPage();
+
+    // 5. Load WIP projects also in init
+    await loadProjects();
+  } catch (err) {
+    console.error("Init failed", err);
+
+    toast("Failed loading app data");
+  }
+}
 
 function applyUser() {
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // not logged in
   if (!user) {
     document.getElementById("login-screen").style.display = "flex";
-
     document.getElementById("app-shell").style.display = "none";
-
     return;
   }
 
-  // logged in
   document.getElementById("login-screen").style.display = "none";
-
   document.getElementById("app-shell").style.display = "flex";
 
-  document.getElementById("guest-buttons").style.display = "none";
-
-  document.getElementById("user-panel").style.display = "block";
-
   document.getElementById("user-name").innerText = user.email;
-
   document.getElementById("user-role").innerText = user.role;
 
   setRole(user.role);
-  loadCartRequests();
-  loadPendingApprovals();
-  loadPayments();
-  loadApprovedPayments();
-  loadAwaitingDelivery();
-  loadLogEntries();
+
+  initAppData();
+
+  connectSocket();
 }
+
 window.onload = function () {
   applyUser();
 };
@@ -1600,7 +1794,7 @@ async function submitOutwardEntries() {
     }
 
     const res = await fetch(
-      `${API_BASE_URL}/api/cart`,
+      `${API_BASE_URL}/api/outward`,
 
       {
         method: "POST",
@@ -1613,6 +1807,7 @@ async function submitOutwardEntries() {
 
         body: JSON.stringify({
           outwardItems,
+          socketId: socket.id,
         }),
       },
     );
@@ -1626,6 +1821,7 @@ async function submitOutwardEntries() {
     }
 
     toast("✓ Outward saved");
+    await applyOutwardPatch(outwardItems);
   } catch (err) {
     console.error(err);
 
@@ -1637,19 +1833,69 @@ async function submitOutwardEntries() {
 
 let currentCartVendor = "";
 
-// ─── GENERIC CART TEXT PARSER (mirrors parsers/generic.js) ───
-// Runs entirely in the browser on pasted cart text.
-// Same logic as the extension's generic.js — no DOM access needed here,
-// we parse raw text line by line instead.
-// ─── STRICT CART TEXT PARSER ─────────────────────────────────
-// Rebuilt to avoid picking up nav text, category names, and random numbers.
-// Key rules:
-//   1. Product name must be ≥ 5 words OR ≥ 25 chars with mixed case
-//   2. Price must be ≥ ₹10 and ≤ ₹5,00,000 (filters out pin codes, counts, IDs)
-//   3. Name and price must appear within a tight 3-line window
-//   4. Blacklist of common non-product lines is much more aggressive
-//   5. Vendor-specific mode uses known structural patterns
+async function applyOutwardPatch(outwardItems = []) {
+  if (!Array.isArray(outwardItems) || !outwardItems.length) {
+    return;
+  }
 
+  for (const item of outwardItems) {
+    const itemId = item.item_id;
+
+    const qtyUsed = Number(item.qty_used || 0);
+
+    const inv = inventoryRows.find((r) => r.id === itemId);
+
+    if (!inv) {
+      continue;
+    }
+
+    // UPDATE MEMORY
+
+    inv.current = Math.max(0, Number(inv.current || 0) - qtyUsed);
+
+    // UPDATE MASTER INVENTORY PAGE
+
+    updateInventoryRow(inv);
+
+    // UPDATE OUTWARD PAGE
+
+    patchOutwardRow(inv);
+  }
+
+  // UPDATE WIP PAGE
+
+  const hasWip = outwardItems.some((item) => item.outward_type === "wip");
+
+  if (hasWip) {
+    await loadProjects();
+  }
+
+  // UPDATE LOGS
+
+  await loadLogEntries();
+}
+
+function patchOutwardRow(inv) {
+  const row = document.querySelector(
+    `#outward-body tr[data-item-id="${inv.id}"]`,
+  );
+
+  if (!row) {
+    return;
+  }
+
+  // UPDATE QTY CELL
+
+  const qtyCell = row.children[2];
+
+  qtyCell.textContent = inv.current;
+
+  // REMOVE ROW IF STOCK EMPTY
+
+  if (Number(inv.current) <= 0) {
+    row.remove();
+  }
+}
 function parseCartText(rawText, vendorHint) {
   const vendor =
     vendorHint && vendorHint !== "generic" ? vendorHint : detectVendor(rawText);
@@ -1959,20 +2205,19 @@ function checkUrlCartData() {
 async function loadCartRequests() {
   try {
     const token = localStorage.getItem("token");
-
     const res = await fetch(`${API_BASE_URL}/api/cart`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     const carts = await res.json();
 
-    renderCartList(carts);
-    console.log("cartview", carts);
+    // store in memory — this is the missing line
+    cartRequests.length = 0;
+    carts.forEach((c) => cartRequests.push(c));
+
+    renderCartList(cartRequests);
   } catch (err) {
     console.error(err);
-
     toast("Failed to load carts");
   }
 }
@@ -2095,31 +2340,24 @@ async function loadLogEntries() {
 }
 
 async function entermasterinventory(inwardentries, token) {
-  const inwardRes = await fetch(
-    `${API_BASE_URL}/api/masterentry`,
-
-    {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-
-        Authorization: `Bearer ${token}`,
-      },
-
-      body: JSON.stringify({
-        inwardentries,
-      }),
+  const res = await fetch(`${API_BASE_URL}/api/masterentry`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
-  );
+    body: JSON.stringify({ inwardentries }),
+  });
 
-  if (!inwardRes.ok) {
-    const err = await inwardRes.json();
-
-    console.error("Inward error", err);
-
+  if (!res.ok) {
+    const err = await res.json();
     throw new Error("Failed inward entry");
   }
+
+  const raw = await res.json();
+  console.log("raw response from server:", raw); // add this
+  const { updatedItems } = raw;
+  return updatedItems;
 }
 
 //wip pages
@@ -2174,27 +2412,18 @@ function renderLogEntries(entries) {
     .join("");
 }
 
-// ─── NAV & UI ─────────────────────────────────────────────────
 function nav(page, el) {
   document
     .querySelectorAll(".page")
     .forEach((p) => p.classList.remove("active"));
+
   document
     .querySelectorAll(".nav-item")
     .forEach((n) => n.classList.remove("active"));
+
   document.getElementById("page-" + page).classList.add("active");
+
   el.classList.add("active");
-
-  if (page === "inventory" && !inventoryLoadedFromApi) {
-    loadMasterInventory();
-  }
-  if (page === "outward") {
-    loadOutwardPage();
-  }
-
-  if (page === "wip") {
-    loadProjects();
-  }
 }
 
 function setRole(role) {
@@ -2409,6 +2638,7 @@ window.inventoryAppServices = {
   loadCartRequests,
   loadPayments,
   loadLogEntries,
+  patchInventoryRows,
 };
 
 // ─── INIT ─────────────────────────────────────────────────────

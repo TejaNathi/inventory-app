@@ -67,9 +67,11 @@ app.use((req, res, next) => {
 // make io accessible
 app.set("io", io);
 
-// ---------------------
-// SOCKET EVENTS
-// ---------------------
+app.use((req, res, next) => {
+  req.io = io;
+
+  next();
+});
 
 io.on(
   "connection",
@@ -91,6 +93,7 @@ io.on(
         socket.join(`user:${data.user_id}`);
 
         // COMBINED ROOM
+        console.log(`${data.role} is now in rooms:`, [...socket.rooms]);
 
         socket.join(`role:${data.role}:${data.department}`);
 
@@ -106,6 +109,6 @@ httpserver.listen(
   "0.0.0.0",
 
   () => {
-    console.log("Server running on http://192.168.0.206:3000");
+    console.log("Server running on http://192.168.0.203:3000");
   },
 );

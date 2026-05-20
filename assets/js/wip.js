@@ -1,7 +1,8 @@
 const appServices = () => window.inventoryAppServices || {};
 
 const toast = (message) => appServices().toast?.(message);
-const API_BASE_URL = "http://192.168.0.206:3000";
+import { API_URL } from "../js/config.js";
+const API_BASE_URL = API_URL;
 
 async function loadProjects() {
   try {
@@ -291,7 +292,7 @@ async function createNewProject() {
     }
 
     const res = await fetch(
-      `${API_BASE_URL}/api/cart/projects`,
+      `${API_BASE_URL}/api/projects`,
 
       {
         method: "POST",

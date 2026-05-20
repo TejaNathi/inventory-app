@@ -1,17 +1,8 @@
-import express from 'express';
+import express from "express";
 
-
-import {
-createmasterinventroy
-  
-
-} from '../controllers/master.controller.js';
-
+import { createmasterinventory } from "../controllers/master.controller.js";
 
 const master = express.Router();
-master.post(
-  '/masterentry',
-  createmasterinventroy
-);
+master.post("/masterentry", createmasterinventory);
 
 export default master;

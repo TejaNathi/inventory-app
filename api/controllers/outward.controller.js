@@ -1,144 +1,89 @@
 import {
-
   createOutwardEntry,
-
   getOutwardEntries,
-
-  getProjectOutward
-
-} from '../models/outward.models.js';
-
-
+  getProjectOutward,
+} from "../models/outward.models.js";
 
 // ======================
 // CREATE OUTWARD
 // ======================
 
-export async function createOutwardController(
-  req,
-  res
-) {
-
+export async function createOutwardController(req, res) {
   try {
+    const outwardItems = req.body.outwardItems;
 
-    const outwardItems =
-      req.body.outwardItems;
+    const socketId = req.body.socketId;
 
     const saved = [];
 
     for (const item of outwardItems) {
+      const result = await createOutwardEntry({
+        ...item,
 
-      const result =
-
-        await createOutwardEntry({
-
-          ...item,
-
-          member_id:
-            req.user.user_id
-
-        });
+        member_id: req.user.user_id,
+      });
 
       saved.push(result);
-
     }
 
-    res.status(201).json(
-      saved
+    // SOCKET EMIT
+    // EXCEPT SENDER
+
+    const io = req.app.get("io");
+
+    io.except(socketId).emit(
+      "outward:created",
+
+      {
+        outwardItems: saved,
+        socketId,
+      },
     );
 
+    // RESPONSE
+
+    res.status(201).json({
+      outwardItems: saved,
+    });
+  } catch (err) {
+    console.error("OUTWARD ERROR:", err);
+
+    console.error("OUTWARD BODY:", req.body);
+
+    res.status(500).json({
+      error: err.message,
+    });
   }
+}
 
-catch (err) {
-
-  console.error(
-    'OUTWARD ERROR:',
-    err
-  );
-
-  console.error(
-    'OUTWARD BODY:',
-    req.body
-  );
-
-  res.status(500).json({
-
-    error:
-      err.message
-
-  });
-
-}}
-
-
-
-// ======================
-// GET ALL OUTWARD
-// ======================
-
-export async function getOutwardController(
-  req,
-  res
-) {
-
+export async function getOutwardController(req, res) {
   try {
-
-    const result =
-      await getOutwardEntries();
+    const result = await getOutwardEntries();
 
     res.json(result);
-
-  }
-
-  catch (err) {
-
+  } catch (err) {
     console.error(err);
 
     res.status(500).json({
-
-      error:
-        'Failed loading outward'
-
+      error: "Failed loading outward",
     });
-
   }
-
 }
-
-
 
 // ======================
 // GET PROJECT OUTWARD
 // ======================
 
-export async function getProjectOutwardController(
-  req,
-  res
-) {
-
+export async function getProjectOutwardController(req, res) {
   try {
-
-    const result =
-
-      await getProjectOutward(
-        req.params.project_id
-      );
+    const result = await getProjectOutward(req.params.project_id);
 
     res.json(result);
-
-  }
-
-  catch (err) {
-
+  } catch (err) {
     console.error(err);
 
     res.status(500).json({
-
-      error:
-        'Failed loading project outward'
-
+      error: "Failed loading project outward",
     });
-
   }
-
 }
