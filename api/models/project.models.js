@@ -1,4 +1,4 @@
-import { query } from "../db.js";
+import { pool, query } from "../db.js";
 
 export async function createProject(project) {
   const result = await query(
