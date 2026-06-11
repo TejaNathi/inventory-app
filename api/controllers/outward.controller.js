@@ -39,7 +39,7 @@ export async function createOutwardController(req, res) {
         socketId,
       },
     );
-
+    console.log("socketidoutward", socketId);
     // RESPONSE
 
     res.status(201).json({

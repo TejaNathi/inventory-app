@@ -40,6 +40,17 @@ export async function getWIPProjectsController(req, res) {
 export async function deleteProjectController(req, res) {
   try {
     const result = await deleteProject(req.params.project_id);
+
+    console.log("results", result);
+    const io = req.app.get("io");
+
+    io.emit(
+      "outward:deleted",
+
+      {
+        updateditems: result,
+      },
+    );
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -66,12 +77,15 @@ export async function moveWipItemController(req, res) {
 export async function returnWipItemController(req, res) {
   try {
     const result = await returnWipItemToMaster(req.params.outward_id);
-    if (!result) {
-      return res.status(404).json({ error: "WIP item not found" });
-    }
-    res.json({ ok: true, inventory: result });
+
+    res.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed returning item to master inventory" });
+    console.error(err.message);
+    console.error(err.detail);
+
+    res.status(500).json({
+      error: err.message,
+    });
   }
 }

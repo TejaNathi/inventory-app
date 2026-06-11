@@ -11,6 +11,7 @@ import {
   closeNewProjectModal,
   createNewProject,
 } from "./wip.js";
+
 import { API_URL } from "../js/config.js";
 const API_BASE_URL = API_URL;
 
@@ -20,7 +21,6 @@ window.closeNewProjectModal = closeNewProjectModal;
 
 window.createNewProject = createNewProject;
 
-// ─── APP STATE ────────────────────────────────────────────────
 const inventory = [];
 const wipItems = [];
 const logEntries = [];
@@ -29,7 +29,6 @@ const cartRequests = [];
 const activityData = [];
 let allLogEntries = [];
 
-// ─── PAYMENT STATE ────────────────────────────────────────────
 let currentPaymentId = null;
 let currentDeliveryId = null;
 let currentCartData = null;
@@ -162,6 +161,11 @@ function connectSocket() {
       toast("Inventory updated");
     },
   );
+
+  socket.on("outward:deleted", async (data) => {
+    console.log("outward socket received", data.updateditems);
+    patchInventoryRows(data.updateditems);
+  });
 }
 
 async function apiGet(path) {
@@ -213,7 +217,6 @@ async function loadMasterInventory() {
   }
 }
 
-// ─── RENDER FUNCTIONS ─────────────────────────────────────────
 function renderInventory(data) {
   const body = document.getElementById("inv-body");
 
@@ -265,6 +268,7 @@ function buildRowHtml(r) {
     <td>${isLow ? '<span class="badge badge-low">Low stock</span>' : '<span class="badge badge-ok">In stock</span>'}</td>
   </tr>`;
 }
+
 function updateInventoryRow(r) {
   // find the exact tr by the item id we put on it
   const tr = document.querySelector(`#inv-body tr[data-item-id="${r.id}"]`);
@@ -276,6 +280,7 @@ function updateInventoryRow(r) {
 }
 
 function appendInventoryRow(r) {
+  x;
   const body = document.getElementById("inv-body");
 
   // if the table was showing the empty state, clear it first
@@ -287,20 +292,14 @@ function appendInventoryRow(r) {
 }
 
 function patchInventoryRows(updatedItems) {
-  // updatedItems is the array coming back from your server
-  // each item is in DB shape, so map it first
   updatedItems.forEach((apiItem) => {
     const mapped = mapInventoryFromApi(apiItem);
-
-    // find this item's position in the in-memory array
     const idx = inventoryRows.findIndex((r) => r.id === mapped.id);
 
     if (idx !== -1) {
-      // item already exists in memory — update it in place
       inventoryRows[idx] = mapped;
-      updateInventoryRow(mapped); // patch that one DOM row
+      updateInventoryRow(mapped);
     } else {
-      // genuinely new item — add to memory and DOM
       inventoryRows.push(mapped);
       appendInventoryRow(mapped);
     }
@@ -1849,15 +1848,9 @@ async function applyOutwardPatch(outwardItems = []) {
       continue;
     }
 
-    // UPDATE MEMORY
-
     inv.current = Math.max(0, Number(inv.current || 0) - qtyUsed);
 
-    // UPDATE MASTER INVENTORY PAGE
-
     updateInventoryRow(inv);
-
-    // UPDATE OUTWARD PAGE
 
     patchOutwardRow(inv);
   }
@@ -1884,13 +1877,9 @@ function patchOutwardRow(inv) {
     return;
   }
 
-  // UPDATE QTY CELL
-
   const qtyCell = row.children[2];
 
   qtyCell.textContent = inv.current;
-
-  // REMOVE ROW IF STOCK EMPTY
 
   if (Number(inv.current) <= 0) {
     row.remove();
@@ -1909,12 +1898,6 @@ function parseCartText(rawText, vendorHint) {
   return { items: parseGenericText(rawText), vendor };
 }
 
-// ── AMAZON TEXT PARSER ──────────────────────────────────────
-// Amazon cart text has a very consistent structure:
-// [product title — usually 1 long line]
-// [brand/sold by line]  ← optional
-// [₹ price]
-// [Qty: N]  OR  [quantity selector line]
 function parseAmazonText(text) {
   const lines = text
     .split("\n")
@@ -2035,9 +2018,6 @@ function parseRobuText(text) {
   return items;
 }
 
-// ── GENERIC STRICT PARSER ───────────────────────────────────
-// For unknown vendors. Much stricter than before:
-// Name must be ≥ 4 words AND ≥ 20 chars to filter out nav/category text.
 function parseGenericText(text) {
   const lines = text
     .split("\n")

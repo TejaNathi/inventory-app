@@ -96,22 +96,30 @@ function attachWipEventHandlers() {
     btn.onclick = () => handleReturnItem(btn.dataset.outwardId);
   });
 
-  document.querySelectorAll("#wip-project-list tr[draggable='true']").forEach((row) => {
-    row.addEventListener("dragstart", (event) => {
-      event.dataTransfer.setData("text/outward-id", row.dataset.outwardId);
-      event.dataTransfer.setData("text/source-project-id", row.dataset.projectId);
+  document
+    .querySelectorAll("#wip-project-list tr[draggable='true']")
+    .forEach((row) => {
+      row.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("text/outward-id", row.dataset.outwardId);
+        event.dataTransfer.setData(
+          "text/source-project-id",
+          row.dataset.projectId,
+        );
+      });
     });
-  });
 
   document.querySelectorAll(".wip-table").forEach((table) => {
     table.addEventListener("dragover", (event) => event.preventDefault());
     table.addEventListener("drop", async (event) => {
       event.preventDefault();
       const outwardId = event.dataTransfer.getData("text/outward-id");
-      const sourceProjectId = event.dataTransfer.getData("text/source-project-id");
+      const sourceProjectId = event.dataTransfer.getData(
+        "text/source-project-id",
+      );
       const targetProjectId = table.dataset.dropProjectId;
 
-      if (!outwardId || !targetProjectId || sourceProjectId === targetProjectId) return;
+      if (!outwardId || !targetProjectId || sourceProjectId === targetProjectId)
+        return;
       await handleMoveItem(outwardId, targetProjectId);
     });
   });
@@ -138,14 +146,17 @@ async function handleDeleteProject(projectId) {
 async function handleMoveItem(outwardId, targetProjectId) {
   try {
     const token = localStorage.getItem("token");
-    const res = await fetch(`${API_BASE_URL}/api/projects/wip-item/${outwardId}/move`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    const res = await fetch(
+      `${API_BASE_URL}/api/projects/wip-item/${outwardId}/move`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ target_project_id: targetProjectId }),
       },
-      body: JSON.stringify({ target_project_id: targetProjectId }),
-    });
+    );
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "Failed moving item");
     toast("Item moved to project");
@@ -159,10 +170,13 @@ async function handleMoveItem(outwardId, targetProjectId) {
 async function handleReturnItem(outwardId) {
   try {
     const token = localStorage.getItem("token");
-    const res = await fetch(`${API_BASE_URL}/api/projects/wip-item/${outwardId}/return`, {
-      method: "PATCH",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(
+      `${API_BASE_URL}/api/projects/wip-item/${outwardId}/return`,
+      {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "Failed returning item");
     toast("Item returned to master inventory");
@@ -173,8 +187,12 @@ async function handleReturnItem(outwardId) {
   }
 }
 
-function openNewProjectModal() { document.getElementById("new-project-modal").style.display = "flex"; }
-function closeNewProjectModal() { document.getElementById("new-project-modal").style.display = "none"; }
+function openNewProjectModal() {
+  document.getElementById("new-project-modal").style.display = "flex";
+}
+function closeNewProjectModal() {
+  document.getElementById("new-project-modal").style.display = "none";
+}
 
 async function createNewProject() {
   try {
@@ -186,8 +204,16 @@ async function createNewProject() {
 
     const res = await fetch(`${API_BASE_URL}/api/projects`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ project_name, department: user.department, member_id: user.id, notes }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        project_name,
+        department: user.department,
+        member_id: user.id,
+        notes,
+      }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "Failed creating project");
@@ -200,4 +226,10 @@ async function createNewProject() {
   }
 }
 
-export { loadProjects, renderProjects, openNewProjectModal, closeNewProjectModal, createNewProject };
+export {
+  loadProjects,
+  renderProjects,
+  openNewProjectModal,
+  closeNewProjectModal,
+  createNewProject,
+};

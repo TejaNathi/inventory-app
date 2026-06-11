@@ -13,6 +13,7 @@ import projects from "./routes/project.routes.js";
 import { Server } from "socket.io";
 import inventorycode from "./routes/inventory.routes.js";
 import outward from "./routes/outward.routes.js";
+import requestRoutes from "./routes/request.routes.js";
 
 const app = express();
 const httpserver = createServer(app);
@@ -47,6 +48,7 @@ app.get("/api/inventory", async (req, res) => {
 app.use("/api/projects", projects);
 
 app.use("/api", inventorycode);
+app.use("/api/request", requestRoutes);
 
 export const io = new Server(
   httpserver,
@@ -66,12 +68,6 @@ app.use((req, res, next) => {
 
 // make io accessible
 app.set("io", io);
-
-app.use((req, res, next) => {
-  req.io = io;
-
-  next();
-});
 
 io.on(
   "connection",
