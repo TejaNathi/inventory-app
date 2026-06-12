@@ -145,6 +145,34 @@ tr:hover td { background: var(--surface2); }
 }
 .form-group textarea { resize: vertical; min-height: 80px; }
 .form-actions { display: flex; gap: 10px; margin-top: 18px; }
+.request-form-wrap { max-width: 100%; }
+
+.request-lines-panel {
+  margin-top: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+
+.request-lines-panel table {
+  min-width: 860px;
+}
+
+.request-lines-panel .request-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.request-lines-panel .request-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
 
 /* BUTTONS */
 .btn {

@@ -375,6 +375,166 @@ function renderPendingRequests() {
     pending.length + " pending";
 }
 
+const requestPaymentTypeLabels = {
+  advance: "Advance payment",
+  after_delivery: "Payment after delivery",
+  credit_invoice: "Credit invoice",
+  no_payment: "No payment required",
+};
+
+const requestStatusLabels = {
+  Pending: "Request raised — awaiting approval",
+  Approved: "Payment pending with accounts",
+  Ordered: "Ordered — awaiting delivery",
+  DeliveryReceived: "Delivery received — inward entry pending",
+  AddedToInventory: "Added to inventory — invoice pending",
+  InvoiceReceived: "Invoice received — awaiting lead approval",
+  InvoiceApproved: "Payment pending with accounts",
+  PaymentCompleted: "Payment completed",
+  Closed: "Request closed",
+  Rejected: "Rejected",
+};
+
+function requestStatusBadge(status) {
+  const badgeMap = {
+    Pending: "badge-pending",
+    Approved: "badge-approved",
+    Ordered: "badge-approved",
+    DeliveryReceived: "badge-paid",
+    AddedToInventory: "badge-paid",
+    InvoiceReceived: "badge-pending",
+    InvoiceApproved: "badge-approved",
+    PaymentCompleted: "badge-delivered",
+    Closed: "badge-delivered",
+    Rejected: "badge-rejected",
+  };
+
+  return badgeMap[status] || "badge-pending";
+}
+
+function requestNeedsPostDeliveryPayment(request) {
+  return ["after_delivery", "credit_invoice"].includes(request.payment_type);
+}
+
+function requestTotal(request) {
+  if (Number.isFinite(Number(request.est))) {
+    return Number(request.est);
+  }
+
+  return (request.items || []).reduce(
+    (sum, item) =>
+      sum + Number(item.qty || 0) * Number(item.rate_per_unit || 0),
+    0,
+  );
+}
+
+function requestDetails(request) {
+  const vendor = request.vendor_name ? ` - ${request.vendor_name}` : "";
+  return `${request.item || "Request"}${vendor}`;
+}
+
+function renderRequestAction(request) {
+  if (request.status === "Ordered") {
+    return `
+      <button class="btn btn-deliver btn-sm" onclick="confirmRequestDelivery('${request.id}')">
+        Confirm delivery
+      </button>
+    `;
+  }
+
+  if (request.status === "DeliveryReceived") {
+    return `
+      <button class="btn btn-approve btn-sm" onclick="addRequestToInventory('${request.id}')">
+        Add to inventory
+      </button>
+    `;
+  }
+
+  if (request.status === "AddedToInventory") {
+    return `
+      <button class="btn btn-secondary btn-sm" onclick="markRequestInvoiceReceived('${request.id}')">
+        Invoice received
+      </button>
+    `;
+  }
+
+  if (request.status === "InvoiceReceived") {
+    return `
+      <button class="btn btn-approve btn-sm" onclick="approveRequestInvoice('${request.id}')">
+        Approve invoice
+      </button>
+    `;
+  }
+
+  if (request.status === "Approved" || request.status === "InvoiceApproved") {
+    return `
+      <button class="btn btn-pay btn-sm" onclick="openPaymentModal('${request.id}')">
+        Mark paid
+      </button>
+    `;
+  }
+
+  return "-";
+}
+
+function renderRequestStatusBoard(carts = []) {
+  const body = document.getElementById("inward-delivered-body");
+
+  if (!body) return;
+
+  const visibleRequests = requests.filter(
+    (request) => !["Rejected"].includes(request.status),
+  );
+
+  const cartRows = carts.map(
+    (cart) => `
+      <tr>
+        <td class="mono">${cart.cart_id}</td>
+        <td>Cart payment</td>
+        <td>${cart.source}</td>
+        <td class="mono">₹${Number(cart.total || 0).toLocaleString("en-IN")}</td>
+        <td><span class="badge badge-paid">Ordered — awaiting delivery</span></td>
+        <td>
+          <button class="btn btn-deliver btn-sm" onclick="openDeliveryChecklist('${cart.cart_id}')">
+            Confirm delivery
+          </button>
+        </td>
+      </tr>
+    `,
+  );
+
+  const requestRows = visibleRequests.map(
+    (request) => `
+      <tr>
+        <td class="mono">${request.id}</td>
+        <td>${requestPaymentTypeLabels[request.payment_type] || "-"}</td>
+        <td>${requestDetails(request)}</td>
+        <td class="mono">₹${requestTotal(request).toLocaleString("en-IN")}</td>
+        <td>
+          <span class="badge ${requestStatusBadge(request.status)}">
+            ${requestStatusLabels[request.status] || request.status}
+          </span>
+        </td>
+        <td>${renderRequestAction(request)}</td>
+      </tr>
+    `,
+  );
+
+  const rows = [...requestRows, ...cartRows];
+
+  body.innerHTML = rows.length
+    ? rows.join("")
+    : `
+      <tr>
+        <td colspan="6">
+          <div class="empty">
+            <p>No raised requests yet</p>
+          </div>
+        </td>
+      </tr>
+    `;
+}
+
 //new with database
 async function renderCartList(carts = []) {
   const body = document.getElementById("cart-list-body");
@@ -701,7 +861,8 @@ function renderCharts() {
 function approveReq(id) {
   const r = requests.find((x) => x.id === id);
   if (!r) return;
-  r.status = "Approved";
+
+  r.status = r.payment_type === "advance" ? "Approved" : "Ordered";
   r.approvedBy = "Lead";
   r.approvedDate = new Date().toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -710,8 +871,9 @@ function approveReq(id) {
   renderPendingRequests();
   renderApprovedList();
   renderPayments();
+  renderRequestStatusBoard();
   updateBadges();
-  toast("✓ " + id + " approved — forwarded to accounts");
+  toast("✓ " + id + " approved");
 }
 
 function rejectReq(id) {
@@ -719,8 +881,61 @@ function rejectReq(id) {
   if (!r) return;
   r.status = "Rejected";
   renderPendingRequests();
+  renderRequestStatusBoard();
   updateBadges();
   toast("Request " + id + " rejected");
+}
+
+function confirmRequestDelivery(id) {
+  const request = requests.find((x) => x.id === id);
+  if (!request) return;
+
+  request.status = "DeliveryReceived";
+  request.deliveryDate = new Date().toLocaleDateString();
+
+  renderRequestStatusBoard();
+  renderPayments();
+  toast("✓ Delivery received — inward entry pending");
+}
+
+function addRequestToInventory(id) {
+  const request = requests.find((x) => x.id === id);
+  if (!request) return;
+
+  if (requestNeedsPostDeliveryPayment(request)) {
+    request.status = "AddedToInventory";
+    toast("✓ Added to inventory — invoice pending");
+  } else {
+    request.status = "Closed";
+    toast("✓ Added to inventory — request closed");
+  }
+
+  renderRequestStatusBoard();
+  renderPayments();
+}
+
+function markRequestInvoiceReceived(id) {
+  const request = requests.find((x) => x.id === id);
+  if (!request) return;
+
+  request.status = "InvoiceReceived";
+  request.invoiceReceivedDate = new Date().toLocaleDateString();
+
+  renderRequestStatusBoard();
+  toast("✓ Invoice received — awaiting lead approval");
+}
+
+function approveRequestInvoice(id) {
+  const request = requests.find((x) => x.id === id);
+  if (!request) return;
+
+  request.status = "InvoiceApproved";
+  request.invoiceApprovedBy = "Lead";
+  request.invoiceApprovedDate = new Date().toLocaleDateString();
+
+  renderRequestStatusBoard();
+  renderPayments();
+  toast("✓ Invoice approved — payment pending");
 }
 
 // async function approveCart(id) {
@@ -822,6 +1037,44 @@ function submitRequest() {
   renderPendingRequests();
   updateBadges();
   toast("✓ Request submitted — awaiting lead approval");
+}
+
+function registerRaisedRequestSummary(request) {
+  const items = request.items || [];
+  const total = items.reduce(
+    (sum, item) =>
+      sum + Number(item.qty || 0) * Number(item.rate_per_unit || 0),
+    0,
+  );
+  const itemLabel =
+    items.length === 1
+      ? items[0].item_name
+      : `${items.length} items - ${request.vendor_name}`;
+  const qtyLabel =
+    items.length === 1
+      ? `${items[0].qty} ${items[0].unit}`
+      : `${items.length} lines`;
+
+  requests.unshift({
+    id: request.request_id || nextLocalId("REQ", requests.length),
+    member: user?.name || user?.email || "You",
+    item: itemLabel,
+    qty: qtyLabel,
+    vendor_name: request.vendor_name,
+    quotation_no: request.quotation_no,
+    payment_type: request.payment_type || "advance",
+    items,
+    purpose:
+      request.purpose ||
+      `${request.vendor_name} / ${request.quotation_no}`,
+    est: total,
+    date: "Today",
+    status: "Pending",
+  });
+
+  renderPendingRequests();
+  renderRequestStatusBoard();
+  updateBadges();
 }
 
 function submitInward() {
@@ -1153,8 +1406,10 @@ async function loadPendingApprovals() {
 }
 function openPaymentModal(id, desc) {
   currentPaymentId = id;
+  const request = requests.find((x) => x.id === id);
+
   document.getElementById("payment-modal-desc").textContent =
-    "Processing: " + desc;
+    "Processing: " + (desc || (request ? requestDetails(request) : id));
   document.getElementById("pay-date").value = new Date()
     .toISOString()
     .split("T")[0];
@@ -1309,6 +1564,9 @@ function renderPayments(carts = []) {
 
   // awaiting payment
   const approved = carts.filter((c) => c.status === "approved");
+  const localPaymentRequests = requests.filter((request) =>
+    ["Approved", "InvoiceApproved"].includes(request.status),
+  );
 
   // awaiting delivery
   const paid = carts.filter((c) => c.status === "paymentdone");
@@ -1318,15 +1576,17 @@ function renderPayments(carts = []) {
     (c) => c.status === "paymentdone", //||
     // c.status === 'delivered'
   );
+  const localPaymentHistory = requests.filter((request) =>
+    ["PaymentCompleted", "Closed"].includes(request.status) &&
+    request.amount_paid,
+  );
 
   // ─────────────────────────────
   // APPROVED → awaiting payment
   // ─────────────────────────────
 
-  paymentsBody.innerHTML = approved.length
-    ? approved
-        .map(
-          (c) => `
+  const cartPaymentRows = approved.map(
+    (c) => `
 
       <tr>
 
@@ -1368,11 +1628,36 @@ function renderPayments(carts = []) {
       </tr>
 
     `,
-        )
-        .join("")
+  );
+
+  const requestPaymentRows = localPaymentRequests.map(
+    (request) => `
+      <tr>
+        <td class="mono">${request.id}</td>
+        <td><span class="badge badge-approved">Raise request</span></td>
+        <td>${requestDetails(request)}</td>
+        <td class="mono">₹${requestTotal(request).toLocaleString("en-IN")}</td>
+        <td>${request.invoiceApprovedBy || request.approvedBy || "-"}</td>
+        <td class="mono">${request.invoiceApprovedDate || request.approvedDate || "-"}</td>
+        <td>
+          <button
+            class="btn btn-pay btn-sm"
+            onclick="openPaymentModal('${request.id}')"
+          >
+            Mark paid
+          </button>
+        </td>
+      </tr>
+    `,
+  );
+
+  const paymentRows = [...requestPaymentRows, ...cartPaymentRows];
+
+  paymentsBody.innerHTML = paymentRows.length
+    ? paymentRows.join("")
     : `
       <tr>
-        <td colspan="6">
+        <td colspan="7">
           <div class="empty">
             <p>
               Nothing awaiting payment
@@ -1449,10 +1734,8 @@ function renderPayments(carts = []) {
   // DELIVERED → history
   // ─────────────────────────────
 
-  historyBody.innerHTML = paidHistory.length
-    ? paidHistory
-        .map(
-          (c) => `
+  const cartHistoryRows = paidHistory.map(
+    (c) => `
 
       <tr>
 
@@ -1485,8 +1768,29 @@ function renderPayments(carts = []) {
       </tr>
 
     `,
-        )
-        .join("")
+  );
+
+  const requestHistoryRows = localPaymentHistory.map(
+    (request) => `
+      <tr>
+        <td class="mono">${request.id}</td>
+        <td>${requestDetails(request)}</td>
+        <td class="mono">₹${Number(request.amount_paid || 0).toLocaleString("en-IN")}</td>
+        <td>${request.invoice_no || "-"}</td>
+        <td>${request.payment_date || "-"}</td>
+        <td>
+          <span class="badge ${requestStatusBadge(request.status)}">
+            ${requestStatusLabels[request.status]}
+          </span>
+        </td>
+      </tr>
+    `,
+  );
+
+  const historyRows = [...requestHistoryRows, ...cartHistoryRows];
+
+  historyBody.innerHTML = historyRows.length
+    ? historyRows.join("")
     : `
       <tr>
         <td colspan="6">
@@ -1522,8 +1826,59 @@ async function loadApprovedPayments() {
 
 function renderApprovedList(carts = []) {
   const body = document.getElementById("approved-body");
+  const localApproved = requests.filter((request) =>
+    ["Approved", "InvoiceApproved"].includes(request.status),
+  );
 
-  if (!carts.length) {
+  const localRows = localApproved.map(
+    (request) => `
+      <tr>
+        <td class="mono">${request.id}</td>
+        <td><span class="badge badge-approved">Raise request</span></td>
+        <td style="font-weight:500">${requestDetails(request)}</td>
+        <td>${request.invoiceApprovedBy || request.approvedBy || "-"}</td>
+        <td class="mono">${request.invoiceApprovedDate || request.approvedDate || "-"}</td>
+        <td>
+          <span class="badge badge-approved">
+            ${requestStatusLabels[request.status]}
+          </span>
+        </td>
+      </tr>
+    `,
+  );
+
+  const cartRows = carts.map(
+    (c) => `
+      <tr>
+        <td class="mono">
+          ${c.cart_id}
+        </td>
+        <td>
+          <span class="badge badge-approved">
+            ${c.source}
+          </span>
+        </td>
+        <td style="font-weight:500">
+          ${c.note || "-"}
+        </td>
+        <td>
+          ${c.member_id || "-"}
+        </td>
+        <td class="mono">
+          ${new Date(c.created_at).toLocaleDateString()}
+        </td>
+        <td>
+          <span class="badge badge-approved">
+            Awaiting payment
+          </span>
+        </td>
+      </tr>
+    `,
+  );
+
+  const rows = [...localRows, ...cartRows];
+
+  if (!rows.length) {
     body.innerHTML = `
       <tr>
         <td colspan="6">
@@ -1539,45 +1894,7 @@ function renderApprovedList(carts = []) {
     return;
   }
 
-  body.innerHTML = carts
-    .map(
-      (c) => `
-
-    <tr>
-
-      <td class="mono">
-        ${c.cart_id}
-      </td>
-
-      <td>
-        <span class="badge badge-approved">
-          ${c.source}
-        </span>
-      </td>
-
-      <td style="font-weight:500">
-        ${c.note || "-"}
-      </td>
-
-      <td>
-        ${c.member_id || "-"}
-      </td>
-
-      <td class="mono">
-        ${new Date(c.created_at).toLocaleDateString()}
-      </td>
-
-      <td>
-        <span class="badge badge-approved">
-          Awaiting payment
-        </span>
-      </td>
-
-    </tr>
-
-  `,
-    )
-    .join("");
+  body.innerHTML = rows.join("");
 }
 
 async function confirmPayment() {
@@ -1587,6 +1904,34 @@ async function confirmPayment() {
 
   if (!invoice || !amount) {
     toast("Fill invoice + amount");
+
+    return;
+  }
+
+  const localRequest = requests.find((request) => request.id === currentPaymentId);
+
+  if (localRequest) {
+    localRequest.invoice_no = invoice;
+    localRequest.amount_paid = Number(amount);
+    localRequest.payment_date = document.getElementById("pay-date").value;
+
+    localRequest.status =
+      localRequest.payment_type === "advance"
+        ? "Ordered"
+        : "PaymentCompleted";
+
+    closeModal("payment-modal");
+
+    renderRequestStatusBoard();
+    renderPayments();
+    renderApprovedList();
+    updateBadges();
+
+    toast(
+      localRequest.status === "Ordered"
+        ? "✓ Payment recorded — awaiting delivery"
+        : "✓ Payment completed",
+    );
 
     return;
   }
@@ -1657,70 +2002,7 @@ async function loadAwaitingDelivery() {
 }
 
 function renderInwardDeliveries(carts = []) {
-  const body = document.getElementById("inward-delivered-body");
-
-  if (!carts.length) {
-    body.innerHTML = `
-      <tr>
-        <td colspan="6">
-          <div class="empty">
-            <p>
-              No entries awaiting delivery
-            </p>
-          </div>
-        </td>
-      </tr>
-    `;
-
-    return;
-  }
-
-  body.innerHTML = carts
-    .map(
-      (c) => `
-
-    <tr>
-
-      <td class="mono">
-        ${c.cart_id}
-      </td>
-
-      <td>
-        <span class="badge badge-approved">
-          ${c.source}
-        </span>
-      </td>
-
-      <td>
-        ₹${Number(c.total).toLocaleString("en-IN")}
-      </td>
-
-      <td class="mono">
-        ${c.payment_date || "-"}
-      </td>
-
-      <td>
-        <span class="badge badge-paid">
-          Awaiting delivery
-        </span>
-      </td>
-
-      <td>
-
-        <button
-          class="btn btn-deliver btn-sm"
-          onclick="openDeliveryChecklist('${c.cart_id}')"
-        >
-          Confirm delivery
-        </button>
-
-      </td>
-
-    </tr>
-
-  `,
-    )
-    .join("");
+  renderRequestStatusBoard(carts);
 }
 
 async function submitOutwardEntries() {
@@ -2572,6 +2854,9 @@ Object.assign(window, {
   clearForm,
   closeAuth,
   closeModal,
+  addRequestToInventory,
+  approveRequestInvoice,
+  confirmRequestDelivery,
   confirmChecklistDelivery,
   confirmPayment,
 
@@ -2580,6 +2865,7 @@ Object.assign(window, {
   filterOutwardInventory,
   logout,
   markDelivered,
+  markRequestInvoiceReceived,
   nav,
   openAuth,
   openDeliveryChecklist,
@@ -2619,6 +2905,7 @@ window.inventoryAppServices = {
   loadPayments,
   loadLogEntries,
   patchInventoryRows,
+  registerRaisedRequestSummary,
 };
 
 // ─── INIT ─────────────────────────────────────────────────────

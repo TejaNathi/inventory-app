@@ -1,577 +1,324 @@
-
 import { API_URL } from "./config.js";
 
-const appServices = () =>
-  window.inventoryAppServices || {};
-
-const toast = message =>
-  appServices().toast?.(message);
+const appServices = () => window.inventoryAppServices || {};
+const toast = message => appServices().toast?.(message);
 
 let requestItems = [];
 
-// ---------------------
-// INIT
-// ---------------------
+const ITEM_TYPES = [
+  "Raw materials",
+  "Hardware",
+  "Tools",
+  "Accessories",
+  "Storage utilities",
+  "Electronics",
+  "Mechanical",
+  "Consumables",
+];
+
+const QTY_TYPES = [
+  "pcs",
+  "kg",
+  "g",
+  "m",
+  "mm",
+  "ltr",
+  "pack",
+  "box",
+  "set",
+];
+
+function money(value) {
+  return Number(value || 0).toFixed(2);
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function optionList(options, selected) {
+  return options
+    .map(
+      option => `
+        <option
+          value="${escapeHtml(option)}"
+          ${option === selected ? "selected" : ""}
+        >
+          ${escapeHtml(option)}
+        </option>
+      `,
+    )
+    .join("");
+}
+
+function createRequestItem() {
+  return {
+    item_name: "",
+    category: "Hardware",
+    qty: 1,
+    unit: "pcs",
+    rate_per_unit: 0,
+  };
+}
 
 function initializeRaiseRequest() {
-
   requestItems = [];
-
   addRequestRow();
 
-  const addBtn =
-    document.getElementById(
-      "add-request-item-btn"
-    );
+  document
+    .getElementById("add-request-item-btn")
+    ?.addEventListener("click", addRequestRow);
 
-  if (addBtn) {
-    addBtn.onclick =
-      addRequestRow;
-  }
+  document
+    .getElementById("submit-request-btn")
+    ?.addEventListener("click", submitRequest);
 
-  const submitBtn =
-    document.getElementById(
-      "submit-request-btn"
-    );
-
-  if (submitBtn) {
-    submitBtn.onclick =
-      submitRequest;
-  }
-
+  document
+    .getElementById("clear-request-btn")
+    ?.addEventListener("click", clearRaiseRequest);
 }
-
-// ---------------------
-// ROW MANAGEMENT
-// ---------------------
 
 function addRequestRow() {
-
-  requestItems.push({
-
-    item_name: "",
-
-    category: "",
-
-    qty: 1,
-
-    unit: "pcs",
-
-    rate_per_unit: 0
-
-  });
-
+  requestItems.push(createRequestItem());
   renderRequestRows();
-
 }
 
-function removeRequestRow(
-  index
-) {
+function removeRequestRow(index) {
+  requestItems.splice(index, 1);
 
-  requestItems.splice(
-    index,
-    1
-  );
+  if (!requestItems.length) {
+    requestItems.push(createRequestItem());
+  }
 
   renderRequestRows();
-
 }
-
-// ---------------------
-// RENDER
-// ---------------------
 
 function renderRequestRows() {
-
-  const body =
-    document.getElementById(
-      "request-items-body"
-    );
+  const body = document.getElementById("request-items-body");
 
   if (!body) return;
 
-  body.innerHTML =
-    requestItems.map(
-
-      (item,index) => `
-
-<tr>
-
-<td>
-
-<input
-
-  type="text"
-
-  value="${item.item_name}"
-
-  data-field="item_name"
-
-  data-index="${index}"
-
-  class="request-input"
-
->
-
-</td>
-
-<td>
-
-<select
-
-  data-field="category"
-
-  data-index="${index}"
-
-  class="request-input"
-
->
-
-  <option value="">
-    Select
-  </option>
-
-  <option
-
-    value="Hardware"
-
-    ${item.category === "Hardware"
-      ? "selected"
-      : ""}
-
-  >
-
-    Hardware
-
-  </option>
-
-  <option
-
-    value="Electronics"
-
-    ${item.category === "Electronics"
-      ? "selected"
-      : ""}
-
-  >
-
-    Electronics
-
-  </option>
-
-  <option
-
-    value="Mechanical"
-
-    ${item.category === "Mechanical"
-      ? "selected"
-      : ""}
-
-  >
-
-    Mechanical
-
-  </option>
-
-  <option
-
-    value="Consumables"
-
-    ${item.category === "Consumables"
-      ? "selected"
-      : ""}
-
-  >
-
-    Consumables
-
-  </option>
-
-</select>
-
-</td>
-
-<td>
-
-<input
-
-  type="number"
-
-  min="1"
-
-  value="${item.qty}"
-
-  data-field="qty"
-
-  data-index="${index}"
-
-  class="request-input"
-
->
-
-</td>
-
-<td>
-
-<select
-
-  data-field="unit"
-
-  data-index="${index}"
-
-  class="request-input"
-
->
-
-  <option
-
-    value="pcs"
-
-    ${item.unit === "pcs"
-      ? "selected"
-      : ""}
-
-  >
-
-    pcs
-
-  </option>
-
-  <option
-
-    value="kg"
-
-    ${item.unit === "kg"
-      ? "selected"
-      : ""}
-
-  >
-
-    kg
-
-  </option>
-
-  <option
-
-    value="m"
-
-    ${item.unit === "m"
-      ? "selected"
-      : ""}
-
-  >
-
-    m
-
-  </option>
-
-</select>
-
-</td>
-
-<td>
-
-<input
-
-  type="number"
-
-  min="0"
-
-  value="${item.rate_per_unit}"
-
-  data-field="rate_per_unit"
-
-  data-index="${index}"
-
-  class="request-input"
-
->
-
-</td>
-
-<td>
-
-₹${(
-  item.qty *
-  item.rate_per_unit
-).toFixed(2)}
-
-</td>
-
-<td>
-
-<button
-
-  class="danger-btn"
-
-  data-action="delete"
-
-  data-index="${index}"
-
->
-
-  Delete
-
-</button>
-
-</td>
-
-</tr>
-
-`
-
-    ).join("");
+  body.innerHTML = requestItems
+    .map((item, index) => {
+      const lineTotal = Number(item.qty || 0) * Number(item.rate_per_unit || 0);
+
+      return `
+        <tr>
+          <td>
+            <input
+              type="text"
+              value="${escapeHtml(item.item_name)}"
+              data-field="item_name"
+              data-index="${index}"
+              class="request-input"
+              placeholder="Item name"
+            >
+          </td>
+          <td>
+            <select
+              data-field="category"
+              data-index="${index}"
+              class="request-input"
+            >
+              ${optionList(ITEM_TYPES, item.category)}
+            </select>
+          </td>
+          <td>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value="${escapeHtml(item.qty)}"
+              data-field="qty"
+              data-index="${index}"
+              class="request-input"
+            >
+          </td>
+          <td>
+            <select
+              data-field="unit"
+              data-index="${index}"
+              class="request-input"
+            >
+              ${optionList(QTY_TYPES, item.unit)}
+            </select>
+          </td>
+          <td>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value="${escapeHtml(item.rate_per_unit)}"
+              data-field="rate_per_unit"
+              data-index="${index}"
+              class="request-input"
+            >
+          </td>
+          <td class="mono" data-line-total="${index}">₹${money(lineTotal)}</td>
+          <td>
+            <button
+              type="button"
+              class="danger-btn"
+              data-action="delete-request-item"
+              data-index="${index}"
+            >
+              Delete
+            </button>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  updateRequestTotal();
 
   bindRequestEvents();
-
 }
-
-// ---------------------
-// EVENTS
-// ---------------------
 
 function bindRequestEvents() {
+  document.querySelectorAll(".request-input").forEach(input => {
+    input.addEventListener("input", updateRequestItem);
+    input.addEventListener("change", updateRequestItem);
+  });
 
   document
-    .querySelectorAll(
-      ".request-input"
-    )
-    .forEach(input => {
-
-      input.addEventListener(
-        "change",
-
-        event => {
-
-          const index =
-            Number(
-              event.target.dataset
-                .index
-            );
-
-          const field =
-            event.target.dataset
-              .field;
-
-          let value =
-            event.target.value;
-
-          if (
-
-            field === "qty" ||
-
-            field ===
-              "rate_per_unit"
-
-          ) {
-
-            value =
-              Number(value);
-
-          }
-
-          requestItems[index][field] =
-            value;
-
-          renderRequestRows();
-
-        }
-
-      );
-
-    });
-
-  document
-    .querySelectorAll(
-      '[data-action="delete"]'
-    )
+    .querySelectorAll('[data-action="delete-request-item"]')
     .forEach(btn => {
-
-      btn.onclick = () =>
-
-        removeRequestRow(
-
-          Number(
-            btn.dataset.index
-          )
-
-        );
-
+      btn.addEventListener("click", () => {
+        removeRequestRow(Number(btn.dataset.index));
+      });
     });
-
 }
 
-// ---------------------
-// SUBMIT
-// ---------------------
+function updateRequestItem(event) {
+  const index = Number(event.target.dataset.index);
+  const field = event.target.dataset.field;
+
+  if (!requestItems[index] || !field) return;
+
+  let value = event.target.value;
+
+  if (field === "qty") {
+    value = value === "" ? 0 : Math.max(0, Number(value));
+  }
+
+  if (field === "rate_per_unit") {
+    value = value === "" ? 0 : Math.max(0, Number(value));
+  }
+
+  requestItems[index][field] = value;
+  updateLineTotal(index);
+  updateRequestTotal();
+}
+
+function updateLineTotal(index) {
+  const totalEl = document.querySelector(`[data-line-total="${index}"]`);
+
+  if (!totalEl) return;
+
+  const item = requestItems[index];
+  const lineTotal = Number(item.qty || 0) * Number(item.rate_per_unit || 0);
+
+  totalEl.textContent = `₹${money(lineTotal)}`;
+}
+
+function updateRequestTotal() {
+  const totalEl = document.getElementById("request-estimated-total");
+
+  if (!totalEl) return;
+
+  const total = requestItems.reduce(
+    (sum, item) =>
+      sum + Number(item.qty || 0) * Number(item.rate_per_unit || 0),
+    0,
+  );
+
+  totalEl.textContent = `₹${money(total)}`;
+}
+
+function validatedItems() {
+  return requestItems.map(item => ({
+    item_name: item.item_name.trim(),
+    category: item.category,
+    qty: Number(item.qty),
+    unit: item.unit,
+    rate_per_unit: Number(item.rate_per_unit),
+  }));
+}
 
 async function submitRequest() {
-
   try {
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const quotation_no = document.getElementById("quotation-no").value.trim();
+    const vendor_name = document.getElementById("vendor-name").value.trim();
+    const payment_type = document.getElementById("request-payment-type").value;
+    const purpose = document.getElementById("request-purpose").value.trim();
+    const items = validatedItems();
 
-    const token =
-      localStorage.getItem(
-        "token"
-      );
+    if (!quotation_no) return toast("Enter quotation number");
+    if (!vendor_name) return toast("Enter vendor name");
+    if (!items.every(item => item.item_name)) return toast("Enter item name");
+    if (!items.every(item => item.qty > 0)) return toast("Enter valid quantity");
 
-    const user =
-      JSON.parse(
+    const res = await fetch(`${API_URL}/api/request`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        quotation_no,
+        vendor_name,
+        payment_type,
+        purpose,
+        member_id: user.id,
+        items,
+      }),
+    });
 
-        localStorage.getItem(
-          "user"
-        ) || "{}"
-
-      );
-
-    const quotation_no =
-      document.getElementById(
-        "quotation-no"
-      ).value.trim();
-
-    const vendor_name =
-      document.getElementById(
-        "vendor-name"
-      ).value.trim();
-
-    const purpose =
-      document.getElementById(
-        "request-purpose"
-      ).value.trim();
-
-    if (
-      !quotation_no
-    ) {
-
-      return toast(
-        "Enter quotation number"
-      );
-
-    }
-
-    if (
-      !vendor_name
-    ) {
-
-      return toast(
-        "Enter vendor name"
-      );
-
-    }
-
-    if (
-      requestItems.length === 0
-    ) {
-
-      return toast(
-        "Add at least one item"
-      );
-
-    }
-
-    const payload = {
-
-      quotation_no,
-
-      vendor_name,
-
-      purpose,
-
-      member_id:
-        user.id,
-
-      items:
-        requestItems
-
-    };
-
-    const res =
-      await fetch(
-
-        `${API_URL}/api/request`,
-
-        {
-
-          method: "POST",
-
-          headers: {
-
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${token}`
-
-          },
-
-          body:
-            JSON.stringify(
-              payload
-            )
-
-        }
-
-      );
-
-    const data =
-      await res.json();
+    const data = await res.json();
 
     if (!res.ok) {
-
-      throw new Error(
-
-        data.error ||
-
-        "Failed request"
-
-      );
-
+      throw new Error(data.error || "Failed request");
     }
 
-    toast(
-      "✓ Request submitted"
-    );
-
-    requestItems = [];
-
-    addRequestRow();
-
-    document.getElementById(
-      "quotation-no"
-    ).value = "";
-
-    document.getElementById(
-      "vendor-name"
-    ).value = "";
-
-    document.getElementById(
-      "request-purpose"
-    ).value = "";
-
-  }
-
-  catch (err) {
-
+    toast("✓ Request submitted");
+    appServices().registerRaisedRequestSummary?.({
+      ...data,
+      quotation_no,
+      vendor_name,
+      payment_type,
+      purpose,
+      items,
+    });
+    clearRaiseRequest();
+  } catch (err) {
     console.error(err);
-
-    toast(
-
-      err.message ||
-
-      "Failed request"
-
-    );
-
+    toast(err.message || "Failed request");
   }
+}
 
+function clearRaiseRequest() {
+  requestItems = [];
+  addRequestRow();
+
+  ["quotation-no", "vendor-name", "request-purpose"].forEach(id => {
+    const field = document.getElementById(id);
+    if (field) field.value = "";
+  });
+
+  const paymentType = document.getElementById("request-payment-type");
+  if (paymentType) paymentType.value = "advance";
 }
 
 export {
-
   initializeRaiseRequest,
-
   submitRequest,
-
-  addRequestRow
-
+  addRequestRow,
+  clearRaiseRequest,
 };
